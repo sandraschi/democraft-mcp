@@ -12,17 +12,21 @@ show_demo_prefab_card. Prompt: democraft_demo_guide(app).
 `DEMOCRAFT_MODEL` (default gemma4:12b, declared skip when down), then real
 CLI subprocess (`CLI_TIMEOUT_S=120`) into `outbox/<app>/<demo>/`. Returns
 `{success, message, ai_step, cli_steps, artifacts, all_cli_ok, run_dir}`.
-Errors: unknown_app, wrappee_missing, needs_account, timeout, spawn - always
-with recovery text. Per-app argv: cad sample/info, deck render --sample,
-design run --sample, effect info + render-frame attempt, fig newFromTemplate +
-render, film inspect, grid csv->xlsx->cat + eval, sound run --demo --inspect,
-word md->docx->pdf + info, pdf combine + render + info, light commands +
-develop run (needs grade-in.png), photo/vector AI SVG + convert/run.
+Errors: unknown_app, wrappee_missing, needs_account, needs_input, timeout, spawn - always
+with recovery text. Per-app argv: cad scripted metric plan + south elevation
+(DXF/PNG/PDF/SVG) + info, deck render --sample, design run --sample,
+effect openDemoProject + render-frame still, fig newFromTemplate + render,
+film single-session run (openDemoProject + exportEdl), grid csv->xlsx->cat + eval,
+sound demo inspect + full-groove bounce + info, word md->docx->pdf + info,
+pdf combine + render + info, light commands map + develop run (needs grade-in.png),
+photo/vector AI SVG (12-20 shapes, end-tag parsed) + convert/run.
 
 ## REST
-GET /api/health|crafts|runs|tools|skills|logs|dashboard(+llm/providers),
-POST /api/demos/run|llm/chat. MCP at /mcp. CORS localhost-only.
-Backend :11246, frontend :11245.
+GET /api/health + /health, /api/status, /api/capabilities, /api/crafts,
+POST /api/demos/run, /api/runs, /api/tools, /api/skills, /api/logs,
+/api/llm/discover+providers+models+onboarding, POST /api/llm/chat + /api/chat,
+POST /api/shutdown (confirm). MCP at /mcp (path=/ mount + lifespan).
+CORS localhost + LAN/Tauri regex. Backend :11246, frontend :11245.
 
 ## Webapp
 web_sota/: AppLayout sidebar+topbar, Dashboard/Inbox/Tools/Skills/Chat/

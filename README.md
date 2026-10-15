@@ -36,6 +36,36 @@ Craft documents - they work in `outbox/` only.
 2. Double-click `start.bat` (backend :11246, frontend :11245).
 3. Open the Dashboard, pick a Craft page, run demo #1.
 
+## Stack
+
+Python 3.11+ (uv) - FastMCP 3.4.4+ - FastAPI + Pydantic v2 - Uvicorn -
+prefab-ui. Webapp: React 19 - Vite 6 - TailwindCSS 4 - Lucide - Framer Motion -
+Zustand - React Router - TypeScript - Biome - Playwright. Package managers:
+uv (Python) + Bun (JS). Gates: `just ci` (ruff, pytest, pyright, tsc, biome, build).
+
+## Tools
+
+| Tool | Pattern | What |
+|------|---------|------|
+| `craft` | portmanteau (8 ops) | list_apps, app_status, run_demo, craft_commands, ollama_models, ai_flow, help, shutdown |
+| `show_apps_prefab_card` | Prefab | Installed-apps card |
+| `show_demo_prefab_card` | Prefab | Single-demo card |
+| prompt `democraft_demo_guide` | prompt | Per-app demo instructions |
+| resource `democraft://apps` | resource | Live registry JSON |
+
+Full reference: `docs/TOOLS.md`.
+
+## Env vars
+
+| Var | Default |
+|-----|---------|
+| `DEMOCRAFT_PORT` | `11246` (frontend :11245) |
+| `DEMOCRAFT_MODEL` | `gemma4:12b` |
+| `DEMOCRAFT_OLLAMA_URL` | `http://127.0.0.1:11434` |
+| `DEMOCRAFT_OUTBOX` | `<repo>/outbox` |
+| `DEMOCRAFT_PROGRAM_FILES` | `C:\Program Files` |
+| `DEMOCRAFT_PREFAB_APPS` | `1` (0 skips Prefab tools) |
+
 ## Documentation
 
 | Doc | What |
