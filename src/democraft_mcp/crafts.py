@@ -5,8 +5,9 @@ demo #1 so the MCP tool, the REST API, and the webapp all read the same
 truth. No per-app snowflakes, no hardcoded lists in the frontend.
 
 Every demo = optional AI step (Ollama, declared) + real CLI subprocess.
-Structured errors beat fake artifacts: a gated engine feature returns
-``success=False, error_type=needs_account`` with recovery steps.
+Structured errors beat fake artifacts: engine failures return the real
+stderr; `needs_account` exists for the day an engine gates a feature.
+Verified 2026-10-15: no generative verbs in any of the 13 CLIs.
 """
 
 from __future__ import annotations
@@ -17,7 +18,7 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
-PROGRAM_FILES = Path(r"C:\Program Files")
+PROGRAM_FILES = Path(os.getenv("DEMOCRAFT_PROGRAM_FILES", r"C:\Program Files"))
 OLLAMA_URL = os.getenv("DEMOCRAFT_OLLAMA_URL", "http://127.0.0.1:11434")
 DEFAULT_MODEL = os.getenv("DEMOCRAFT_MODEL", "gemma4:12b")
 CLI_TIMEOUT_S = 120
@@ -57,8 +58,9 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "house-plan",
-                "Demo 1: Japanese small house plan",
-                "Sample floorplan DXF + AI room reading, rendered to PNG.",
+                "Demo 1: Japanese small house set",
+                "Scripted metric plan (rooms, labels, dims) + south elevation: "
+                "DXF, PNG, PDF, SVG. 2D engine: no true isometric.",
                 "List rooms of a small Japanese house plan (genkan, washitsu, "
                 "engawa, LD, bath) as JSON list of {room, note}. No prose.",
             ),
@@ -161,9 +163,10 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "ident-jingle",
-                "Demo 1: 15s democraft ident",
-                "Demo project inspect + AI jingle brief; bounce is attempted headless.",
-                "Brief a 15-second ident jingle (tempo, key, layers) as JSON. No prose.",
+                "Demo 1: Midnight Groove bounce (~56s)",
+                "Bundled demo project rendered locally to WAV. No AI composes "
+                "music; the AI step writes only the words describing it.",
+                "Brief the bounced groove (tempo, key, layers heard) as JSON. No prose.",
             ),
         ),
     ),
@@ -221,8 +224,12 @@ APPS: tuple[CraftApp, ...] = (
                 "pelican-photo",
                 "Demo 1: pelican riding a bike (photo)",
                 "AI SVG concept rendered through the convert/info pipeline. "
-                "Generative pixels are account-gated.",
-                "Write a minimal SVG (3-6 shapes) of a pelican on a bike. Raw SVG only.",
+                "No generative verbs exist in this build.",
+                "Draw a flat side-view pictogram on an 800x600 canvas: "
+                "pelican body (ellipse), head (circle), long beak (polygon), "
+                "eye (small circle), wing (ellipse), two bike wheels (circles "
+                "with spoke lines), frame lines, ground line. 12-20 shapes. "
+                "Raw SVG only.",
                 "cli",
             ),
         ),
@@ -238,7 +245,11 @@ APPS: tuple[CraftApp, ...] = (
                 "Demo 1: pelican riding a bike (vector)",
                 "AI SVG concept run through the run/export pipeline. Same "
                 "prompt as photo: compare the two.",
-                "Write a minimal SVG (3-6 shapes) of a pelican on a bike. Raw SVG only.",
+                "Draw a flat side-view pictogram on an 800x600 canvas: "
+                "pelican body (ellipse), head (circle), long beak (polygon), "
+                "eye (small circle), wing (ellipse), two bike wheels (circles "
+                "with spoke lines), frame lines, ground line. 12-20 shapes. "
+                "Raw SVG only.",
                 "cli",
             ),
         ),
@@ -285,12 +296,12 @@ def ai_step(prompt: str, model: str = DEFAULT_MODEL) -> dict:
         }
 
 
-def cli_run(exe: Path, argv: list[str], cwd: Path) -> dict:
+def cli_run(exe: Path, argv: list[str], cwd: Path, timeout_s: int = CLI_TIMEOUT_S) -> dict:
     """Run one CLI argv. Returns the real result, including real failures."""
     started = time.time()
     try:
         p = subprocess.run(
-            [str(exe), *argv], cwd=str(cwd), capture_output=True, text=True, timeout=CLI_TIMEOUT_S
+            [str(exe), *argv], cwd=str(cwd), capture_output=True, text=True, timeout=timeout_s
         )
         return {
             "success": p.returncode == 0,
@@ -305,8 +316,8 @@ def cli_run(exe: Path, argv: list[str], cwd: Path) -> dict:
             "success": False,
             "argv": argv,
             "error_type": "timeout",
-            "error": f"exceeded {CLI_TIMEOUT_S}s",
-            "ms": CLI_TIMEOUT_S * 1000,
+            "error": f"exceeded {timeout_s}s",
+            "ms": timeout_s * 1000,
         }
     except Exception as e:
         return {
@@ -359,9 +370,42 @@ def run_demo(app_key: str, demo_id: str, outbox: Path, model: str = DEFAULT_MODE
 
     k = app_key
     if k == "cad":
-        do(["sample", "floorplan", "floorplan.dxf"])
-        do(["info", "floorplan.dxf"])
-        do(["sample", "floorplan", "floorplan.png"])
+        plan = [
+            ["rectang", '{"p1": [0, 0], "p2": [7.28, 5.46]}'],
+            ["line", '{"points": [[1.82, 0], [1.82, 1.82]]}'],
+            ["line", '{"points": [[0, 1.82], [7.28, 1.82]]}'],
+            ["line", '{"points": [[3.64, 1.82], [3.64, 5.46]]}'],
+            ["line", '{"points": [[5.46, 0], [5.46, 1.82]]}'],
+            ["text", '{"at": [0.91, 0.91], "text": "genkan", "height": 0.18}'],
+            ["text", '{"at": [3.64, 0.91], "text": "hall", "height": 0.18}'],
+            ["text", '{"at": [1.82, 3.64], "text": "washitsu", "height": 0.18}'],
+            ["text", '{"at": [5.46, 3.64], "text": "LD", "height": 0.18}'],
+            ["text", '{"at": [6.37, 0.91], "text": "bath", "height": 0.18}'],
+            ["dimlinear", '{"p1": [0, 0], "p2": [7.28, 0], "at": [3.64, -0.6]}'],
+            ["dimlinear", '{"p1": [0, 0], "p2": [0, 5.46], "at": [-0.6, 2.73]}'],
+        ]
+        argv: list[str] = ["run", "--metric"]
+        for cid, params in plan:
+            argv += ["--cmd", f"{cid} {params}"]
+        do([*argv, "--save", "house.dxf", "--export", "house-plan.png"])
+        do(["convert", "house.dxf", "house-plan.pdf"])
+        do(["convert", "house.dxf", "house-plan.svg"])
+        do(["info", "house.dxf"])
+        elev = [
+            ["line", '{"points": [[-1, 0], [8.28, 0]]}'],
+            ["rectang", '{"p1": [0, 0], "p2": [7.28, 2.6]}'],
+            ["line", '{"points": [[-0.5, 2.6], [3.64, 4.1]]}'],
+            ["line", '{"points": [[3.64, 4.1], [7.78, 2.6]]}'],
+            ["rectang", '{"p1": [1.0, 1.0], "p2": [2.5, 2.0]}'],
+            ["rectang", '{"p1": [4.5, 0], "p2": [5.5, 2.1]}'],
+            ["text", '{"at": [3.64, 4.5], "text": "SOUTH ELEVATION", "height": 0.25}'],
+            ["dimlinear", '{"p1": [0, 0], "p2": [7.28, 0], "at": [3.64, -0.6]}'],
+        ]
+        argv = ["run", "--metric"]
+        for cid, params in elev:
+            argv += ["--cmd", f"{cid} {params}"]
+        do([*argv, "--save", "elevation-south.dxf", "--export", "elevation-south.png"])
+        do(["convert", "elevation-south.dxf", "elevation-south.pdf"])
     elif k == "deck":
         do(["render", "--sample", "--all", "slides"])
     elif k == "design":
@@ -400,6 +444,16 @@ def run_demo(app_key: str, demo_id: str, outbox: Path, model: str = DEFAULT_MODE
         do(["eval", "6*7"])
     elif k == "sound":
         do(["run", "--demo", "--inspect"])
+        bounced = dict(
+            cli_run(
+                app.cli_path, ["run", "--demo", "--bounce", "ident.wav"], run_dir, timeout_s=300
+            )
+        )
+        steps.append(bounced)
+        if bounced.get("success") and (run_dir / "ident.wav").is_file():
+            do(["info", "ident.wav"])
+        else:
+            steps[-1]["note"] = "bounce produced no file - inspect JSON is the demo"
     elif k == "word":
         brief = run_dir / "brief.md"
         if ai.get("success") and ai.get("text"):
@@ -443,16 +497,21 @@ def run_demo(app_key: str, demo_id: str, outbox: Path, model: str = DEFAULT_MODE
                 "recovery": "Run the fig demo, copy landing.png here as grade-in.png, retry.",
             }
         cmds = cli_run(app.cli_path, ["commands", "--json"], run_dir)
+        if not cmds.get("success"):
+            cmds = cli_run(app.cli_path, ["commands"], run_dir)
         steps.append(cmds)
         do(["run", "--import", "grade-in.png", "develop.auto", "app.export", "path=grade-out.png"])
     elif k in ("photo", "vector"):
         svg = run_dir / "pelican.svg"
         txt = ai.get("text", "") if ai.get("success") else ""
         start = txt.find("<svg")
-        svg.write_text(
-            txt[start:] if start >= 0 else _FALLBACK_SVG,
-            encoding="utf-8",
-        )
+        end = txt.find("</svg>")
+        if start >= 0 and end > start:
+            svg.write_text(txt[start : end + len("</svg>")], encoding="utf-8")
+        elif start >= 0:
+            svg.write_text(txt[start:], encoding="utf-8")
+        else:
+            svg.write_text(_FALLBACK_SVG, encoding="utf-8")
         if k == "photo":
             do(["convert", "pelican.svg", "pelican.png"])
             do(["info", "pelican.png"])

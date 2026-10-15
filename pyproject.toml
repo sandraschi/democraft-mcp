@@ -1,6 +1,6 @@
 [project]
 name = "democraft-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "Demo fleet for the ArtCraft family: one page per Craft app, every demo a real headless CLI/MCP run with an AI flow."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "pytest-asyncio>=0.23", "ruff>=0.16"]
+dev = ["pytest>=8", "pytest-asyncio>=0.23", "pytest-cov>=5", "ruff>=0.16", "pyright>=1.1"]
 
 [dependency-sources]
 # local only - PyPI defaults apply
@@ -31,7 +31,18 @@ target-version = "py311"
 line-length = 100
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B"]
+select = ["E", "F", "I", "UP", "B", "T20"]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/*.py" = ["T20"]
+"tests/*.py" = ["T20"]
+
+[tool.coverage.run]
+source = ["democraft_mcp"]
+
+[tool.coverage.report]
+fail_under = 55
+show_missing = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

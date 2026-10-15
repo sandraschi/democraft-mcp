@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Annotated, Literal
 
 from fastmcp import FastMCP
+from fastmcp.server.providers import SkillsDirectoryProvider
 from pydantic import Field
 
 from .crafts import APPS, BY_KEY, DEFAULT_MODEL, ai_step, cli_run, run_demo
@@ -21,7 +22,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 OUTBOX = Path(os.getenv("DEMOCRAFT_OUTBOX", str(REPO_ROOT / "outbox")))
 BACKEND_PORT = int(os.getenv("DEMOCRAFT_PORT", "11246"))
 
-mcp = FastMCP("democraft-mcp")
+mcp = FastMCP("democraft-mcp", providers=[SkillsDirectoryProvider(roots=[REPO_ROOT / "skills"])])
 
 Operation = Literal[
     "list_apps",
@@ -35,7 +36,10 @@ Operation = Literal[
 ]
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations={"readOnlyHint": False, "openWorldHint": True},
+    output_schema={"type": "object"},
+)
 def craft(
     operation: Annotated[
         Operation,
@@ -61,7 +65,7 @@ def craft(
     ## Return Format
     `{"success": bool, "message": str, ...operation fields}` - `run_demo`
     adds `ai_step`, `cli_steps`, `artifacts`. Engine failures are reported,
-    never hidden; account-gated features return `error_type: needs_account`.
+    never hidden. AI writes words/SVG only; all rendering is local.
 
     ## Examples
     `craft(operation="list_apps")`
@@ -112,6 +116,9 @@ def craft(
                 "error_type": "wrappee_missing",
             }
         res = cli_run(a.cli_path, ["commands", "--json"], OUTBOX)
+        if not res.get("success"):
+            res = cli_run(a.cli_path, ["commands"], OUTBOX)
+            res["flavor"] = "text (this CLI has no --json)"
         return {
             "success": res.get("success", False),
             "message": f"commands for {a.name}",
@@ -170,7 +177,7 @@ def craft(
     return {"success": False, "message": f"unknown operation '{operation}'"}
 
 
-@mcp.tool(app=True)
+@mcp.tool(app=True, annotations={"readOnlyHint": True}, output_schema={"type": "object"})
 def show_apps_prefab_card() -> dict:
     """Show installed Craft apps as a rich Prefab card (plain-text fallback included)."""
     rows = [(a.name, "ready" if a.installed() else "missing") for a in APPS]
@@ -183,7 +190,7 @@ def show_apps_prefab_card() -> dict:
     }
 
 
-@mcp.tool(app=True)
+@mcp.tool(app=True, annotations={"readOnlyHint": True}, output_schema={"type": "object"})
 def show_demo_prefab_card(app: str = "cad", demo: str = "") -> dict:
     """Show one demo's definition as a Prefab card (run it with craft/run_demo)."""
     a = BY_KEY.get(app)
@@ -207,6 +214,24 @@ def show_demo_prefab_card(app: str = "cad", demo: str = "") -> dict:
     }
 
 
+@mcp.resource("democraft://apps")
+def apps_resource() -> str:
+    """Live Craft registry as JSON (same source as /api/crafts)."""
+    import json
+
+    return json.dumps(
+        [
+            {
+                "key": a.key,
+                "name": a.name,
+                "installed": a.installed(),
+                "demos": [d.id for d in a.demos],
+            }
+            for a in APPS
+        ]
+    )
+
+
 @mcp.prompt()
 def democraft_demo_guide(app: str = "cad") -> str:
     a = BY_KEY.get(app)
@@ -215,7 +240,7 @@ def democraft_demo_guide(app: str = "cad") -> str:
     return (
         f"Democraft guide for {app} ({demo}). Apps: {names}. "
         "Every demo is a real headless CLI run plus a local-LLM step; "
-        "account-gated engine features return needs_account, never fake pixels. "
+        "AI writes words/SVG only, engines render locally, never fake pixels. "
         "Call craft(operation='run_demo', app=..., demo=...) and report artifacts honestly."
     )
 
