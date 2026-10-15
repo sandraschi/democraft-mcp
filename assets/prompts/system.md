@@ -16,9 +16,11 @@ run_demo, craft_commands, ollama_models, ai_flow, help, shutdown.
 `{success, message, ai_step, cli_steps, artifacts, all_cli_ok, run_dir}`.
 3. Engine stderr is evidence: quote it, do not paraphrase it away. A failed
 CLI step is a real result - report `all_cli_ok: false` and move on.
-4. Account-gated engine features (ArtCraft hosted generation) return
-`error_type: needs_account` with the onboarding pointer. Missing wrappees
-return `wrappee_missing`. Ollama down means the AI step is a declared skip.
+4. No generative verbs exist in the 13 shipped CLIs (verified 2026-10-15:
+no text-to-image, no music model, no tokens, no cloud calls). If ArtCraft
+ships any, they become declared `needs_account` features then - not before.
+Missing wrappees return `wrappee_missing`. Ollama down means the AI step is
+a declared skip.
 5. Default model `gemma4:12b` (8GB) via `DEMOCRAFT_MODEL` override. CLI
 timeout 120s per step. Ports: backend 11246, frontend 11245.
 
@@ -105,9 +107,9 @@ grade).
 PhotoCraft (`photocraft-cli.exe`): `convert <in> <out> [--format] [--quality]
 [--tiff-layers] [--tga-bits] [--dpx-bits]`, `info <file> [--compact]`,
 plus `run/inspect/render` family. Demo pelican-photo: the AI step writes
-`pelican.svg` (minimal shapes, declared AI-drawn), then `convert
-pelican.svg pelican.png` and `info pelican.png`. Generative pixels stay
-account-gated; the pipeline itself is fully exercised.
+`pelican.svg` (12-20 shapes, declared AI-drawn), then `convert
+pelican.svg pelican.png` and `info pelican.png`. The pipeline itself is
+fully exercised; there is nothing gated behind it.
 
 VectorCraft (`vectorcraft-cli.exe`): `mcp [--connect ADDR|--headless]
 [--automation-read-root] [--automation-write-root]`, `run [--in FILE] [--cmd
@@ -119,10 +121,11 @@ side with their real engine logs.
 ## Error taxonomy
 
 unknown_app (with known_apps), unknown demo (with known_demos),
-wrappee_missing (with install recovery), needs_account (generation-gated),
-needs_input (light grade input), timeout (120s), spawn. REST mirrors the
-same dicts. The webapp renders MOCK badges for missing wrappees and gated
-features until onboarding succeeds.
+wrappee_missing (with install recovery), needs_account (reserved for future
+gated features - none exist in these builds), needs_input (light grade
+input), timeout (120s, 300s sound bounce), spawn. REST mirrors the
+same dicts. The webapp renders MOCK badges for missing wrappees until
+onboarding succeeds.
 
 ## Webapp contract
 
@@ -378,9 +381,9 @@ Grid homepage-grid: write `lineup.csv` (header app,demo,status + 3 rows),
 `convert lineup.csv lineup.xlsx`, `cat lineup.xlsx --csv` (must equal input),
 `eval 6*7` (must print 42). Artifacts: lineup.csv, lineup.xlsx.
 
-Sound ident-jingle: `run --demo --inspect` (demo project JSON). Bounce form:
-`run --demo --bounce ident.wav --start 0 --end 15` (attempt only when the
-inspect shows a demo project; 15s bounce fits the timeout).
+Sound ident-jingle: `run --demo --inspect` (demo project JSON, Midnight
+Groove ~56s). Bounce form: `run --demo --bounce ident.wav` (full project,
+300s budget; no --start/--end clipping).
 
 Word demo-report: AI text (or 3-bullet fallback) to `brief.md`, `convert
 brief.md brief.docx`, `convert brief.md brief.pdf`, `info brief.docx`
@@ -436,4 +439,3 @@ nav-chat, nav-settings, craft-run, craft-artifacts, chat-send, onboarding-cta,
 kpi-*. Companion-mode toggle + pop-out in topbar; logger modal on Ctrl+L;
 toasts on demo start/finish. Playwright smoke: dashboard loads, crafts list
 13, run CAD demo completes, chat sends. Biome + tsc clean.
-

@@ -124,10 +124,10 @@ artifact; the page shows both.
 Goal: same prompt as vector, photo pipeline. Chat: run_demo app photo. AI
 step writes minimal `pelican.svg` (raw shapes, declared AI-drawn). CLI:
 `photocraft-cli convert pelican.svg pelican.png`, `info pelican.png`. Look
-at: PNG renders, info mode/depth/layers. Generative (text-to-image) pixels
-are account-gated demo #2: attempt, report `needs_account` with the token
-pointer, keep the MOCK badge. Format matrix (`--quality`, webp lossy vs
-lossless, tiff-layers) is demo #3.
+at: PNG renders, info mode/depth/layers. No generative verbs exist in this
+build (verified 2026-10-15: no text-to-image, no tokens, no cloud model) -
+if ArtCraft ships any, they become demo #2 with the token pointer.
+Format matrix (`--quality`, webp lossy vs lossless, tiff-layers) is demo #3.
 
 ## VectorCraft: pelican-vector
 
@@ -205,8 +205,9 @@ fidelity proven); eval prints 42. AI one-liner quoted. Extension session:
 
 Session Sound (ident-jingle): run_demo sound. inspect JSON: tracks, sample
 rate, demo flag. AI brief quoted (tempo/key/layers). Bounce session (demo
-#2): run --demo --bounce ident.wav --start 0 --end 15, verify wav bytes,
-report duration. convert --normalize on the bounce is demo #3.
+#2): run --demo --bounce ident.wav (full Midnight Groove, ~56s, 300s
+budget), verify wav seconds, report duration. convert --normalize on the
+bounce is demo #3.
 
 Session Word (demo-report): run_demo word. brief.md (AI or fallback -
 state which), brief.docx (~8KB), brief.pdf, info (pages/paragraphs/words).
@@ -228,9 +229,9 @@ AI suggestion labeled grounded/ungrounded.
 
 Session Photo (pelican-photo): run_demo photo. AI SVG saved verbatim (show
 first 200 chars on the page). convert -> pelican.png, info (mode/depth).
-State plainly: shapes are AI-drawn, pixels are engine-rendered. Generative
-attempt (demo #2): only with tokens configured; else needs_account + token
-pointer + MOCK stays.
+State plainly: shapes are AI-drawn, pixels are engine-rendered. There is no
+generative demo #2 today (no such verbs in this build); a formats matrix
+is the honest demo #2.
 
 Session Vector (pelican-vector): run_demo vector. Same SVG bytes as photo
 (compare hashes on the page). run --in --export. Rejection (if any) shown
@@ -245,7 +246,7 @@ Design: .dcs spread placing the pelican PNG (frame.create + place_image).
 Effect: render range (`render --start/--end`) once a project is open.
 Fig: dashboard template + icon-set. Film: sequence assembly from the EDL
 (newSequence + clip verbs). Grid: VLOOKUP second sheet + check oracle.
-Sound: 15s bounce + normalize convert. Word: --author tracked pass +
+Sound: full-groove bounce + normalize convert. Word: --author tracked pass +
 --markup export. Pdf: edit rotate/delete before/after + audit faux-redaction
 demo. Light: second grade with mapped develop ids. Photo: format matrix
 (webp quality, tiff-layers) + generative attempt with tokens. Vector:
@@ -323,7 +324,8 @@ timecodes present, clip names quoted; AI board attached separately. Fail:
 empty EDL (project failed to open - attach line-1 result). Grid:
 lineup.xlsx opens in Excel/Libre (3 rows), cat output == csv input, eval 42.
 Fail: inequality (report both texts). Sound: inspect JSON has tracks;
-bounce wav plays 15s. Fail: silence (check --start/--end). Word: docx
+bounce wav plays ~56s (full Midnight Groove). Fail: short file (bounce was
+clipped - re-run without --start/--end). Word: docx
 opens in Word (5 bullets), pdf opens (1 page), info counts match. Fail:
 font substitution warnings (note, not error). Pdf: portfolio.pdf 2 pages,
 thumb.png shows page 1. Fail: page count != 2 (seed chain broke). Light:
@@ -417,9 +419,9 @@ project across processes) + AI board. Say: "No footage was rendered - the
 EDL is real, assembly is demo #2 behind a project file."
 2. "Grade my photo." (no input) -> needs_input + copy instruction. Say:
 "Nothing was graded - put the PNG where the recovery says and retry."
-3. "Make the pelican photoreal." -> pelican.png (SVG pipeline) +
-needs_account pointer for generative. Say: "Shapes are AI-drawn, pixels are
-engine-rendered; photoreal needs tokens, badge stays."
+3. "Make the pelican photoreal." -> pelican.png (SVG pipeline). Say:
+"Shapes are AI-drawn, pixels are engine-rendered; no photoreal engine
+exists in this build - verified, not assumed."
 4. "Ollama is down, still demo?" -> Yes: AI step skipped, CLI ran, page
 labels the caption fallback. Demos degrade, never refuse, over a dead LLM.
 5. "Effect render failed." -> Quote stderr + comp id + the capability map
@@ -470,8 +472,8 @@ Ops: list_apps, app_status, run_demo(app,demo), craft_commands(app),
 ollama_models, ai_flow(prompt), help, shutdown(confirm). Errors:
 unknown_app, wrappee_missing, needs_account, needs_input, timeout, spawn -
 each with recovery. Ports 11246/11245. Model gemma4:12b default. Timeout
-120s CLI, 90s LLM. Outbox per run. MOCK clears by run only. EDL is real,
-render needs a project, generative needs tokens. Quote stderr, never invent. Escalation: engine bug (file upstream with argv +
+120s CLI (300s sound bounce), 90s LLM. Outbox per run. MOCK clears by run only. EDL is real,
+render needs a project. Quote stderr, never invent. Escalation: engine bug (file upstream with argv +
 stderr + version), demo bug (fix argv, update worked session, CHANGELOG),
 prompt bug (fix pack same commit as code), infra bug (ports/Ollama/CORS -
 TROUBLESHOOTING first). Severity: wrong artifact (critical), stale docs
@@ -490,4 +492,3 @@ prompt), cad house-plan (zero inputs), open outbox/cad/house-plan. Each
 wrappee install clears its pages' MOCK badges only after one successful
 run - the run is the proof, not the installer exit code. Re-run quarterly:
 engines update, demos drift; the runs inbox diff tells you what changed.
-

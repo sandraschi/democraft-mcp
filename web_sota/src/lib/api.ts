@@ -1,4 +1,29 @@
-const BASE = (import.meta.env.VITE_API_TARGET as string | undefined) ?? "";
+declare global {
+	interface Window {
+		__TAURI__?: unknown;
+		__TAURI_INTERNALS__?: unknown;
+	}
+}
+
+function isTauri(): boolean {
+	if (typeof window === "undefined") return false;
+	return (
+		window.__TAURI__ !== undefined ||
+		window.__TAURI_INTERNALS__ !== undefined ||
+		window.location.hostname === "tauri.localhost"
+	);
+}
+
+// Canonical shape: same-origin "" everywhere EXCEPT behind a Tauri gate,
+// where the baked VITE_API_TARGET is used. Absolute backend URLs in plain
+// browser tabs break on any non-localhost hostname (CORS).
+const BASE = isTauri()
+	? ((import.meta.env.VITE_API_TARGET as string | undefined) ?? "")
+	: "";
+
+export function apiBase(): string {
+	return BASE;
+}
 
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
 	const r = await fetch(`${BASE}${path}`, {
