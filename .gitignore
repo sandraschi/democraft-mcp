@@ -18,6 +18,9 @@ htmlcov/
 *.mcpb
 *.bak
 *.bak.*
+reports/
+test-results/
+playwright-report/
 __pycache__/
 *.pyc
 .pytest_cache/
