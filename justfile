@@ -18,16 +18,16 @@ fmt:
     {{UV}} run ruff format .
 
 web-install:
-    cd web_sota && C:\Users\sandr\.bun\bin\bun.exe install
+    cd web_sota; C:\Users\sandr\.bun\bin\bun.exe install
 
 web-build:
-    cd web_sota && C:\Users\sandr\.bun\bin\bun.exe run build
+    cd web_sota; C:\Users\sandr\.bun\bin\bun.exe run build
 
 web-check:
-    cd web_sota && C:\Users\sandr\.bun\bin\bun.exe run check
+    cd web_sota; C:\Users\sandr\.bun\bin\bun.exe run check
 
 e2e:
-    cd web_sota && C:\Users\sandr\.bun\bin\bun.exe run e2e
+    cd web_sota; C:\Users\sandr\.bun\bin\bun.exe run e2e
 
 mcpb-pack:
     powershell -ExecutionPolicy Bypass -File scripts/mcpb-pack.ps1
