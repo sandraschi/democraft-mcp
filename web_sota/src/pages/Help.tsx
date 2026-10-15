@@ -5,19 +5,19 @@ import { useBackend } from "../store/backend";
 const FAQS = [
 	[
 		"Do demos need accounts?",
-		"Demo #1s never do. Generative engine features need ArtCraft tokens and stay MOCK-badged until configured.",
+		"Demo #1s never do. Some advanced engine features need ArtCraft tokens and stay marked MOCK until configured.",
 	],
 	[
 		"Ollama is down - do demos still run?",
-		"Yes. The AI step is a declared skip; the CLI part runs.",
+		"Yes. You still get every demo output; only the AI-written caption is skipped.",
 	],
 	[
 		"Where are my outputs?",
 		"outbox/<app>/<demo>/ under the repo - see the Inbox page.",
 	],
 	[
-		"A CLI step failed - is that normal?",
-		"It is a real result. Read the step's stderr on the Craft page; fix params and retry.",
+		"A demo step failed - is that normal?",
+		"It can be. The Craft page shows the engine's real error message - read it, fix what's named, retry.",
 	],
 ];
 
