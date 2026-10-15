@@ -2,9 +2,17 @@
 
 from __future__ import annotations
 
+import pytest
 from fastapi.testclient import TestClient
 
+from democraft_mcp.crafts import BY_KEY
 from democraft_mcp.server import build_api, craft
+
+
+def _needs(app_key: str):
+    return pytest.mark.skipif(
+        not BY_KEY[app_key].installed(), reason=f"{app_key} wrappee not installed"
+    )
 
 
 def _client() -> TestClient:
@@ -103,6 +111,7 @@ def test_craft_shutdown_needs_confirm():
     assert res["needs_confirm"] is True
 
 
+@_needs("cad")
 def test_craft_commands_cad():
     res = craft(operation="craft_commands", app="cad")
     assert res["success"] is True
@@ -120,6 +129,7 @@ def test_word_topics_exposed():
     assert len(word["demos"][0]["topics"]) == 20
 
 
+@_needs("word")
 def test_word_demo_with_topic(tmp_path):
     from democraft_mcp.crafts import run_demo
 
@@ -129,6 +139,7 @@ def test_word_demo_with_topic(tmp_path):
     assert "report.docx" in names and "report.pdf" in names
 
 
+@_needs("grid")
 def test_artifact_served_and_guarded(tmp_path):
     from democraft_mcp.crafts import run_demo
     from democraft_mcp.server import build_api as _build
@@ -142,6 +153,21 @@ def test_artifact_served_and_guarded(tmp_path):
         client = TestClient(_build())
         ok = client.get("/api/artifacts/grid/homepage-grid/lineup.xlsx")
         assert ok.status_code == 200
+    finally:
+        srv.OUTBOX = old
+
+
+def test_artifact_guard_no_wrappee(tmp_path):
+    import democraft_mcp.server as srv
+    from democraft_mcp.server import build_api as _build
+
+    seed = tmp_path / "grid" / "homepage-grid"
+    seed.mkdir(parents=True)
+    (seed / "x.txt").write_text("hi", encoding="utf-8")
+    old = srv.OUTBOX
+    srv.OUTBOX = tmp_path
+    try:
+        client = TestClient(_build())
         bad = client.get("/api/artifacts/grid/homepage-grid/../../secret")
         # httpx may normalize dot-segments before sending; either the guard
         # fires or the route 404s - both prove no file escapes.

@@ -16,6 +16,12 @@ test("tools page lists operations", async ({ page }) => {
 	await expect(page.getByTestId("tools-list")).toContainText("run_demo");
 });
 
+test("word page offers topic combobox", async ({ page }) => {
+	await page.goto("/craft/word");
+	await expect(page.getByTestId("topic-pick")).toBeVisible();
+	await expect(page.getByTestId("topic-custom")).toBeVisible();
+});
+
 test("onboarding CTA visible when wrappees missing", async ({ page }) => {
 	await page.goto("/");
 	const cta = page.getByTestId("onboarding-cta");
