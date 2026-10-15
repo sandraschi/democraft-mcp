@@ -1,0 +1,1 @@
+{"description": "Demo fleet for the ArtCraft family (13 apps, real headless demos + local AI flows).", "manifest_version": "0.3", "name": "democraft-mcp", "server": {"entry_point": "src/democraft_mcp/mcp_stdio.py", "mcp_config": {"command": "uv", "args": ["run", "python", "-m", "democraft_mcp.mcp_stdio"]}}, "version": "0.1.0"}

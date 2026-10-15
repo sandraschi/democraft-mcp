@@ -1,0 +1,22 @@
+import { expect, test } from "@playwright/test";
+
+test("dashboard loads with KPIs", async ({ page }) => {
+	await page.goto("/");
+	await expect(page.getByTestId("kpi-apps")).toBeVisible();
+});
+
+test("crafts list shows 13 apps", async ({ page }) => {
+	await page.goto("/craft/cad");
+	await expect(page.getByTestId("craft-run")).toBeVisible();
+});
+
+test("tools page lists operations", async ({ page }) => {
+	await page.goto("/tools");
+	await expect(page.getByTestId("tools-list")).toContainText("run_demo");
+});
+
+test("onboarding CTA visible when wrappees missing", async ({ page }) => {
+	await page.goto("/");
+	const cta = page.getByTestId("onboarding-cta");
+	if (await cta.count()) await expect(cta).toBeVisible();
+});

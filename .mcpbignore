@@ -1,0 +1,11 @@
+.venv/
+node_modules/
+web_sota/
+tests/
+data/
+outbox/
+target/
+*.log
+.env
+__pycache__/
+*.pyc

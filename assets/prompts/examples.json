@@ -1,0 +1,743 @@
+[
+ {
+  "tool": "craft",
+  "operation": "list_apps",
+  "input": {},
+  "note": "cad: inventory before anything else"
+ },
+ {
+  "tool": "craft",
+  "operation": "app_status",
+  "input": {},
+  "note": "cad: which wrappees are installed"
+ },
+ {
+  "tool": "craft",
+  "operation": "run_demo",
+  "input": {
+   "app": "cad",
+   "demo": "house-plan"
+  },
+  "note": "cad: execute the app demo #1"
+ },
+ {
+  "tool": "craft",
+  "operation": "craft_commands",
+  "input": {
+   "app": "cad"
+  },
+  "note": "cad: live command discovery from the CLI"
+ },
+ {
+  "tool": "craft",
+  "operation": "ollama_models",
+  "input": {},
+  "note": "cad: local models available"
+ },
+ {
+  "tool": "craft",
+  "operation": "ai_flow",
+  "input": {
+   "prompt": "caption this demo output"
+  },
+  "note": "cad: single local-LLM step"
+ },
+ {
+  "tool": "craft",
+  "operation": "help",
+  "input": {},
+  "note": "cad: operation catalog"
+ },
+ {
+  "tool": "craft",
+  "operation": "shutdown",
+  "input": {
+   "confirm": true
+  },
+  "note": "cad: graceful exit"
+ },
+ {
+  "tool": "craft",
+  "operation": "list_apps",
+  "input": {},
+  "note": "deck: inventory before anything else"
+ },
+ {
+  "tool": "craft",
+  "operation": "app_status",
+  "input": {},
+  "note": "deck: which wrappees are installed"
+ },
+ {
+  "tool": "craft",
+  "operation": "run_demo",
+  "input": {
+   "app": "deck",
+   "demo": "pitch-deck"
+  },
+  "note": "deck: execute the app demo #1"
+ },
+ {
+  "tool": "craft",
+  "operation": "craft_commands",
+  "input": {
+   "app": "deck"
+  },
+  "note": "deck: live command discovery from the CLI"
+ },
+ {
+  "tool": "craft",
+  "operation": "ollama_models",
+  "input": {},
+  "note": "deck: local models available"
+ },
+ {
+  "tool": "craft",
+  "operation": "ai_flow",
+  "input": {
+   "prompt": "caption this demo output"
+  },
+  "note": "deck: single local-LLM step"
+ },
+ {
+  "tool": "craft",
+  "operation": "help",
+  "input": {},
+  "note": "deck: operation catalog"
+ },
+ {
+  "tool": "craft",
+  "operation": "shutdown",
+  "input": {
+   "confirm": true
+  },
+  "note": "deck: graceful exit"
+ },
+ {
+  "tool": "craft",
+  "operation": "list_apps",
+  "input": {},
+  "note": "design: inventory before anything else"
+ },
+ {
+  "tool": "craft",
+  "operation": "app_status",
+  "input": {},
+  "note": "design: which wrappees are installed"
+ },
+ {
+  "tool": "craft",
+  "operation": "run_demo",
+  "input": {
+   "app": "design",
+   "demo": "print-spread"
+  },
+  "note": "design: execute the app demo #1"
+ },
+ {
+  "tool": "craft",
+  "operation": "craft_commands",
+  "input": {
+   "app": "design"
+  },
+  "note": "design: live command discovery from the CLI"
+ },
+ {
+  "tool": "craft",
+  "operation": "ollama_models",
+  "input": {},
+  "note": "design: local models available"
+ },
+ {
+  "tool": "craft",
+  "operation": "ai_flow",
+  "input": {
+   "prompt": "caption this demo output"
+  },
+  "note": "design: single local-LLM step"
+ },
+ {
+  "tool": "craft",
+  "operation": "help",
+  "input": {},
+  "note": "design: operation catalog"
+ },
+ {
+  "tool": "craft",
+  "operation": "shutdown",
+  "input": {
+   "confirm": true
+  },
+  "note": "design: graceful exit"
+ },
+ {
+  "tool": "craft",
+  "operation": "list_apps",
+  "input": {},
+  "note": "effect: inventory before anything else"
+ },
+ {
+  "tool": "craft",
+  "operation": "app_status",
+  "input": {},
+  "note": "effect: which wrappees are installed"
+ },
+ {
+  "tool": "craft",
+  "operation": "run_demo",
+  "input": {
+   "app": "effect",
+   "demo": "title-card"
+  },
+  "note": "effect: execute the app demo #1"
+ },
+ {
+  "tool": "craft",
+  "operation": "craft_commands",
+  "input": {
+   "app": "effect"
+  },
+  "note": "effect: live command discovery from the CLI"
+ },
+ {
+  "tool": "craft",
+  "operation": "ollama_models",
+  "input": {},
+  "note": "effect: local models available"
+ },
+ {
+  "tool": "craft",
+  "operation": "ai_flow",
+  "input": {
+   "prompt": "caption this demo output"
+  },
+  "note": "effect: single local-LLM step"
+ },
+ {
+  "tool": "craft",
+  "operation": "help",
+  "input": {},
+  "note": "effect: operation catalog"
+ },
+ {
+  "tool": "craft",
+  "operation": "shutdown",
+  "input": {
+   "confirm": true
+  },
+  "note": "effect: graceful exit"
+ },
+ {
+  "tool": "craft",
+  "operation": "list_apps",
+  "input": {},
+  "note": "fig: inventory before anything else"
+ },
+ {
+  "tool": "craft",
+  "operation": "app_status",
+  "input": {},
+  "note": "fig: which wrappees are installed"
+ },
+ {
+  "tool": "craft",
+  "operation": "run_demo",
+  "input": {
+   "app": "fig",
+   "demo": "landing-page"
+  },
+  "note": "fig: execute the app demo #1"
+ },
+ {
+  "tool": "craft",
+  "operation": "craft_commands",
+  "input": {
+   "app": "fig"
+  },
+  "note": "fig: live command discovery from the CLI"
+ },
+ {
+  "tool": "craft",
+  "operation": "ollama_models",
+  "input": {},
+  "note": "fig: local models available"
+ },
+ {
+  "tool": "craft",
+  "operation": "ai_flow",
+  "input": {
+   "prompt": "caption this demo output"
+  },
+  "note": "fig: single local-LLM step"
+ },
+ {
+  "tool": "craft",
+  "operation": "help",
+  "input": {},
+  "note": "fig: operation catalog"
+ },
+ {
+  "tool": "craft",
+  "operation": "shutdown",
+  "input": {
+   "confirm": true
+  },
+  "note": "fig: graceful exit"
+ },
+ {
+  "tool": "craft",
+  "operation": "list_apps",
+  "input": {},
+  "note": "film: inventory before anything else"
+ },
+ {
+  "tool": "craft",
+  "operation": "app_status",
+  "input": {},
+  "note": "film: which wrappees are installed"
+ },
+ {
+  "tool": "craft",
+  "operation": "run_demo",
+  "input": {
+   "app": "film",
+   "demo": "storyboard"
+  },
+  "note": "film: execute the app demo #1"
+ },
+ {
+  "tool": "craft",
+  "operation": "craft_commands",
+  "input": {
+   "app": "film"
+  },
+  "note": "film: live command discovery from the CLI"
+ },
+ {
+  "tool": "craft",
+  "operation": "ollama_models",
+  "input": {},
+  "note": "film: local models available"
+ },
+ {
+  "tool": "craft",
+  "operation": "ai_flow",
+  "input": {
+   "prompt": "caption this demo output"
+  },
+  "note": "film: single local-LLM step"
+ },
+ {
+  "tool": "craft",
+  "operation": "help",
+  "input": {},
+  "note": "film: operation catalog"
+ },
+ {
+  "tool": "craft",
+  "operation": "shutdown",
+  "input": {
+   "confirm": true
+  },
+  "note": "film: graceful exit"
+ },
+ {
+  "tool": "craft",
+  "operation": "list_apps",
+  "input": {},
+  "note": "grid: inventory before anything else"
+ },
+ {
+  "tool": "craft",
+  "operation": "app_status",
+  "input": {},
+  "note": "grid: which wrappees are installed"
+ },
+ {
+  "tool": "craft",
+  "operation": "run_demo",
+  "input": {
+   "app": "grid",
+   "demo": "homepage-grid"
+  },
+  "note": "grid: execute the app demo #1"
+ },
+ {
+  "tool": "craft",
+  "operation": "craft_commands",
+  "input": {
+   "app": "grid"
+  },
+  "note": "grid: live command discovery from the CLI"
+ },
+ {
+  "tool": "craft",
+  "operation": "ollama_models",
+  "input": {},
+  "note": "grid: local models available"
+ },
+ {
+  "tool": "craft",
+  "operation": "ai_flow",
+  "input": {
+   "prompt": "caption this demo output"
+  },
+  "note": "grid: single local-LLM step"
+ },
+ {
+  "tool": "craft",
+  "operation": "help",
+  "input": {},
+  "note": "grid: operation catalog"
+ },
+ {
+  "tool": "craft",
+  "operation": "shutdown",
+  "input": {
+   "confirm": true
+  },
+  "note": "grid: graceful exit"
+ },
+ {
+  "tool": "craft",
+  "operation": "list_apps",
+  "input": {},
+  "note": "sound: inventory before anything else"
+ },
+ {
+  "tool": "craft",
+  "operation": "app_status",
+  "input": {},
+  "note": "sound: which wrappees are installed"
+ },
+ {
+  "tool": "craft",
+  "operation": "run_demo",
+  "input": {
+   "app": "sound",
+   "demo": "ident-jingle"
+  },
+  "note": "sound: execute the app demo #1"
+ },
+ {
+  "tool": "craft",
+  "operation": "craft_commands",
+  "input": {
+   "app": "sound"
+  },
+  "note": "sound: live command discovery from the CLI"
+ },
+ {
+  "tool": "craft",
+  "operation": "ollama_models",
+  "input": {},
+  "note": "sound: local models available"
+ },
+ {
+  "tool": "craft",
+  "operation": "ai_flow",
+  "input": {
+   "prompt": "caption this demo output"
+  },
+  "note": "sound: single local-LLM step"
+ },
+ {
+  "tool": "craft",
+  "operation": "help",
+  "input": {},
+  "note": "sound: operation catalog"
+ },
+ {
+  "tool": "craft",
+  "operation": "shutdown",
+  "input": {
+   "confirm": true
+  },
+  "note": "sound: graceful exit"
+ },
+ {
+  "tool": "craft",
+  "operation": "list_apps",
+  "input": {},
+  "note": "word: inventory before anything else"
+ },
+ {
+  "tool": "craft",
+  "operation": "app_status",
+  "input": {},
+  "note": "word: which wrappees are installed"
+ },
+ {
+  "tool": "craft",
+  "operation": "run_demo",
+  "input": {
+   "app": "word",
+   "demo": "demo-report"
+  },
+  "note": "word: execute the app demo #1"
+ },
+ {
+  "tool": "craft",
+  "operation": "craft_commands",
+  "input": {
+   "app": "word"
+  },
+  "note": "word: live command discovery from the CLI"
+ },
+ {
+  "tool": "craft",
+  "operation": "ollama_models",
+  "input": {},
+  "note": "word: local models available"
+ },
+ {
+  "tool": "craft",
+  "operation": "ai_flow",
+  "input": {
+   "prompt": "caption this demo output"
+  },
+  "note": "word: single local-LLM step"
+ },
+ {
+  "tool": "craft",
+  "operation": "help",
+  "input": {},
+  "note": "word: operation catalog"
+ },
+ {
+  "tool": "craft",
+  "operation": "shutdown",
+  "input": {
+   "confirm": true
+  },
+  "note": "word: graceful exit"
+ },
+ {
+  "tool": "craft",
+  "operation": "list_apps",
+  "input": {},
+  "note": "pdf: inventory before anything else"
+ },
+ {
+  "tool": "craft",
+  "operation": "app_status",
+  "input": {},
+  "note": "pdf: which wrappees are installed"
+ },
+ {
+  "tool": "craft",
+  "operation": "run_demo",
+  "input": {
+   "app": "pdf",
+   "demo": "portfolio"
+  },
+  "note": "pdf: execute the app demo #1"
+ },
+ {
+  "tool": "craft",
+  "operation": "craft_commands",
+  "input": {
+   "app": "pdf"
+  },
+  "note": "pdf: live command discovery from the CLI"
+ },
+ {
+  "tool": "craft",
+  "operation": "ollama_models",
+  "input": {},
+  "note": "pdf: local models available"
+ },
+ {
+  "tool": "craft",
+  "operation": "ai_flow",
+  "input": {
+   "prompt": "caption this demo output"
+  },
+  "note": "pdf: single local-LLM step"
+ },
+ {
+  "tool": "craft",
+  "operation": "help",
+  "input": {},
+  "note": "pdf: operation catalog"
+ },
+ {
+  "tool": "craft",
+  "operation": "shutdown",
+  "input": {
+   "confirm": true
+  },
+  "note": "pdf: graceful exit"
+ },
+ {
+  "tool": "craft",
+  "operation": "list_apps",
+  "input": {},
+  "note": "light: inventory before anything else"
+ },
+ {
+  "tool": "craft",
+  "operation": "app_status",
+  "input": {},
+  "note": "light: which wrappees are installed"
+ },
+ {
+  "tool": "craft",
+  "operation": "run_demo",
+  "input": {
+   "app": "light",
+   "demo": "grade-pelican"
+  },
+  "note": "light: execute the app demo #1"
+ },
+ {
+  "tool": "craft",
+  "operation": "craft_commands",
+  "input": {
+   "app": "light"
+  },
+  "note": "light: live command discovery from the CLI"
+ },
+ {
+  "tool": "craft",
+  "operation": "ollama_models",
+  "input": {},
+  "note": "light: local models available"
+ },
+ {
+  "tool": "craft",
+  "operation": "ai_flow",
+  "input": {
+   "prompt": "caption this demo output"
+  },
+  "note": "light: single local-LLM step"
+ },
+ {
+  "tool": "craft",
+  "operation": "help",
+  "input": {},
+  "note": "light: operation catalog"
+ },
+ {
+  "tool": "craft",
+  "operation": "shutdown",
+  "input": {
+   "confirm": true
+  },
+  "note": "light: graceful exit"
+ },
+ {
+  "tool": "craft",
+  "operation": "list_apps",
+  "input": {},
+  "note": "photo: inventory before anything else"
+ },
+ {
+  "tool": "craft",
+  "operation": "app_status",
+  "input": {},
+  "note": "photo: which wrappees are installed"
+ },
+ {
+  "tool": "craft",
+  "operation": "run_demo",
+  "input": {
+   "app": "photo",
+   "demo": "pelican-photo"
+  },
+  "note": "photo: execute the app demo #1"
+ },
+ {
+  "tool": "craft",
+  "operation": "craft_commands",
+  "input": {
+   "app": "photo"
+  },
+  "note": "photo: live command discovery from the CLI"
+ },
+ {
+  "tool": "craft",
+  "operation": "ollama_models",
+  "input": {},
+  "note": "photo: local models available"
+ },
+ {
+  "tool": "craft",
+  "operation": "ai_flow",
+  "input": {
+   "prompt": "caption this demo output"
+  },
+  "note": "photo: single local-LLM step"
+ },
+ {
+  "tool": "craft",
+  "operation": "help",
+  "input": {},
+  "note": "photo: operation catalog"
+ },
+ {
+  "tool": "craft",
+  "operation": "shutdown",
+  "input": {
+   "confirm": true
+  },
+  "note": "photo: graceful exit"
+ },
+ {
+  "tool": "craft",
+  "operation": "list_apps",
+  "input": {},
+  "note": "vector: inventory before anything else"
+ },
+ {
+  "tool": "craft",
+  "operation": "app_status",
+  "input": {},
+  "note": "vector: which wrappees are installed"
+ },
+ {
+  "tool": "craft",
+  "operation": "run_demo",
+  "input": {
+   "app": "vector",
+   "demo": "pelican-vector"
+  },
+  "note": "vector: execute the app demo #1"
+ },
+ {
+  "tool": "craft",
+  "operation": "craft_commands",
+  "input": {
+   "app": "vector"
+  },
+  "note": "vector: live command discovery from the CLI"
+ },
+ {
+  "tool": "craft",
+  "operation": "ollama_models",
+  "input": {},
+  "note": "vector: local models available"
+ },
+ {
+  "tool": "craft",
+  "operation": "ai_flow",
+  "input": {
+   "prompt": "caption this demo output"
+  },
+  "note": "vector: single local-LLM step"
+ },
+ {
+  "tool": "craft",
+  "operation": "help",
+  "input": {},
+  "note": "vector: operation catalog"
+ },
+ {
+  "tool": "craft",
+  "operation": "shutdown",
+  "input": {
+   "confirm": true
+  },
+  "note": "vector: graceful exit"
+ }
+]

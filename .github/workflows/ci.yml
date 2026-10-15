@@ -1,0 +1,19 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  ci:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --extra dev
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest -q
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+        working-directory: web_sota
+      - run: bun run check
+        working-directory: web_sota
+      - run: bun run build
+        working-directory: web_sota

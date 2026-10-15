@@ -1,0 +1,36 @@
+# democraft-mcp - llms-full.txt
+
+## What
+`craft(operation, app, demo, model, prompt, confirm)` portmanteau over 13
+Craft apps (cad, deck, design, effect, fig, film, grid, sound, word, pdf,
+light, photo, vector). Ops: list_apps, app_status, run_demo, craft_commands,
+ollama_models, ai_flow, help, shutdown. Prefab: show_apps_prefab_card,
+show_demo_prefab_card. Prompt: democraft_demo_guide(app).
+
+## How demos run
+`run_demo` (src/democraft_mcp/crafts.py): AI step via Ollama
+`DEMOCRAFT_MODEL` (default gemma4:12b, declared skip when down), then real
+CLI subprocess (`CLI_TIMEOUT_S=120`) into `outbox/<app>/<demo>/`. Returns
+`{success, message, ai_step, cli_steps, artifacts, all_cli_ok, run_dir}`.
+Errors: unknown_app, wrappee_missing, needs_account, timeout, spawn - always
+with recovery text. Per-app argv: cad sample/info, deck render --sample,
+design run --sample, effect info + render-frame attempt, fig newFromTemplate +
+render, film inspect, grid csv->xlsx->cat + eval, sound run --demo --inspect,
+word md->docx->pdf + info, pdf combine + render + info, light commands +
+develop run (needs grade-in.png), photo/vector AI SVG + convert/run.
+
+## REST
+GET /api/health|crafts|runs|tools|skills|logs|dashboard(+llm/providers),
+POST /api/demos/run|llm/chat. MCP at /mcp. CORS localhost-only.
+Backend :11246, frontend :11245.
+
+## Webapp
+web_sota/: AppLayout sidebar+topbar, Dashboard/Inbox/Tools/Skills/Chat/
+Settings/Help/Logs + Craft/:app dynamic domain pages fed by /api/crafts.
+Zustand stores (llm, backend), data-testid on controls, MOCK badges until
+wrappee installed. Onboarding CTA under hero per ONBOARDING_STANDARD.
+
+## Scaffolding truth
+FastMCP 3.4.4+ (<4), prefab-ui core, uv+just+ruff, bun webapp, pytest
+(real CLIs, tmp outbox), Windows CI + just ci, MCPB (wipe+recopy,
+3-4-100 prompts), ports claimed (11246/11245).

@@ -1,0 +1,1 @@
+democraft-mcp session context: FastMCP 3.4 portmanteau + FastAPI backend + React webapp. Demos execute real Craft CLIs (C:\Program Files) into outbox/. Ports BE 11246 FE 11245. Justfile recipes: serve test lint fmt web-install web-build web-check e2e mcpb-pack ci.
