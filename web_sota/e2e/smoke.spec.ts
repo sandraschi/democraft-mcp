@@ -22,6 +22,13 @@ test("word page offers topic combobox", async ({ page }) => {
 	await expect(page.getByTestId("topic-custom")).toBeVisible();
 });
 
+test("grid and fig pages offer topic comboboxes", async ({ page }) => {
+	await page.goto("/craft/grid");
+	await expect(page.getByTestId("topic-pick")).toBeVisible();
+	await page.goto("/craft/fig");
+	await expect(page.getByTestId("topic-pick")).toBeVisible();
+});
+
 test("onboarding CTA visible when wrappees missing", async ({ page }) => {
 	await page.goto("/");
 	const cta = page.getByTestId("onboarding-cta");
