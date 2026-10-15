@@ -3,3 +3,25 @@
 :root {
 	color-scheme: dark;
 }
+
+body {
+	font-family:
+		ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+		sans-serif;
+}
+
+::selection {
+	background: rgb(245 158 11 / 0.35);
+}
+
+*::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+	background: rgb(51 65 85);
+	border-radius: 8px;
+}
+*::-webkit-scrollbar-track {
+	background: transparent;
+}

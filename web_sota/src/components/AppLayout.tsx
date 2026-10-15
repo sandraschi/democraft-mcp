@@ -181,9 +181,12 @@ export default function AppLayout() {
 						</a>
 					</div>
 				</header>
-				<main className="flex-1 p-6">
+				<main className="mx-auto w-full max-w-5xl flex-1 p-6">
 					<Outlet />
 				</main>
+				<footer className="border-t border-slate-800 px-6 py-3 text-xs text-slate-500">
+					democraft-mcp - real headless demos for the Craft family. Vienna.
+				</footer>
 			</div>
 			{logsOpen && (
 				<div
