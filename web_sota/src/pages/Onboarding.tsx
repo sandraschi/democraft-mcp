@@ -5,7 +5,7 @@ import { useBackend } from "../store/backend";
 export default function Onboarding() {
 	const { missing } = useBackend();
 	return (
-		<div>
+		<div data-testid="onboarding-page">
 			<h1 className="text-2xl font-bold">Onboarding</h1>
 			<ol className="mt-3 flex list-decimal flex-col gap-3 pl-5 text-sm">
 				<li>
@@ -24,7 +24,7 @@ export default function Onboarding() {
 					only.
 				</li>
 			</ol>
-			<p className="mt-3 text-sm text-slate-400">
+			<p className="mt-3 text-sm text-slate-300">
 				Full narrative: docs/ONBOARDING.md.{" "}
 				<Link to="/" className="underline">
 					Back to Dashboard
