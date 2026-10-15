@@ -30,7 +30,12 @@ e2e:
     cd web_sota; C:\Users\sandr\.bun\bin\bun.exe run e2e
 
 mcpb-pack:
-    powershell -ExecutionPolicy Bypass -File scripts/mcpb-pack.ps1
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/mcpb-pack.ps1
+
+bootstrap:
+    {{UV}} sync --extra dev
+    pre-commit install
+    cd web_sota; C:\Users\sandr\.bun\bin\bun.exe install
 
 ci: lint test web-check web-build
     @echo "ci green."
