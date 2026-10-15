@@ -69,10 +69,11 @@ is the gated follow-up, never pretended.
 GridCraft (`gridcraft-cli.exe`): `info`, `convert <in> <out> [--sheet]`
 (xlsx/csv/tsv/json/html), `eval <formula>`, `cat [--range] [--formulas]
 [--csv]`, `check` (calc oracle), `run [--in FILE|--sample NAME] [--cmd]...
-[--out]`, `commands`, `functions`, `mcp`. Demo homepage-grid: write
-`lineup.csv`, `convert lineup.csv lineup.xlsx`, `cat lineup.xlsx --csv`,
-`eval 6*7`. AI step summarizes the sheet. Round-trip fidelity is checkable
-with `check`.
+[--out]`, `commands`, `functions`, `mcp`. Demo homepage-grid: AI JSON table
+-> `cell.set` values, header fill, engine chart recommendation + insert,
+sparkline, `file.saveAs` PDF, `cat` readback. Non-numerics: charts (15
+types), sparklines, pictures, shapes, pivots, checkboxes, comments,
+hyperlinks, merge, table styles.
 
 SoundCraft (`soundcraft-cli.exe`): `info FILE`, `convert IN OUT
 [--bit-depth] [--rate] [--normalize]`, `run [--in S.scraft|--demo] [--cmd
@@ -377,9 +378,10 @@ Film storyboard: `inspect` (project tree; empty headless), `inspect
 sequence` (active sequence; empty headless). Both JSON to stdout. Demo
 records both plus the AI board.
 
-Grid homepage-grid: write `lineup.csv` (header app,demo,status + 3 rows),
-`convert lineup.csv lineup.xlsx`, `cat lineup.xlsx --csv` (must equal input),
-`eval 6*7` (must print 42). Artifacts: lineup.csv, lineup.xlsx.
+Grid homepage-grid: AI JSON {title, headers, rows} (or sales fallback),
+`cell.set` values, amber header, engine chart recommendation + insert,
+sparkline, `file.saveAs` PDF, `cat` readback. Artifacts: report.xlsx,
+report-chart.xlsx, report-final.xlsx, report.pdf.
 
 Sound ident-jingle: `run --demo --inspect` (demo project JSON, Midnight
 Groove ~56s). Bounce form: `run --demo --bounce ident.wav` (full project,

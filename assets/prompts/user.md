@@ -73,12 +73,18 @@ footage.
 
 ## GridCraft: homepage-grid
 
-Goal: spreadsheet round-trip. Chat: run_demo app grid. CLI: write
-`lineup.csv`, `gridcraft-cli convert lineup.csv lineup.xlsx`,
-`gridcraft-cli cat lineup.xlsx --csv`, `gridcraft-cli eval "6*7"`. Look at:
-cat output equals the CSV (fidelity), eval prints 42. AI step summarizes the
-sheet. Extension: `check` the xlsx for calc-oracle fidelity, `functions
---search` for one demo formula. Sheets with charts: `info` first.
+Goal: AI-filled topic sheet with engine formatting, chart, sparkline, PDF.
+Chat: run_demo app grid with a topic (or none for the sales fallback). How
+AI fills it: the topic prompt demands JSON {title, headers, rows}; the
+runner parses it (brace-slice), validates shapes/caps, and writes values
+cell by cell via `cell.set` (numbers bare, formulas allowed). The ENGINE
+then does everything visual: header `home.fillColor`,
+`insert.chartRecommendations` picks the chart type from the data shape, `insert.chart`
+places it, `insert.sparkline` trends the first numeric column,
+`file.saveAs` exports PDF, `cat --csv` reads back. Non-numerics supported:
+merged titles, colors, fonts, tables, pictures, shapes, checkboxes, pivots,
+comments, hyperlinks (see command inventory). Extension: `check` the xlsx
+calc-oracle, `functions --search` for a demo formula.
 
 ## SoundCraft: ident-jingle
 
@@ -187,10 +193,11 @@ stderr "no composition" (wording varies - quote it). Report the capability
 map: comp count 0, command count from commands listing, title spec from AI
 held for retry. Page shows MOCK-until-project badge.
 
-Session Fig (landing-page): run_demo fig. landing.jsonl (1 line),
-landing.figcraft (~50KB, ~190 nodes), landing.png (~600KB). Verify with
-info: frames Desktop/Phone. AI sections list. This session is the reference
-implementation - when other demos behave oddly, compare against this one's
+Session Fig (landing-page): run_demo fig with a topic. landing.jsonl (1 line),
+landing.figcraft (~50KB, ~190 nodes), landing.png (~600KB), copy-brief.md (AI
+landing copy for the topic). Verify with info: frames Desktop/Phone. This
+session is the reference implementation - when other demos behave oddly,
+compare against this one's
 shape (script + build + render + verify).
 
 Session Film (storyboard): run_demo film. inspect -> {} or minimal JSON;
@@ -198,10 +205,11 @@ inspect sequence likewise. Report both verbatim (truncated), attach AI
 3-shot board (shot/lens/action). Render/assembly stays demo #2 behind a
 project file. Never present the board as footage.
 
-Session Grid (homepage-grid): run_demo grid. lineup.csv 4 lines;
-lineup.xlsx (~5KB); cat --csv output diffed against input (equal =
-fidelity proven); eval prints 42. AI one-liner quoted. Extension session:
-`functions --search lookup` then a real VLOOKUP demo on a second sheet.
+Session Grid (homepage-grid): run_demo grid with a topic. AI JSON parsed
+(title/headers/rows) or declared sales fallback. report.xlsx (values +
+amber header), report-chart.xlsx (engine-picked chart + PDF), sparkline +
+cat --csv readback. Extension session: `functions --search lookup` then a
+real VLOOKUP demo on a second sheet.
 
 Session Sound (ident-jingle): run_demo sound. inspect JSON: tracks, sample
 rate, demo flag. AI brief quoted (tempo/key/layers). Bounce session (demo
@@ -322,8 +330,9 @@ Fail: silent empty PNG (check bytes, re-run). Fig: landing.png opens
 (template changed - list templates). Film: storyboard.edl opens, TITLE +
 timecodes present, clip names quoted; AI board attached separately. Fail:
 empty EDL (project failed to open - attach line-1 result). Grid:
-lineup.xlsx opens in Excel/Libre (3 rows), cat output == csv input, eval 42.
-Fail: inequality (report both texts). Sound: inspect JSON has tracks;
+report.xlsx opens (AI data + amber header), report.pdf exists, chart type
+matches recommendations output. Fail: unparsed AI JSON (fallback fired -
+quote which). Sound: inspect JSON has tracks;
 bounce wav plays ~56s (full Midnight Groove). Fail: short file (bounce was
 clipped - re-run without --start/--end). Word: docx
 opens in Word (5 bullets), pdf opens (1 page), info counts match. Fail:
@@ -348,8 +357,8 @@ Inventory: "List all craft demo apps with install state." "Which wrappees
 am I missing?" "What does the photo demo need?" Single demos: "Run the CAD
 house-plan demo and show me the PNG." "Render the deck sample and count
 slides." "Build the Fig landing page and tell me node count." "Export the
-film EDL and quote three clip names." "Round-trip the grid lineup and prove
-fidelity." "Convert the word brief and give me sizes." "Combine the PDF
+film EDL and quote three clip names." "Fill the grid sales report and name the chart type."
+"Convert the word brief and give me sizes." "Combine the PDF
 portfolio and show the thumb." "Grade the pelican PNG and show before/after
 argv." "Run the vector pelican and compare with photo." Discovery: "List
 EffectCraft commands matching render." "Describe file.exportEdl params."
@@ -374,7 +383,7 @@ tokens never needed for what they just saw.
 
 Minute 0-2: app_status (13 rows, installed flags match C:\Program Files),
 ollama_models (or llm_down with recovery). 2-5: run cad + grid + word
-demos; open floorplan.png, lineup.xlsx, brief.docx from outbox. 5-8: photo
+demos; open house-plan.png, report.xlsx, report.docx from outbox. 5-8: photo
 + vector pelican (compare hashes, read both logs). 8-11: film EDL (clip
 names), effect still (1920x1080), fig landing.png. 11-13: POST /api/demos/run
 for deck + design + sound (artifacts in outbox). 13-15: pdf combine, light

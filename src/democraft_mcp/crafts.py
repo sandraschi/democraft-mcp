@@ -31,7 +31,85 @@ class Demo:
     blurb: str
     ai_prompt: str
     requires: str = "cli"  # cli | artcraft-account
-    topics: tuple[str, ...] = ()  # word demo: combobox choices; empty = free text only
+    topics: tuple[str, ...] = ()  # combobox choices; empty = free text only
+    topic_prompt: str = ""  # {topic} template used when a topic is picked; else ai_prompt
+
+
+def _grid_data(ai: dict, topic: str) -> dict:
+    """Parse the AI JSON table or fall back to a real sales mini-table (declared)."""
+    import json as _json
+
+    fallback = {
+        "title": topic or "Sales report 2025",
+        "headers": ["Month", "Revenue", "Units"],
+        "rows": [
+            ["Jan", "12400", "312"],
+            ["Feb", "11800", "298"],
+            ["Mar", "14200", "351"],
+            ["Apr", "13900", "340"],
+            ["May", "15100", "377"],
+            ["Jun", "14800", "365"],
+        ],
+    }
+    txt = ai.get("text", "") if ai.get("success") else ""
+    start, end = txt.find("{"), txt.rfind("}")
+    if start >= 0 and end > start:
+        try:
+            obj = _json.loads(txt[start : end + 1])
+            headers = [str(h)[:40] for h in obj.get("headers", [])][:8]
+            rows = [[str(v)[:40] for v in row][:8] for row in obj.get("rows", [])][:20]
+            if headers and rows and all(rows):
+                return {
+                    "title": str(obj.get("title", topic or "Report"))[:80],
+                    "headers": headers,
+                    "rows": rows,
+                }
+        except Exception:
+            pass
+    fallback["title"] = topic or fallback["title"]
+    return fallback
+
+
+def _first_numeric_col(rows: list[list[str]], ncols: int) -> int:
+    for c in range(ncols):
+        try:
+            [float(r[c].replace(",", "")) for r in rows if len(r) > c]
+            return c
+        except (ValueError, IndexError):
+            continue
+    return -1
+
+
+FIG_TOPICS: tuple[str, ...] = (
+    "Pelican bike shop",
+    "Vienna coffee map",
+    "Sourdough bakery",
+    "Danube cycling guide",
+    "Watch repair atelier",
+    "Community tool library",
+    "Night tram photography",
+    "Small-house architects",
+    "Secondhand bookshop",
+    "Urban beekeeping co-op",
+    "Kids bike school",
+    "Lake swimming guide",
+)
+
+
+GRID_TOPICS: tuple[str, ...] = (
+    "Sales report 2025 (monthly revenue + units)",
+    "Pelican census (Danube counts by month)",
+    "Bike shop inventory (models, stock, price)",
+    "Household energy 2025 (kWh by month)",
+    "Reading log 2025 (books, pages, rating)",
+    "Marathon training (week, km, long run)",
+    "Sourdough log (bake, hydration, score)",
+    "Vienna rents (district, sqm, euros)",
+    "Coffee spending 2025 (month, cups, euros)",
+    "Fleet demo runs (app, seconds, artifacts)",
+    "Garden harvest (crop, kg, week)",
+    "Rainy days 2025 (month, days, mm)",
+)
 
 
 WORD_TOPICS: tuple[str, ...] = (
@@ -143,10 +221,15 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "landing-page",
-                "Demo 1: democraft landing page",
-                "Landing-page template built headless + PNG render.",
-                "List landing-page sections for a demo site as JSON list of "
-                "{section, purpose}. No prose.",
+                "Demo 1: landing page + copy brief (pick a topic)",
+                "Landing-page template built headless + PNG render; local AI "
+                "writes the landing copy brief for your topic.",
+                "Write a landing-page copy brief as markdown: # headline, "
+                "3 sections with one line each, one call to action.",
+                topics=FIG_TOPICS,
+                topic_prompt="Write a landing-page copy brief for '{topic}' as "
+                "markdown: # headline, 3 sections with one line each, one call "
+                "to action. No preamble.",
             ),
         ),
     ),
@@ -169,14 +252,20 @@ APPS: tuple[CraftApp, ...] = (
         "grid",
         "GridCraft",
         "gridcraft-cli.exe",
-        "Spreadsheets: convert, eval, round-trip.",
+        "Spreadsheets: AI-filled data, formatting, charts, sparklines, PDF.",
         (
             Demo(
                 "homepage-grid",
-                "Demo 1: democraft homepage grid",
-                "CSV lineup written, converted to XLSX, read back. AI summaries the sheet.",
-                "Given rows [app, demo, status], write a one-line summary. "
-                "Rows: cad/house-plan/ok, deck/pitch-deck/ok, fig/landing-page/ok.",
+                "Demo 1: topic report sheet (try Sales report 2025)",
+                "Pick a topic: local AI fills the data, the engine formats, "
+                "charts, sparklines, and exports XLSX + PDF.",
+                'Return JSON only: {"title": str, "headers": [3-5 short column '
+                'names], "rows": [[6-10 rows of short plain values, numbers '
+                "bare]]}. No prose.",
+                topics=GRID_TOPICS,
+                topic_prompt="Return JSON only about '{topic}': {{\"title\": str, "
+                '"headers": [3-5 short column names], "rows": [[6-10 rows of '
+                "short plain values, numbers bare]]}}. No prose.",
             ),
         ),
     ),
@@ -208,6 +297,8 @@ APPS: tuple[CraftApp, ...] = (
                 "WordCraft's Report template styles it to DOCX + PDF.",
                 "Draft a one-page report as markdown: a # title line, then 4-6 short paragraphs.",
                 topics=WORD_TOPICS,
+                topic_prompt="Write a one-page report on '{topic}' as markdown: a # title "
+                "line, then 4-6 short paragraphs. No preamble.",
             ),
         ),
     ),
@@ -387,10 +478,7 @@ def run_demo(
     ai = ai_step(
         demo.ai_prompt
         if not topic
-        else (
-            f"Write a one-page report on '{topic}' as markdown: a # title line, "
-            "then 4-6 short paragraphs. No preamble."
-        ),
+        else (demo.topic_prompt.format(topic=topic) if demo.topic_prompt else demo.ai_prompt),
         model,
     )
     steps: list[dict] = []
@@ -460,6 +548,15 @@ def run_demo(
         do(["run", str(script), "--out", "landing.figcraft"])
         if (run_dir / "landing.figcraft").is_file():
             do(["render", str(run_dir / "landing.figcraft"), "-o", "landing.png"])
+        brief = run_dir / "copy-brief.md"
+        if ai.get("success") and ai.get("text"):
+            brief.write_text(ai["text"], encoding="utf-8")
+        else:
+            brief.write_text(
+                f"# Landing copy: {topic or 'democraft'}\n\n- Hero: one line.\n"
+                "- Three sections.\n- One call to action.\n",
+                encoding="utf-8",
+            )
     elif k == "film":
         script = run_dir / "storyboard.jsonl"
         script.write_text(
@@ -471,13 +568,101 @@ def run_demo(
         # NOTE: inspect/project probes live in separate processes with no open
         # project, so the exported EDL above is the demo artifact, not the probe.
     elif k == "grid":
-        (run_dir / "lineup.csv").write_text(
-            "app,demo,status\ncad,house-plan,ok\ndeck,pitch-deck,ok\nfig,landing-page,ok\n",
-            encoding="utf-8",
+        import json as _json
+
+        data = _grid_data(ai, topic)
+        headers: list[str] = data["headers"]
+        rows: list[list[str]] = data["rows"]
+        title: str = data["title"]
+        ncols = min(len(headers), 8)
+        headers = headers[:ncols]
+        col_letters = "ABCDEFGH"[:ncols]
+        argv = ["run", "--cmd", f"cell.set={_json.dumps({'cell': 'A1', 'input': title})}"]
+        for c, h in enumerate(headers):
+            argv += ["--cmd", f"cell.set={_json.dumps({'cell': f'{col_letters[c]}2', 'input': h})}"]
+        for r, row in enumerate(rows):
+            for c in range(min(ncols, len(row))):
+                cell = f"{col_letters[c]}{r + 3}"
+                argv += ["--cmd", f"cell.set={_json.dumps({'cell': cell, 'input': row[c]})}"]
+        last_row = len(rows) + 2
+        head_range = f"A2:{col_letters[-1]}2"
+        argv += [
+            "--cmd",
+            f"home.fillColor={_json.dumps({'range': head_range, 'color': '#F59E0B'})}",
+        ]
+        do([*argv, "--out", "report.xlsx"])
+        data_range = f"A2:{col_letters[-1]}{last_row}"
+        rec = cli_run(
+            app.cli_path,
+            [
+                "run",
+                "--in",
+                "report.xlsx",
+                "--cmd",
+                "insert.chartRecommendations=" + _json.dumps({"range": data_range}),
+            ],
+            run_dir,
         )
-        do(["convert", "lineup.csv", "lineup.xlsx"])
-        do(["cat", "lineup.xlsx", "--csv"])
-        do(["eval", "6*7"])
+        steps.append(rec)
+        chart_type, chart_sub = "column", ""
+        try:
+            first = _json.loads(rec.get("stdout", "") or "{}")
+            cands = first if isinstance(first, list) else []
+            if isinstance(first, dict):
+                for key in ("result", "recommendations", "charts"):
+                    if isinstance(first.get(key), list) and first[key]:
+                        cands = first[key]
+                        break
+            if cands:
+                chart_type = cands[0].get("type", "column")
+                chart_sub = cands[0].get("subtype", "")
+        except Exception:
+            pass
+        chart_at = f"A{last_row + 3}"
+        chart_params = {
+            "range": data_range,
+            "type": chart_type,
+            "subtype": chart_sub,
+            "title": title,
+            "at": chart_at,
+        }
+        do(
+            [
+                "run",
+                "--in",
+                "report.xlsx",
+                "--cmd",
+                f"insert.chart={_json.dumps(chart_params)}",
+                "--cmd",
+                f"file.saveAs={_json.dumps({'path': 'report.pdf'})}",
+                "--out",
+                "report-chart.xlsx",
+            ]
+        )
+        num_col = _first_numeric_col(rows, ncols)
+        if num_col >= 0 and ncols < 8:
+            num_letter = col_letters[num_col]
+            free_letter = "ABCDEFGH"[ncols]
+            spark_params = {
+                "range": f"{num_letter}3:{num_letter}{last_row}",
+                "location": f"{free_letter}3",
+                "type": "line",
+            }
+            do(
+                [
+                    "run",
+                    "--in",
+                    "report-chart.xlsx",
+                    "--cmd",
+                    f"insert.sparkline={_json.dumps(spark_params)}",
+                    "--out",
+                    "report-final.xlsx",
+                ]
+            )
+            final = "report-final.xlsx"
+        else:
+            final = "report-chart.xlsx"
+        do(["cat", final, "--csv"])
     elif k == "sound":
         do(["run", "--demo", "--inspect"])
         bounced = dict(

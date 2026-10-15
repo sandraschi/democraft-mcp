@@ -55,7 +55,7 @@ def test_grid_round_trip(tmp_path):
     res = run_demo("grid", "homepage-grid", tmp_path)
     assert res["success"] is True
     names = [Path(p).name for p in res["artifacts"]]
-    assert "lineup.xlsx" in names
+    assert "report.xlsx" in names and "report.pdf" in names
 
 
 @_needs("word")

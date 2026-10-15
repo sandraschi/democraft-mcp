@@ -129,6 +129,27 @@ def test_word_topics_exposed():
     assert len(word["demos"][0]["topics"]) == 20
 
 
+def test_grid_fig_topics_exposed():
+    r = _client().get("/api/crafts")
+    apps = {a["key"]: a for a in r.json()["apps"]}
+    assert len(apps["grid"]["demos"][0]["topics"]) == 12
+    assert len(apps["fig"]["demos"][0]["topics"]) == 12
+
+
+@_needs("grid")
+def test_grid_demo_with_topic(tmp_path):
+    from pathlib import Path as _P
+
+    from democraft_mcp.crafts import run_demo
+
+    res = run_demo(
+        "grid", "homepage-grid", tmp_path, topic="Sales report 2025 (monthly revenue + units)"
+    )
+    assert res["success"] is True
+    names = [_P(p).name for p in res["artifacts"]]
+    assert "report.xlsx" in names and "report.pdf" in names
+
+
 @_needs("word")
 def test_word_demo_with_topic(tmp_path):
     from democraft_mcp.crafts import run_demo
