@@ -1,0 +1,6 @@
+democraft-mcp session context: FastMCP 3.4 portmanteau (`craft` op) + FastAPI backend + React webapp. Demos execute real Craft CLIs (C:\Program Files) into outbox/. Ports BE 11246 FE 11245. Justfile recipes: bootstrap serve test lint fmt web-install web-build web-check e2e mcpb-pack ci.
+
+## Session Context (democraft-mcp)
+
+Before starting work: run `craft(operation="app_status")` for wrappee state; read docs/TOOLS.md for op shapes.
+At end of work: run just ci equivalent gates touched; commit in <=5-file batches; never leave the tree dirty.

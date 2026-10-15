@@ -1,0 +1,1 @@
+{"description": "Demo fleet for the 13 ArtCraft apps (real headless demos + local AI flows).", "hooks": "../hooks/hooks.json", "name": "democraft-mcp", "version": "0.1.1"}

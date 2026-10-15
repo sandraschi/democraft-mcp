@@ -1,0 +1,1 @@
+{"hooks": {"SessionStart": [{"type": "text", "text": "## democraft-mcp\nMCP tool: craft(operation=...) - ops list_apps, app_status, run_demo, craft_commands, ollama_models, ai_flow, help, shutdown. Demos run real Craft CLIs into outbox/<app>/<demo>/. Before starting work: app_status for wrappee state. At end of work: gates green, small commits, clean tree."}]}}
