@@ -6,17 +6,33 @@ export default function Tools() {
 		{ name: string; pattern: string; operations?: string[] }[]
 	>([]);
 	const [open, setOpen] = useState<string | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [failed, setFailed] = useState(false);
 	useEffect(() => {
 		api<{ tools: typeof tools }>("/api/tools")
-			.then((j) => setTools(j.tools))
-			.catch(() => {});
+			.then((j) => {
+				setTools(j.tools);
+				setLoading(false);
+			})
+			.catch(() => {
+				setFailed(true);
+				setLoading(false);
+			});
 	}, []);
 	return (
-		<div>
+		<div data-testid="tools-page">
 			<h1 className="text-2xl font-bold">Tools</h1>
-			<p className="text-sm text-slate-400">
+			<p className="text-sm text-slate-300">
 				Discovered live from /api/tools - never hardcoded.
 			</p>
+			{loading && (
+				<p className="mt-2 text-sm text-slate-300">Loading tools...</p>
+			)}
+			{failed && (
+				<p className="mt-2 text-sm text-amber-300">
+					Backend unreachable - start it and retry.
+				</p>
+			)}
 			<ul data-testid="tools-list" className="mt-4 flex flex-col gap-2">
 				{tools.map((t) => (
 					<li
@@ -29,7 +45,7 @@ export default function Tools() {
 							onClick={() => setOpen(open === t.name ? null : t.name)}
 						>
 							{t.name}{" "}
-							<span className="text-xs text-slate-500">({t.pattern})</span>
+							<span className="text-sm text-slate-300">({t.pattern})</span>
 						</button>
 						{open === t.name && t.operations && (
 							<ul className="mt-2 list-disc pl-5 font-mono text-sm text-slate-300">

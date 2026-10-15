@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("dashboard loads with KPIs", async ({ page }) => {
 	await page.goto("/");
-	await expect(page.getByTestId("kpi-apps")).toBeVisible();
+	await expect(page.getByTestId("kpi-craft-apps")).toBeVisible();
 });
 
 test("crafts list shows 13 apps", async ({ page }) => {
@@ -12,6 +12,7 @@ test("crafts list shows 13 apps", async ({ page }) => {
 
 test("tools page lists operations", async ({ page }) => {
 	await page.goto("/tools");
+	await page.getByRole("button", { name: /craft/ }).click();
 	await expect(page.getByTestId("tools-list")).toContainText("run_demo");
 });
 
