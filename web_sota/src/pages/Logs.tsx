@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
+import { api } from "../lib/api";
 
 export default function Logs() {
 	const [logs, setLogs] = useState<
 		{ ts: string; source: string; message: string }[]
 	>([]);
 	useEffect(() => {
-		fetch("/api/logs?limit=300")
-			.then((r) => r.json())
+		api<{ logs: { ts: string; source: string; message: string }[] }>(
+			"/api/logs?limit=300",
+		)
 			.then((j) => setLogs(j.logs ?? []))
 			.catch(() => {});
 	}, []);

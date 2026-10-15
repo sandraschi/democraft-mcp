@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { MockBadge } from "../components/AppLayout";
+import { api } from "../lib/api";
 import { useBackend } from "../store/backend";
 
 export default function Dashboard() {
@@ -10,8 +11,7 @@ export default function Dashboard() {
 	);
 	useEffect(() => {
 		refresh();
-		fetch("/api/dashboard")
-			.then((r) => r.json())
+		api<{ kpis: { label: string; value: number | string }[] }>("/api/dashboard")
 			.then((j) => setKpis(j.kpis ?? []))
 			.catch(() => {});
 	}, [refresh]);
