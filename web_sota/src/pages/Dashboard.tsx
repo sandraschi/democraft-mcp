@@ -2,25 +2,71 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { useBackend } from "../store/backend";
+import { useLlm } from "../store/llm";
 
 export default function Dashboard() {
-	const { missing, refresh } = useBackend();
+	const { missing, health, refresh } = useBackend();
+	const { providers, refresh: refreshLlm } = useLlm();
 	const [kpis, setKpis] = useState<{ label: string; value: number | string }[]>(
 		[],
 	);
+	const [loading, setLoading] = useState(true);
+	const [failed, setFailed] = useState(false);
 	useEffect(() => {
 		refresh();
+		refreshLlm();
 		api<{ kpis: { label: string; value: number | string }[] }>("/api/dashboard")
-			.then((j) => setKpis(j.kpis ?? []))
-			.catch(() => {});
-	}, [refresh]);
+			.then((j) => {
+				setKpis(j.kpis ?? []);
+				setLoading(false);
+			})
+			.catch(() => {
+				setFailed(true);
+				setLoading(false);
+			});
+	}, [refresh, refreshLlm]);
+	const llmOk = providers.some((p) => p.ok);
 	return (
 		<div>
 			<h1 className="text-3xl font-bold">Demo the whole Craft family.</h1>
-			<p className="mt-2 text-slate-400">
+			<p className="mt-2 text-slate-300">
 				One page per Craft app. Every demo runs the real headless CLI plus a
 				local-LLM step.
 			</p>
+			<div
+				data-testid="dashboard"
+				className="mt-4 flex flex-wrap items-center gap-3 text-sm"
+			>
+				<span className="flex items-center gap-1">
+					<span
+						className={`inline-block h-2 w-2 rounded-full ${health ? "bg-emerald-400" : "bg-red-400"}`}
+					/>
+					Backend{" "}
+					{health ? `ok (${health.installed}/${health.apps} apps)` : "down"}
+				</span>
+				<span className="flex items-center gap-1">
+					<span
+						className={`inline-block h-2 w-2 rounded-full ${llmOk ? "bg-emerald-400" : "bg-slate-600"}`}
+					/>
+					LLM {llmOk ? "available" : "not detected"}
+				</span>
+			</div>
+			{loading && (
+				<p className="mt-4 text-sm text-slate-300">Loading dashboard...</p>
+			)}
+			{failed && (
+				<p className="mt-4 text-sm text-amber-300">
+					Backend unreachable. Start it, then{" "}
+					<button
+						type="button"
+						className="underline"
+						onClick={() => window.location.reload()}
+					>
+						retry
+					</button>
+					.
+				</p>
+			)}
 			<div className="mt-4 flex gap-3">
 				<Link
 					to="/craft/cad"
@@ -52,11 +98,11 @@ export default function Dashboard() {
 						className="rounded border border-slate-800 bg-slate-900 p-4"
 					>
 						<p className="text-2xl font-bold">{k.value}</p>
-						<p className="text-sm text-slate-400">{k.label}</p>
+						<p className="text-sm text-slate-300">{k.label}</p>
 					</div>
 				))}
 			</div>
-			<p className="mt-4 text-xs text-slate-500">
+			<p className="mt-4 text-sm text-slate-300">
 				Numbers update live from the backend on this machine.
 			</p>
 		</div>

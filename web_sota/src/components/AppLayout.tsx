@@ -40,7 +40,7 @@ export function MockBadge() {
 	return (
 		<span
 			data-testid="mock-badge"
-			className="rounded bg-amber-500/20 px-2 py-0.5 text-xs font-semibold text-amber-300"
+			className="rounded bg-amber-500/20 px-2 py-0.5 text-sm font-semibold text-amber-300"
 		>
 			MOCK
 		</span>
@@ -86,7 +86,10 @@ export default function AppLayout() {
 				<div className="flex items-center justify-between p-3">
 					{!collapsed && (
 						<span className="font-bold">
-							democraft <span className="text-xs text-slate-400">0.1.0</span>
+							democraft{" "}
+							<span className="text-sm text-slate-300">
+								{health?.version ?? ""}
+							</span>
 						</span>
 					)}
 					<button
@@ -99,14 +102,12 @@ export default function AppLayout() {
 						{collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
 					</button>
 				</div>
-				<div className="flex items-center gap-2 px-3 pb-2 text-xs">
+				<div className="flex items-center gap-2 px-3 pb-2 text-sm text-slate-300">
 					<span
 						data-testid="backend-dot"
 						className={`inline-block h-2 w-2 rounded-full ${health ? "bg-emerald-400" : "bg-red-400"}`}
 					/>
-					{!collapsed && (
-						<span>{health ? `BE :11246 ok` : "backend down"}</span>
-					)}
+					{!collapsed && <span>{health ? "backend ok" : "backend down"}</span>}
 				</div>
 				<nav className="flex flex-col gap-1 p-2">
 					{NAV.map((n) => (
@@ -122,7 +123,7 @@ export default function AppLayout() {
 				</nav>
 				{!collapsed && (
 					<div className="p-2">
-						<p className="px-2 text-xs uppercase text-slate-500">Craft apps</p>
+						<p className="px-2 text-sm uppercase text-slate-300">Craft apps</p>
 						{apps.map((a) => (
 							<Link
 								key={a.key}
@@ -186,14 +187,14 @@ export default function AppLayout() {
 				<main className="mx-auto w-full max-w-5xl flex-1 p-6">
 					<Outlet />
 				</main>
-				<footer className="border-t border-slate-800 px-6 py-3 text-xs text-slate-500">
+				<footer className="border-t border-slate-800 px-6 py-3 text-sm text-slate-300">
 					democraft-mcp - real headless demos for the Craft family. Vienna.
 				</footer>
 			</div>
 			{logsOpen && (
 				<div
 					data-testid="logs-modal"
-					className="fixed right-4 top-14 max-h-[70vh] w-[420px] overflow-auto rounded border border-slate-700 bg-slate-900 p-3 text-xs"
+					className="fixed right-4 top-14 max-h-[70vh] w-[420px] overflow-auto rounded border border-slate-700 bg-slate-900 p-3 text-sm"
 				>
 					<p className="mb-2 font-semibold">Logs (Ctrl+L)</p>
 					{logs.map((l) => (
@@ -205,7 +206,7 @@ export default function AppLayout() {
 						</p>
 					))}
 					{!logs.length && (
-						<p className="text-slate-500">No log entries yet.</p>
+						<p className="text-slate-300">No log entries yet.</p>
 					)}
 				</div>
 			)}

@@ -30,7 +30,7 @@ export default function Help() {
 			.catch(() => setApiPorts("backend unreachable"));
 	}, []);
 	return (
-		<div>
+		<div data-testid="help-page">
 			<h1 className="text-2xl font-bold">Help</h1>
 			<h2 className="mt-4 font-semibold">First demo in 3 steps</h2>
 			<ol className="mt-1 list-decimal pl-5 text-sm text-slate-300">
@@ -56,12 +56,12 @@ export default function Help() {
 				</tbody>
 			</table>
 			<h2 className="mt-4 font-semibold">API / ports</h2>
-			<p className="text-sm text-slate-400">
+			<p className="text-sm text-slate-300">
 				Backend :11246 (/api/*, /mcp), frontend :11245. CORS: localhost only.{" "}
 				{apiPorts}.
 			</p>
 			<h2 className="mt-4 font-semibold">Error fix</h2>
-			<p className="text-sm text-slate-400">
+			<p className="text-sm text-slate-300">
 				wrappee_missing: install the app. needs_account: configure tokens.
 				needs_input: follow the recovery path. timeout: split ranges. Full
 				catalog: docs/TROUBLESHOOTING.md.
@@ -73,7 +73,7 @@ export default function Help() {
 					className="mt-2 rounded border border-slate-800 p-2 text-sm"
 				>
 					<summary className="cursor-pointer">{q}</summary>
-					<p className="mt-1 text-slate-400">{a}</p>
+					<p className="mt-1 text-slate-300">{a}</p>
 				</details>
 			))}
 		</div>
