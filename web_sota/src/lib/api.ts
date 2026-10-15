@@ -39,6 +39,7 @@ export interface CraftDemo {
 	title: string;
 	blurb: string;
 	requires: string;
+	topics?: string[];
 }
 export interface CraftApp {
 	key: string;
