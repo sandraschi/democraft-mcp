@@ -57,7 +57,14 @@ export default function CraftPage() {
 	}
 
 	if (!craft)
-		return (
+		return apps.length === 0 ? (
+			<p>
+				Loading backend registry - is the backend up on :11246?{" "}
+				<Link to="/help" className="underline">
+					Help
+				</Link>
+			</p>
+		) : (
 			<p>
 				Unknown craft app.{" "}
 				<Link to="/" className="underline">

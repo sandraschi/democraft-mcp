@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { api } from "../lib/api";
 import { useBackend } from "../store/backend";
 
 const FAQS = [
@@ -24,13 +25,25 @@ export default function Help() {
 	const { apps } = useBackend();
 	const [apiPorts, setApiPorts] = useState("11246/11245");
 	useEffect(() => {
-		fetch("/api/health")
+		api("/api/health")
 			.then(() => setApiPorts("11246/11245"))
 			.catch(() => setApiPorts("backend unreachable"));
 	}, []);
 	return (
 		<div>
 			<h1 className="text-2xl font-bold">Help</h1>
+			<h2 className="mt-4 font-semibold">First demo in 3 steps</h2>
+			<ol className="mt-1 list-decimal pl-5 text-sm text-slate-300">
+				<li>
+					Check the backend line above reads 11246/11245 - if it says
+					unreachable, start the backend.
+				</li>
+				<li>Open any installed Craft app in the sidebar (no MOCK badge).</li>
+				<li>
+					Press Run demo #1 and read the artifacts. Every attempt, including
+					failures, lands in the Inbox.
+				</li>
+			</ol>
 			<h2 className="mt-4 font-semibold">Wrappees (host apps)</h2>
 			<table className="mt-2 w-full text-sm">
 				<tbody>

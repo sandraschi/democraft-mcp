@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
+import { api } from "../lib/api";
 import { useBackend } from "../store/backend";
 
 const NAV = [
@@ -70,8 +71,9 @@ export default function AppLayout() {
 	}, []);
 	useEffect(() => {
 		if (logsOpen)
-			fetch("/api/logs?limit=100")
-				.then((r) => r.json())
+			api<{ logs: { ts: string; source: string; message: string }[] }>(
+				"/api/logs?limit=100",
+			)
 				.then((j) => setLogs(j.logs ?? []))
 				.catch(() => {});
 	}, [logsOpen]);
