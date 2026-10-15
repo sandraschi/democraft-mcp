@@ -114,6 +114,47 @@ def test_craft_ollama_models():
     assert "models" in res or "error_type" in res
 
 
+def test_word_topics_exposed():
+    r = _client().get("/api/crafts")
+    word = next(a for a in r.json()["apps"] if a["key"] == "word")
+    assert len(word["demos"][0]["topics"]) == 20
+
+
+def test_word_demo_with_topic(tmp_path):
+    from democraft_mcp.crafts import run_demo
+
+    res = run_demo("word", "demo-report", tmp_path, topic="Pelicans: a short natural history")
+    assert res["success"] is True
+    names = [__import__("pathlib").Path(p).name for p in res["artifacts"]]
+    assert "report.docx" in names and "report.pdf" in names
+
+
+def test_artifact_served_and_guarded(tmp_path):
+    from democraft_mcp.crafts import run_demo
+    from democraft_mcp.server import build_api as _build
+
+    run_demo("grid", "homepage-grid", tmp_path)
+    import democraft_mcp.server as srv
+
+    old = srv.OUTBOX
+    srv.OUTBOX = tmp_path
+    try:
+        client = TestClient(_build())
+        ok = client.get("/api/artifacts/grid/homepage-grid/lineup.xlsx")
+        assert ok.status_code == 200
+        bad = client.get("/api/artifacts/grid/homepage-grid/../../secret")
+        # httpx may normalize dot-segments before sending; either the guard
+        # fires or the route 404s - both prove no file escapes.
+        if bad.status_code == 200:
+            assert bad.json()["error_type"] == "bad_path"
+        else:
+            assert bad.status_code == 404
+        missing = client.get("/api/artifacts/grid/homepage-grid/nope.txt")
+        assert missing.json()["success"] is False
+    finally:
+        srv.OUTBOX = old
+
+
 def test_prefab_cards_have_content():
     from democraft_mcp.server import show_apps_prefab_card, show_demo_prefab_card
 

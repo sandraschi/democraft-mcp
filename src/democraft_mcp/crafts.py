@@ -31,6 +31,31 @@ class Demo:
     blurb: str
     ai_prompt: str
     requires: str = "cli"  # cli | artcraft-account
+    topics: tuple[str, ...] = ()  # word demo: combobox choices; empty = free text only
+
+
+WORD_TOPICS: tuple[str, ...] = (
+    "Why headless demos beat screenshots",
+    "A field guide to DXF",
+    "The quiet craft of release notes",
+    "What EDLs remember",
+    "Danube floodplains: a cyclist's notes",
+    "Vienna's coffee-house WiFi, ranked",
+    "How spreadsheets lie",
+    "The 56-second ident",
+    "Pelicans: a short natural history",
+    "Bike lanes I have loved",
+    "What print still does better",
+    "Fonts that survive fax",
+    "A defense of plain text",
+    "The backup that saved October",
+    "Reading a floorplan",
+    "Why every demo needs a failure mode",
+    "The care and feeding of local LLMs",
+    "Small houses, big ideas",
+    "What I learned bouncing stems",
+    "Port registries and other love letters",
+)
 
 
 @dataclass(frozen=True)
@@ -178,10 +203,11 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "demo-report",
-                "Demo 1: one-page demo report",
-                "Brief written as markdown, converted to DOCX + PDF. AI drafts the brief.",
-                "Draft a 5-bullet report on 'headless demos beat screenshots' "
-                "as markdown bullets only.",
+                "Demo 1: one-page report, your topic",
+                "Pick a topic (or write your own): local AI drafts the report, "
+                "WordCraft's Report template styles it to DOCX + PDF.",
+                "Draft a one-page report as markdown: a # title line, then 4-6 short paragraphs.",
+                topics=WORD_TOPICS,
             ),
         ),
     ),
@@ -328,7 +354,9 @@ def cli_run(exe: Path, argv: list[str], cwd: Path, timeout_s: int = CLI_TIMEOUT_
         }
 
 
-def run_demo(app_key: str, demo_id: str, outbox: Path, model: str = DEFAULT_MODEL) -> dict:
+def run_demo(
+    app_key: str, demo_id: str, outbox: Path, model: str = DEFAULT_MODEL, topic: str = ""
+) -> dict:
     """Run a demo end to end. Returns dialogic {success, message, ...}."""
     app = BY_KEY.get(app_key)
     if app is None:
@@ -356,7 +384,15 @@ def run_demo(app_key: str, demo_id: str, outbox: Path, model: str = DEFAULT_MODE
     run_dir = outbox / app_key / demo_id
     run_dir.mkdir(parents=True, exist_ok=True)
 
-    ai = ai_step(demo.ai_prompt, model)
+    ai = ai_step(
+        demo.ai_prompt
+        if not topic
+        else (
+            f"Write a one-page report on '{topic}' as markdown: a # title line, "
+            "then 4-6 short paragraphs. No preamble."
+        ),
+        model,
+    )
     steps: list[dict] = []
     artifacts: list[str] = []
 
@@ -460,7 +496,7 @@ def run_demo(app_key: str, demo_id: str, outbox: Path, model: str = DEFAULT_MODE
             brief.write_text(ai["text"], encoding="utf-8")
         else:
             brief.write_text(
-                "# democraft demo report\n\n- Headless demos execute.\n"
+                f"# {topic or 'democraft demo report'}\n\n- Headless demos execute.\n"
                 "- Structured errors beat fake artifacts.\n"
                 "- Declared gates beat silent mocks.\n",
                 encoding="utf-8",
@@ -468,6 +504,22 @@ def run_demo(app_key: str, demo_id: str, outbox: Path, model: str = DEFAULT_MODE
         do(["convert", "brief.md", "brief.docx"])
         do(["convert", "brief.md", "brief.pdf"])
         do(["info", "brief.docx"])
+        paras = [p.strip() for p in brief.read_text(encoding="utf-8").split("\n\n") if p.strip()]
+        if paras:
+            import json as _json
+
+            argv = ["run", "--template", "Report"]
+            for para in paras[:12]:
+                argv += ["--cmd", f"text.insert={_json.dumps({'text': para[:2000]})}"]
+                argv += ["--cmd", "text.newParagraph={}"]
+            styled = do([*argv, "--save", "report.docx"])
+            if styled.get("success") and (run_dir / "report.docx").is_file():
+                do(["convert", "report.docx", "report.pdf"])
+                do(["info", "report.docx"])
+            else:
+                steps[-1].setdefault(
+                    "note", "template styling failed - plain brief.* remain the demo"
+                )
     elif k == "pdf":
         src = run_dir / "brief.pdf"
         if not src.is_file():

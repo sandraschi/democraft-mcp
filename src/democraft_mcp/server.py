@@ -82,7 +82,9 @@ def craft(
                     "name": a.name,
                     "installed": a.installed(),
                     "tagline": a.tagline,
-                    "demos": [{"id": d.id, "title": d.title} for d in a.demos],
+                    "demos": [
+                        {"id": d.id, "title": d.title, "topics": list(d.topics)} for d in a.demos
+                    ],
                 }
                 for a in APPS
             ],

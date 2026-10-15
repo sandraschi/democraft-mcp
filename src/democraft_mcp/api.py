@@ -45,6 +45,7 @@ class DemoRequest(BaseModel):
     app: str
     demo: str = ""
     model: str = DEFAULT_MODEL
+    topic: str = ""
 
 
 class ChatRequest(BaseModel):
@@ -119,7 +120,13 @@ def create_app(outbox: Path | None = None) -> FastAPI:
                     "installed": a.installed(),
                     "tagline": a.tagline,
                     "demos": [
-                        {"id": d.id, "title": d.title, "blurb": d.blurb, "requires": d.requires}
+                        {
+                            "id": d.id,
+                            "title": d.title,
+                            "blurb": d.blurb,
+                            "requires": d.requires,
+                            "topics": list(d.topics),
+                        }
                         for d in a.demos
                     ],
                 }
@@ -131,9 +138,33 @@ def create_app(outbox: Path | None = None) -> FastAPI:
     def demos_run(req: DemoRequest) -> dict:
         a = BY_KEY.get(req.app)
         demo_id = req.demo or (a.demos[0].id if a and a.demos else "")
-        res = run_demo(req.app, demo_id, box, req.model)
+        res = run_demo(req.app, demo_id, box, req.model, topic=req.topic.strip()[:200])
         log("demo", f"{req.app}/{demo_id} success={res.get('success')}")
         return res
+
+    @api.get("/api/artifacts/{app}/{demo}/{path:path}")
+    def artifact(app: str, demo: str, path: str):
+        """Serve a demo artifact for clickthrough (open in browser / Craft app).
+
+        Path traversal is rejected: the resolved file must stay inside
+        outbox/<app>/<demo>/. Correct MIME so PNG/PDF open inline and
+        DOCX/XLSX/WAV download for their Craft app.
+        """
+        from fastapi.responses import FileResponse
+
+        if app not in BY_KEY:
+            return {"success": False, "message": f"unknown app '{app}'"}
+        root = (box / app / demo).resolve()
+        target = (root / path).resolve()
+        if root != target and root not in target.parents:
+            return {
+                "success": False,
+                "message": "path escapes the run dir",
+                "error_type": "bad_path",
+            }
+        if not target.is_file():
+            return {"success": False, "message": f"no such artifact '{path}'"}
+        return FileResponse(str(target))
 
     @api.get("/api/runs")
     def runs() -> dict:
