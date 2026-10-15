@@ -6,6 +6,21 @@ engine features return `needs_account`, missing wrappees return `wrappee_missing
 
 ![FastMCP 3.4.4+](https://img.shields.io/badge/FastMCP-3.4.4%2B-blue) ![MCPB](https://img.shields.io/badge/packaging-MCPB-green) ![Windows CI](https://img.shields.io/badge/CI-Windows-lightgrey)
 
+## Preview
+
+Same prompt ("pelican riding a bike" as AI-drafted SVG), two real pipelines:
+
+| PhotoCraft (`convert` + `info`) | VectorCraft (`run` + `export`) |
+|---|---|
+| ![pelican via PhotoCraft](docs/screenshots/pelican-photo.png) | ![pelican via VectorCraft](docs/screenshots/pelican-vector.png) |
+
+Plus a real EffectCraft demo-project still (1920x1080):
+
+![EffectCraft title-card still](docs/screenshots/effect-still.png)
+
+Shapes are AI-drawn, pixels are engine-rendered - the compare page shows both
+engine logs side by side.
+
 ## How it runs
 
 Headless by default: each demo shells to the installed `<Craft>\*-cli.exe`
