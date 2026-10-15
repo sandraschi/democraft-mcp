@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { MockBadge } from "../components/AppLayout";
 import { api } from "../lib/api";
 import { useBackend } from "../store/backend";
 
@@ -58,8 +57,7 @@ export default function Dashboard() {
 				))}
 			</div>
 			<p className="mt-4 text-xs text-slate-500">
-				KPIs are live from /api/dashboard. <MockBadge /> marks gated content
-				until onboarding succeeds.
+				Numbers update live from the backend on this machine.
 			</p>
 		</div>
 	);
