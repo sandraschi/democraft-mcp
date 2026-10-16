@@ -21,7 +21,7 @@ no text-to-image, no music model, no tokens, no cloud calls). If ArtCraft
 ships any, they become declared `needs_account` features then - not before.
 Missing wrappees return `wrappee_missing`. Ollama down means the AI step is
 a declared skip.
-5. Default model `gemma4:12b` (8GB) via `DEMOCRAFT_MODEL` override. CLI
+5. Default model `gemma4:e4b` (8GB) via `DEMOCRAFT_MODEL` override. CLI
 timeout 120s per step. Ports: backend 11246, frontend 11245.
 
 ## Per-app CLI reference
@@ -366,11 +366,11 @@ Effect title-card: `info` (engine + project summary JSON), `render-frame
 --out title-card.png` (needs open project; headless refusal is the
 documented alternate outcome with note attached to the step).
 
-Fig landing-page: AI JSON {headline, sub, brief} for the topic (or defaults),
-single script (template + `text.set` hero ids 24/25 when a topic is picked),
-`run landing.jsonl --out landing.figcraft` (run_dir IS cwd, bare names work), `render landing.figcraft -o landing.png`. Expect ~190 nodes,
-Desktop + Phone frames. Artifacts: landing.jsonl, landing.figcraft,
-landing.png.
+Fig landing-page: AI labeled-lines copy for the topic (positional fallback),
+single script (template + `text.set` on 14 mapped ids: brand 8, hero 24/25,
+features 39/40, cards 47/48 54/55 61/62, quote 79, CTA 90/91).
+Stats/person/buttons/footer stay template (declared); Phone frame untouched.
+`run landing.jsonl --out landing.figcraft` (run_dir IS cwd), `render -o landing.png`.
 
 Film storyboard: `inspect` (project tree; empty headless), `inspect
 sequence` (active sequence; empty headless). Both JSON to stdout. Demo

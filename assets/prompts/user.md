@@ -4,7 +4,7 @@ How to demo each Craft app with democraft-mcp: chat calls, CLI equivalents,
 what to look at in the artifacts, and what to do when the engine says no.
 Conventions: `craft(operation='run_demo', app='<key>')` runs demo #1.
 Artifacts land in `outbox/<app>/<demo>/`. AI steps use `DEMOCRAFT_MODEL`
-(default gemma4:12b); a down Ollama marks the step skipped and the CLI part
+(default gemma4:e4b); a down Ollama marks the step skipped and the CLI part
 still runs.
 
 ## CADCraft: house-plan
@@ -170,7 +170,7 @@ the runs inbox keeps every attempt, including failures.
 ## Worked sessions (annotated transcripts)
 
 Session CAD (house-plan): call run_demo cad. AI step returns 5 rooms JSON
-(model gemma4:12b, ~8s). CLI: sample writes floorplan.dxf (check bytes >
+(model gemma4:e4b, ~8s). CLI: sample writes floorplan.dxf (check bytes >
 10k), info prints entities JSON (keep, this grounds the caption), sample
 renders floorplan.png (check 100+KB). Artifacts 2 files. Caption for the
 page: rooms from AI + extents from info. If info shows zero entities, say so
@@ -402,7 +402,7 @@ an AI flow, DXF + PNG. Deck automail: sample-to-PDF handout. Grid audit:
 check-oracle on a real budget sheet. All recorded here so they are plans,
 not implied features.
 
-## AI step craft notes (model: DEMOCRAFT_MODEL, default gemma4:12b 8GB)
+## AI step craft notes (model: DEMOCRAFT_MODEL, default gemma4:e4b 8GB)
 
 Prompt pattern: task + exact output shape + "No prose" (JSON lists for
 readings/briefs, raw SVG only for pelican, markdown bullets for the word
@@ -412,7 +412,7 @@ every demo (5-shape pelican, 3-bullet brief, grid summary template) and the
 page states which fired. Keep prompts short: 1-3 sentences; the engine
 output grounds the demo, not the model's eloquence.
 
-Model notes: gemma4:12b default (fits alongside engines, follows shape
+Model notes: gemma4:e4b default (fits alongside engines, follows shape
 instructions). qwen3.8-tools (17GB) when VRAM allows - better structured
 output, same prompts. mistral-nemo:12b (7GB) lean fallback. qwen3.6-35b
 (23GB) overkill for captions - reserve for script drafting (CURShapes,
@@ -442,7 +442,7 @@ run_dir, not the claim.
 ## Workshop handout (one page, print it)
 
 Setup (10 min): install 2+ Craft apps from getartcraft.com/apps, install
-Ollama + gemma4:12b, double-click start.bat, open :11245. Exercise 1 (10
+Ollama + gemma4:e4b, double-click start.bat, open :11245. Exercise 1 (10
 min): CAD house-plan - run, open floorplan.png, read one info entity aloud.
 Expected: DXF + PNG + 5-room reading. Exercise 2 (15 min): pelican compare -
 run photo, run vector, open both PNGs, vote which reads more pelican, read
@@ -480,7 +480,7 @@ still true?).
 Ops: list_apps, app_status, run_demo(app,demo), craft_commands(app),
 ollama_models, ai_flow(prompt), help, shutdown(confirm). Errors:
 unknown_app, wrappee_missing, needs_account, needs_input, timeout, spawn -
-each with recovery. Ports 11246/11245. Model gemma4:12b default. Timeout
+each with recovery. Ports 11246/11245. Model gemma4:e4b default. Timeout
 120s CLI (300s sound bounce), 90s LLM. Outbox per run. MOCK clears by run only. EDL is real,
 render needs a project. Quote stderr, never invent. Escalation: engine bug (file upstream with argv +
 stderr + version), demo bug (fix argv, update worked session, CHANGELOG),
