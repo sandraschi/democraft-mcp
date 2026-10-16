@@ -2,11 +2,11 @@
 
 ## `craft` (portmanteau)
 
-[RATIONALE] 13 apps, one entry. The `operation` enum is the catalog.
+[RATIONALE] 14 apps, one entry. The `operation` enum is the catalog.
 
 | Operation | Params | Returns |
 |-----------|--------|---------|
-| `list_apps` | - | 13 apps, installed flags, demo ids |
+| `list_apps` | - | 14 apps, installed flags, demo ids |
 | `app_status` | - | per-app CLI paths + missing list |
 | `run_demo` | `app`, `demo` (=#1 default), `model` | `ai_step`, `cli_steps`, `artifacts`, `run_dir` |
 | `craft_commands` | `app` | live `commands --json` from the CLI |

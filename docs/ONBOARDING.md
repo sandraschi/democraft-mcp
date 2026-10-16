@@ -2,7 +2,7 @@
 
 ## 1. What this is for
 
-Democraft demos all 13 ArtCraft apps (CAD through Word) from one MCP server
+Democraft demos all 13 ArtCraft apps (CAD through Word) plus IncaCraft (proposed) from one MCP server
 and webapp. Each demo runs the real headless CLI plus a local-LLM step and
 shows the artifacts. It does not replace the Craft apps, and it does not
 generate ArtCraft AI pixels without an account.

@@ -5,7 +5,7 @@ Domain skill for working with democraft-mcp (repo `democraft-mcp`, backend :1124
 ## For agents
 
 Use the `craft` portmanteau - one tool, `operation` enum is the catalog:
-`craft(operation="list_apps")` (13 apps + install flags), `craft(operation="app_status")`
+`craft(operation="list_apps")` (14 apps + install flags), `craft(operation="app_status")`
 (CLI paths + missing list), `craft(operation="run_demo", app="<key>", demo="<id>")`
 (real headless CLI + local-LLM step, artifacts in `outbox/<app>/<demo>/`),
 `craft(operation="craft_commands", app="<key>")` (live command discovery),

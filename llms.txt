@@ -1,6 +1,6 @@
 # democraft-mcp - llms.txt
 
-Demo fleet for the 13 ArtCraft apps. One MCP portmanteau (`craft`), one page
+Demo fleet for the 13 ArtCraft apps + IncaCraft (proposed). One MCP portmanteau (`craft`), one page
 per app, every demo a real headless CLI run plus a local Ollama step.
 
 - Docs: `docs/ONBOARDING.md` (start), `docs/TOOLS.md` (tool reference)
