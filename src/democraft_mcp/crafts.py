@@ -101,6 +101,25 @@ def _labeled_lines(text: str, labels: dict[str, str]) -> dict[str, str]:
     return out
 
 
+BENCH_MODELS: tuple[str, ...] = ("qwen3.8-tools", "mistral-nemo:12b")
+
+
+def _save_svg(text: str, path) -> bool:
+    """Slice <svg>...</svg> out of model chatter. False when there is no SVG."""
+    start, end = text.find("<svg"), text.find("</svg>")
+    if start >= 0 and end > start:
+        path.write_text(text[start : end + len("</svg>")], encoding="utf-8")
+        return True
+    if start >= 0:
+        path.write_text(text[start:], encoding="utf-8")
+        return True
+    return False
+
+
+def _model_tag(model: str) -> str:
+    return "".join(c if c.isalnum() else "-" for c in model).strip("-")[:40]
+
+
 def _first_numeric_col(rows: list[list[str]], ncols: int) -> int:
     for c in range(ncols):
         try:
@@ -517,18 +536,13 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "pelican-photo",
-                "Demo 1: SVG subject (pick one)",
-                "AI draws your subject as SVG; the convert/info pipeline "
-                "renders it. No generative verbs exist in this build.",
-                "Draw a flat side-view pictogram on an 800x600 canvas: "
-                "pelican body (ellipse), head (circle), long beak (polygon), "
-                "eye (small circle), wing (ellipse), two bike wheels (circles "
-                "with spoke lines), frame lines, ground line. 12-20 shapes. "
-                "Raw SVG only.",
+                "Demo 1: pelican benchmark (pick a subject)",
+                "Same plain prompt on every contender model, each rendered "
+                "through convert/info. Quality deltas are the models'.",
+                "Draw an SVG of a pelican riding a bicycle. Raw SVG only.",
                 "cli",
                 topics=PHOTO_TOPICS,
-                topic_prompt="Draw '{topic}' as a flat pictogram SVG on an 800x600 "
-                "canvas, 12-20 shapes (ellipse/circle/rect/polygon/line). Raw SVG only.",
+                topic_prompt="Draw an SVG of {topic}. Raw SVG only.",
             ),
         ),
     ),
@@ -540,18 +554,13 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "pelican-vector",
-                "Demo 1: SVG subject (pick one)",
-                "AI draws your subject as SVG; the run/export pipeline "
-                "renders it. Same prompt as photo: compare the two.",
-                "Draw a flat side-view pictogram on an 800x600 canvas: "
-                "pelican body (ellipse), head (circle), long beak (polygon), "
-                "eye (small circle), wing (ellipse), two bike wheels (circles "
-                "with spoke lines), frame lines, ground line. 12-20 shapes. "
-                "Raw SVG only.",
+                "Demo 1: pelican benchmark (pick a subject)",
+                "Same plain prompt on every contender model, each rendered "
+                "through run/export. Compare with photo.",
+                "Draw an SVG of a pelican riding a bicycle. Raw SVG only.",
                 "cli",
                 topics=VECTOR_TOPICS,
-                topic_prompt="Draw '{topic}' as a flat pictogram SVG on an 800x600 "
-                "canvas, 12-20 shapes (ellipse/circle/rect/polygon/line). Raw SVG only.",
+                topic_prompt="Draw an SVG of {topic}. Raw SVG only.",
             ),
         ),
     ),
@@ -568,7 +577,7 @@ _FALLBACK_SVG = (
 )
 
 
-def ai_step(prompt: str, model: str = DEFAULT_MODEL) -> dict:
+def ai_step(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 90) -> dict:
     """One local-LLM call. Never raises: failure is a declared skip."""
     import httpx
 
@@ -577,7 +586,7 @@ def ai_step(prompt: str, model: str = DEFAULT_MODEL) -> dict:
         r = httpx.post(
             f"{OLLAMA_URL}/api/generate",
             json={"model": model, "prompt": prompt, "stream": False},
-            timeout=90,
+            timeout=timeout,
         )
         r.raise_for_status()
         return {
@@ -697,16 +706,60 @@ def run_demo(
     k = app_key
     if k == "cad":
         plan = [
-            ["rectang", '{"p1": [0, 0], "p2": [7.28, 5.46]}'],
-            ["line", '{"points": [[1.82, 0], [1.82, 1.82]]}'],
-            ["line", '{"points": [[0, 1.82], [7.28, 1.82]]}'],
-            ["line", '{"points": [[3.64, 1.82], [3.64, 5.46]]}'],
-            ["line", '{"points": [[5.46, 0], [5.46, 1.82]]}'],
-            ["text", '{"at": [0.91, 0.91], "text": "genkan", "height": 0.18}'],
-            ["text", '{"at": [3.64, 0.91], "text": "hall", "height": 0.18}'],
-            ["text", '{"at": [1.82, 3.64], "text": "washitsu", "height": 0.18}'],
-            ["text", '{"at": [5.46, 3.64], "text": "LD", "height": 0.18}'],
-            ["text", '{"at": [6.37, 0.91], "text": "bath", "height": 0.18}'],
+            ["style", '{"name": "ArialTT", "font": "Arial"}'],
+            [
+                "dimstyle",
+                '{"name": "ISO-25", "DIMTXT": 0.25, "arrowSize": 0.3, "DIMTXSTY": "ArialTT"}',
+            ],
+            ["rectang", '{"p1": [0, 0], "p2": [7.28, 0.24]}'],
+            ["rectang", '{"p1": [0, 5.22], "p2": [7.28, 5.46]}'],
+            ["rectang", '{"p1": [0, 0.24], "p2": [0.24, 5.22]}'],
+            ["rectang", '{"p1": [7.04, 0.24], "p2": [7.28, 5.22]}'],
+            ["rectang", '{"p1": [1.82, 0.24], "p2": [1.94, 2.06]}'],
+            ["rectang", '{"p1": [0.24, 1.94], "p2": [7.04, 2.06]}'],
+            ["rectang", '{"p1": [3.64, 2.06], "p2": [3.76, 5.22]}'],
+            ["rectang", '{"p1": [5.46, 0.24], "p2": [5.58, 2.06]}'],
+            ["hatch", '{"points": [[3.64, 0.12]], "pattern": "SOLID"}'],
+            ["hatch", '{"points": [[3.64, 5.34]], "pattern": "SOLID"}'],
+            ["hatch", '{"points": [[0.12, 2.7]], "pattern": "SOLID"}'],
+            ["hatch", '{"points": [[7.16, 2.7]], "pattern": "SOLID"}'],
+            ["hatch", '{"points": [[1.88, 1.0]], "pattern": "SOLID"}'],
+            ["hatch", '{"points": [[3.0, 2.0]], "pattern": "SOLID"}'],
+            ["hatch", '{"points": [[3.7, 3.6]], "pattern": "SOLID"}'],
+            ["hatch", '{"points": [[5.52, 1.0]], "pattern": "SOLID"}'],
+            [
+                "mtext",
+                '{"at": [1.03, 1.0], "text": "genkan", "height": 0.16, '
+                '"style": "ArialTT", "align": "center"}',
+            ],
+            [
+                "mtext",
+                '{"at": [3.7, 1.0], "text": "hall", "height": 0.2, '
+                '"style": "ArialTT", "align": "center"}',
+            ],
+            [
+                "mtext",
+                '{"at": [1.94, 3.64], "text": "washitsu", "height": 0.2, '
+                '"style": "ArialTT", "align": "center"}',
+            ],
+            [
+                "mtext",
+                '{"at": [5.4, 3.64], "text": "LD", "height": 0.2, '
+                '"style": "ArialTT", "align": "center"}',
+            ],
+            [
+                "mtext",
+                '{"at": [6.31, 1.0], "text": "bath", "height": 0.2, '
+                '"style": "ArialTT", "align": "center"}',
+            ],
+            [
+                "table",
+                '{"at": [8.0, 5.4], "rows": 5, "cols": 2, "title": "Room schedule", '
+                '"header": ["Room", "Finish"], "cells": [["genkan", "stone"], '
+                '["hall", "wood"], ["washitsu", "tatami"], ["LD", "wood"], '
+                '["bath", "tile"]]}',
+            ],
+            ["mleader", '{"points": [[5.0, 5.46], [5.0, 6.2]], "text": "window w1.5"}'],
             ["dimlinear", '{"p1": [0, 0], "p2": [7.28, 0], "at": [3.64, -0.6]}'],
             ["dimlinear", '{"p1": [0, 0], "p2": [0, 5.46], "at": [-0.6, 2.73]}'],
         ]
@@ -714,7 +767,8 @@ def run_demo(
             import json as _json
 
             plan.insert(
-                0, ["text", _json.dumps({"at": [0, 6.1], "text": topic[:40], "height": 0.3})]
+                0,
+                ["text", _json.dumps({"at": [0, 6.6], "text": topic[:40], "height": 0.3})],
             )
         argv: list[str] = ["run", "--metric"]
         for cid, params in plan:
@@ -1028,21 +1082,52 @@ def run_demo(
         steps.append(cmds)
         do(["run", "--import", "grade-in.png", "develop.auto", "app.export", "path=grade-out.png"])
     elif k in ("photo", "vector"):
-        svg = run_dir / "pelican.svg"
-        txt = ai.get("text", "") if ai.get("success") else ""
-        start = txt.find("<svg")
-        end = txt.find("</svg>")
-        if start >= 0 and end > start:
-            svg.write_text(txt[start : end + len("</svg>")], encoding="utf-8")
-        elif start >= 0:
-            svg.write_text(txt[start:], encoding="utf-8")
-        else:
-            svg.write_text(_FALLBACK_SVG, encoding="utf-8")
-        if k == "photo":
-            do(["convert", "pelican.svg", "pelican.png"])
-            do(["info", "pelican.png"])
-        else:
-            do(["run", "--in", "pelican.svg", "--export", "pelican.png"])
+        # Pelican benchmark: the SAME plain prompt on every contender model,
+        # each rendered through the real engine pipeline. Quality deltas are
+        # the models', not the prompt's - no scaffolding, no retries.
+        bench_prompt = demo.topic_prompt.format(topic=topic) if topic else demo.ai_prompt
+        rendered: list[str] = []
+        seen: set[str] = set()
+        for m in (model, *BENCH_MODELS):
+            if m in seen:
+                continue
+            seen.add(m)
+            tag = _model_tag(m)
+            step = ai if m == model else ai_step(bench_prompt, m, timeout=240)
+            if m != model:
+                ok = bool(step.get("success") and step.get("text"))
+                steps.append(
+                    {
+                        "argv": ["ollama", m],
+                        "returncode": 0 if ok else 1,
+                        "stdout": f"benchmark contender ({step.get('ms', 0)}ms)",
+                        "stderr": "" if ok else str(step.get("error", "")),
+                        "ms": step.get("ms", 0),
+                        "success": True,
+                        "note": "contender call - a miss only skips this model",
+                    }
+                )
+            if step.get("success") and step.get("text"):
+                svg_path = run_dir / f"pelican-{tag}.svg"
+                if _save_svg(step["text"], svg_path):
+                    png = f"pelican-{tag}.png"
+                    if k == "photo":
+                        do(["convert", svg_path.name, png])
+                    else:
+                        do(["run", "--in", svg_path.name, "--export", png])
+                    if (run_dir / png).is_file():
+                        rendered.append(png)
+        if not rendered:
+            (run_dir / "pelican-fallback.svg").write_text(_FALLBACK_SVG, encoding="utf-8")
+            if k == "photo":
+                do(["convert", "pelican-fallback.svg", "pelican-fallback.png"])
+            else:
+                do(["run", "--in", "pelican-fallback.svg", "--export", "pelican-fallback.png"])
+            rendered = (
+                ["pelican-fallback.png"] if (run_dir / "pelican-fallback.png").is_file() else []
+            )
+        if rendered:
+            do(["info", rendered[0]])
 
     artifacts = sorted({str(f) for f in run_dir.rglob("*") if f.is_file()})
     ok_cli = all(s.get("success") for s in steps) if steps else False
