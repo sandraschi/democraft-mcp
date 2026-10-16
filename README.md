@@ -60,7 +60,7 @@ Full reference: `docs/TOOLS.md`.
 | Var | Default |
 |-----|---------|
 | `DEMOCRAFT_PORT` | `11246` (frontend :11245) |
-| `DEMOCRAFT_MODEL` | `gemma4:12b` |
+| `DEMOCRAFT_MODEL` | `gemma4:e4b` |
 | `DEMOCRAFT_OLLAMA_URL` | `http://127.0.0.1:11434` |
 | `DEMOCRAFT_OUTBOX` | `<repo>/outbox` |
 | `DEMOCRAFT_PROGRAM_FILES` | `C:\Program Files` |

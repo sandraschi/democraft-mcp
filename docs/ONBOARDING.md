@@ -25,7 +25,7 @@ missing apps show MOCK badges on their page until installed.
 
 ## 4. AI flows (local Ollama)
 
-Install Ollama, pull a model (`ollama pull gemma4:12b` - 8GB default).
+Install Ollama, pull a model (`ollama pull gemma4:e4b` - 8GB default).
 Override with `DEMOCRAFT_MODEL`. If Ollama is down, demos still run the CLI
 part and mark the AI step skipped.
 

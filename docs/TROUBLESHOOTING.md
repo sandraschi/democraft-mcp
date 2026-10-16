@@ -13,7 +13,7 @@ Craft app, then retry. Demo #1s never need this.
 ## Ollama down (`ai_step.skipped`)
 
 Demos still run the CLI part. Start Ollama (`ollama serve`), pull
-`gemma4:12b`, or set `DEMOCRAFT_MODEL` to a model you have.
+`gemma4:e4b`, or set `DEMOCRAFT_MODEL` to a model you have.
 
 ## CLI step failed (non-zero returncode)
 
