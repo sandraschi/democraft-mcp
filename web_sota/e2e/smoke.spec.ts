@@ -5,7 +5,7 @@ test("dashboard loads with KPIs", async ({ page }) => {
 	await expect(page.getByTestId("kpi-craft-apps")).toBeVisible();
 });
 
-test("crafts list shows 13 apps", async ({ page }) => {
+test("crafts list shows 14 apps", async ({ page }) => {
 	await page.goto("/craft/cad");
 	await expect(page.getByTestId("craft-run")).toBeVisible();
 });

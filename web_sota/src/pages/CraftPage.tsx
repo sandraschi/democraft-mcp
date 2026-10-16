@@ -124,14 +124,20 @@ export default function CraftPage() {
 						type="button"
 						data-testid="craft-run"
 						onClick={() => run(d.id, topicCustom.trim() || topicPick)}
-						disabled={running || !craft.installed}
+						disabled={running || !craft.runnable}
 						className="mt-3 rounded bg-amber-500 px-4 py-2 font-semibold text-slate-950 disabled:opacity-40"
 					>
 						{running ? "Running..." : "Run demo #1"}
 					</button>
-					{!craft.installed && (
+					{!craft.runnable && (
 						<p className="mt-2 text-sm text-amber-300">
 							Install {craft.name} to run - see onboarding.
+						</p>
+					)}
+					{craft.runnable && !craft.installed && (
+						<p className="mt-2 text-sm text-amber-300">
+							{craft.name} does not exist yet - this demo runs on a fallback
+							engine.
 						</p>
 					)}
 				</div>

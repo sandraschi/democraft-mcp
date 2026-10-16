@@ -1,4 +1,4 @@
-"""Seed assets/prompts/examples.json: 13 apps x 8 ops = 104 real tool-call examples.
+"""Seed assets/prompts/examples.json: 14 apps x 8 ops = 112 real tool-call examples.
 
 Committed generator: re-run after adding demos. Output is data, reviewed like code.
 """
@@ -20,6 +20,7 @@ APPS = [
     "light",
     "photo",
     "vector",
+    "inca",
 ]
 DEMOS = {
     "cad": "house-plan",
@@ -35,6 +36,7 @@ DEMOS = {
     "light": "grade-pelican",
     "photo": "pelican-photo",
     "vector": "pelican-vector",
+    "inca": "dry-stone-wall",
 }
 
 OPS = [
@@ -60,5 +62,5 @@ for app in APPS:
 
 out = Path(__file__).resolve().parents[1] / "assets" / "prompts" / "examples.json"
 out.parent.mkdir(parents=True, exist_ok=True)
-out.write_text(json.dumps(examples, indent=1), encoding="utf-8")
+out.write_text(json.dumps(examples, indent=1) + "\n", encoding="utf-8")
 print(f"wrote {len(examples)} examples")

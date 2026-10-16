@@ -45,6 +45,7 @@ export interface CraftApp {
 	key: string;
 	name: string;
 	installed: boolean;
+	runnable: boolean;
 	tagline: string;
 	demos: CraftDemo[];
 }

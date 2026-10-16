@@ -739,5 +739,62 @@
    "confirm": true
   },
   "note": "vector: graceful exit"
+ },
+ {
+  "tool": "craft",
+  "operation": "list_apps",
+  "input": {},
+  "note": "inca: inventory before anything else"
+ },
+ {
+  "tool": "craft",
+  "operation": "app_status",
+  "input": {},
+  "note": "inca: which wrappees are installed"
+ },
+ {
+  "tool": "craft",
+  "operation": "run_demo",
+  "input": {
+   "app": "inca",
+   "demo": "dry-stone-wall"
+  },
+  "note": "inca: execute the app demo #1"
+ },
+ {
+  "tool": "craft",
+  "operation": "craft_commands",
+  "input": {
+   "app": "inca"
+  },
+  "note": "inca: live command discovery from the CLI"
+ },
+ {
+  "tool": "craft",
+  "operation": "ollama_models",
+  "input": {},
+  "note": "inca: local models available"
+ },
+ {
+  "tool": "craft",
+  "operation": "ai_flow",
+  "input": {
+   "prompt": "caption this demo output"
+  },
+  "note": "inca: single local-LLM step"
+ },
+ {
+  "tool": "craft",
+  "operation": "help",
+  "input": {},
+  "note": "inca: operation catalog"
+ },
+ {
+  "tool": "craft",
+  "operation": "shutdown",
+  "input": {
+   "confirm": true
+  },
+  "note": "inca: graceful exit"
  }
 ]
