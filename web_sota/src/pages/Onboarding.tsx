@@ -18,7 +18,7 @@ export default function Onboarding() {
 						"All detected."
 					)}
 				</li>
-				<li>Install Ollama and pull gemma4:12b (or set DEMOCRAFT_MODEL).</li>
+				<li>Install Ollama and pull gemma4:e4b (or set DEMOCRAFT_MODEL).</li>
 				<li>
 					Run the CAD house-plan demo. MOCK badges clear by successful runs
 					only.

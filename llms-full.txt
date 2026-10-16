@@ -9,7 +9,7 @@ show_demo_prefab_card. Prompt: democraft_demo_guide(app).
 
 ## How demos run
 `run_demo` (src/democraft_mcp/crafts.py): AI step via Ollama
-`DEMOCRAFT_MODEL` (default gemma4:12b, declared skip when down), then real
+`DEMOCRAFT_MODEL` (default gemma4:e4b, declared skip when down), then real
 CLI subprocess (`CLI_TIMEOUT_S=120`) into `outbox/<app>/<demo>/`. Returns
 `{success, message, ai_step, cli_steps, artifacts, all_cli_ok, run_dir}`.
 Errors: unknown_app, wrappee_missing, needs_account, needs_input, timeout, spawn - always

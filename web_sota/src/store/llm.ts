@@ -50,7 +50,7 @@ async function sleep(ms: number): Promise<void> {
 export const useLlm = create<LlmState>((set, get) => ({
 	providers: [],
 	provider: stored(LS_PROVIDER, "ollama"),
-	model: stored(LS_MODEL, "gemma4:12b"),
+	model: stored(LS_MODEL, "gemma4:e4b"),
 	models: [],
 	gpu: false,
 	probing: true,
@@ -88,7 +88,7 @@ export const useLlm = create<LlmState>((set, get) => ({
 			models = [];
 		}
 		const savedProvider = stored(LS_PROVIDER, "ollama");
-		const savedModel = stored(LS_MODEL, "gemma4:12b");
+		const savedModel = stored(LS_MODEL, "gemma4:e4b");
 		const provider = providers.some((p) => p.id === savedProvider && p.ok)
 			? savedProvider
 			: "ollama";

@@ -380,7 +380,7 @@ def create_app(outbox: Path | None = None) -> FastAPI:
             return {"success": True, "models": models, "live": True}
         except Exception as e:
             logger.exception("llm/models probe failed")
-            fallback = ["gemma4:12b", "qwen3.8-tools", "mistral-nemo:12b"]
+            fallback = ["gemma4:e4b", "qwen3.8-tools", "mistral-nemo:12b"]
             return {
                 "success": True,
                 "models": fallback,
@@ -405,7 +405,7 @@ def create_app(outbox: Path | None = None) -> FastAPI:
             detail = f"{len(models)} local model(s); start with {DEFAULT_MODEL}."
         else:
             path = "install-ollama"
-            detail = "Install Ollama and pull gemma4:12b (8GB); demos run without it."
+            detail = "Install Ollama and pull gemma4:e4b (8GB); demos run without it."
         return {"success": True, "path": path, "detail": detail, "recommended_model": DEFAULT_MODEL}
 
     from .server import mcp as _mcp
