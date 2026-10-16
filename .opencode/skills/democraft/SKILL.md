@@ -1,6 +1,6 @@
 ---
 name: democraft
-description: Run real headless demos for the 13 ArtCraft apps via the craft tool.
+description: Run real headless demos for the 13 ArtCraft apps + IncaCraft via the craft tool.
 ---
 
 # democraft (OpenCode skill)

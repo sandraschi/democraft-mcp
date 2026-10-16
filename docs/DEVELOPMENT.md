@@ -1,6 +1,6 @@
 # docs/DEVELOPMENT.md
 
-Onboarding is required for this repo (wrappees = the 13 Craft apps), so no
+Onboarding is required for this repo (wrappees = the Craft apps), so no
 N/A rationale applies.
 
 ## Loop
