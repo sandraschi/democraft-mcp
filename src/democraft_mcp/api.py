@@ -118,6 +118,7 @@ def create_app(outbox: Path | None = None) -> FastAPI:
                     "key": a.key,
                     "name": a.name,
                     "installed": a.installed(),
+                    "runnable": a.runnable(),
                     "tagline": a.tagline,
                     "demos": [
                         {

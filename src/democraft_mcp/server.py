@@ -1,6 +1,6 @@
 """democraft-mcp server: FastMCP portmanteau + FastAPI backend.
 
-[RATIONALE] One `craft` tool fronts all 13 Craft apps so hosts see a single
+[RATIONALE] One `craft` tool fronts all 14 Craft apps so hosts see a single
 entry instead of 13 toolsets; the `operation` enum is the catalog. The same
  Python functions back the REST API - one truth, two transports.
 """
@@ -81,6 +81,7 @@ def craft(
                     "key": a.key,
                     "name": a.name,
                     "installed": a.installed(),
+                    "runnable": a.runnable(),
                     "tagline": a.tagline,
                     "demos": [
                         {"id": d.id, "title": d.title, "topics": list(d.topics)} for d in a.demos
@@ -154,7 +155,7 @@ def craft(
     if operation == "help":
         return {
             "success": True,
-            "message": "democraft-mcp: one tool, 8 ops, 13 apps",
+            "message": "democraft-mcp: one tool, 8 ops, 14 apps",
             "operations": [
                 "list_apps",
                 "app_status",

@@ -24,7 +24,7 @@ def test_status_shape():
     assert r.status_code == 200
     body = r.json()
     assert body["status"] == "ok"
-    assert body["apps"] == 13
+    assert body["apps"] == 14
     assert "uptime_seconds" in body
 
 
@@ -33,7 +33,7 @@ def test_capabilities_shape():
     assert r.status_code == 200
     body = r.json()
     assert "run_demo" in body["operations"]
-    assert len(body["apps"]) == 13
+    assert len(body["apps"]) == 14
 
 
 def test_chat_alias():
@@ -88,7 +88,7 @@ def test_demo_invalid_app_fast():
 def test_craft_list_apps():
     res = craft(operation="list_apps")
     assert res["success"] is True
-    assert len(res["apps"]) == 13
+    assert len(res["apps"]) == 14
 
 
 def test_craft_app_status():
@@ -142,6 +142,18 @@ def test_all_demos_have_topics():
     for a in _APPS:
         assert len(a.demos[0].topics) >= 8, a.key
         assert a.demos[0].topic_prompt, a.key
+
+
+def test_inca_wall_runs_headless(tmp_path):
+    from democraft_mcp.crafts import BY_KEY as _BY
+    from democraft_mcp.crafts import run_demo
+
+    if not _BY["inca"].runnable():
+        pytest.skip("freecadcmd not installed")
+    res = run_demo("inca", "dry-stone-wall", tmp_path, topic="Garden dry-stone wall")
+    assert res["success"] is True
+    names = [__import__("pathlib").Path(p).name for p in res["artifacts"]]
+    assert "wall-iso.svg" in names
 
 
 @_needs("grid")

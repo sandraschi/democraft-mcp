@@ -120,6 +120,165 @@ def _model_tag(model: str) -> str:
     return "".join(c if c.isalnum() else "-" for c in model).strip("-")[:40]
 
 
+FREECADCMD = Path(
+    os.getenv(
+        "DEMOCRAFT_FREECADCMD",
+        r"D:\Dev\repos\FreeCAD\FreeCAD_1.1.1-Windows-x86_64-py311\bin\freecadcmd.exe",
+    )
+)
+FREECAD_REST = os.getenv("DEMOCRAFT_FREECAD_REST", "http://127.0.0.1:10944/api/v1/control/tool")
+
+
+def _freecad_bridge_probe(steps: list[dict]) -> None:
+    """Record freecad-mcp REST reachability (read-only, 5s). Never fails the demo."""
+    import httpx
+
+    try:
+        r = httpx.post(FREECAD_REST, json={"tool": "bim_status", "arguments": {}}, timeout=5)
+        bridge = f"freecad-mcp reachable ({r.status_code})" if r.status_code == 200 else "down"
+    except Exception as e:
+        bridge = f"unreachable ({type(e).__name__})"
+    steps.append(
+        {
+            "argv": ["freecad-mcp", "bim_status"],
+            "returncode": 0,
+            "stdout": bridge,
+            "stderr": "",
+            "ms": 0,
+            "success": True,
+            "note": "bridge probe - model build below is direct freecadcmd",
+        }
+    )
+
+
+def _freecad_iso_boxes(
+    run_dir: Path,
+    steps: list[dict],
+    name: str,
+    boxes: list[tuple[tuple, tuple]],
+    scale: float = 12.0,
+) -> bool:
+    """Build boxes in FreeCAD, fuse, TechDraw ISO view. True on real SVG output."""
+    if not FREECADCMD.is_file():
+        steps.append(
+            {
+                "argv": ["freecadcmd"],
+                "returncode": 1,
+                "stdout": "",
+                "stderr": "freecadcmd not found - set DEMOCRAFT_FREECADCMD",
+                "ms": 0,
+                "success": False,
+                "error_type": "wrappee_missing",
+            }
+        )
+        return False
+    out_svg = run_dir / f"{name}-fragments.svg"
+    script = run_dir / f"{name}_fc.py"
+    lines = [
+        "import FreeCAD, Part, TechDraw",
+        f'doc = FreeCAD.newDocument("{name}")',
+        "objs = []",
+        "i = 0",
+    ]
+    for n, (p, d) in enumerate(boxes):
+        lines += [
+            f"p{n} = {p!r}",
+            f"d{n} = {d!r}",
+            f"b = doc.addObject('Part::Box', 'Block{n}')",
+            f"b.Placement.Base = FreeCAD.Vector(*p{n})",
+            f"b.Length, b.Width, b.Height = d{n}",
+            "objs.append(b)",
+        ]
+    lines += [
+        "doc.recompute()",
+        "fused = doc.addObject('Part::MultiFuse','Solid')",
+        "fused.Shapes = objs",
+        "doc.recompute()",
+        "page = doc.addObject('TechDraw::DrawPage','Page')",
+        "template = doc.addObject('TechDraw::DrawTemplate','Template')",
+        "template.Width = 297.0",
+        "template.Height = 210.0",
+        "template.Orientation = 'Landscape'",
+        "page.Template = template",
+        "iso = doc.addObject('TechDraw::DrawViewPart','ViewIso')",
+        "iso.Source = [fused]",
+        "iso.Direction = (1,-1,1)",
+        f"iso.Scale = {scale}",
+        "page.addView(iso)",
+        "doc.recompute()",
+        f"open(r'{out_svg}', 'w').write(TechDraw.viewPartAsSvg(iso))",
+        "print('ISO-OK')",
+    ]
+    script.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    res = cli_run(FREECADCMD, [str(script)], run_dir, timeout_s=300)
+    res["argv"] = ["freecadcmd", f"{name}_fc.py"]
+    steps.append(res)
+    if not res.get("success") or not out_svg.is_file():
+        res.setdefault("note", "FreeCAD iso failed - 2D set above is the demo")
+        return False
+    frag = out_svg.read_text(encoding="utf-8")
+    (run_dir / f"{name}.svg").write_text(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="-6 -4.5 12 9" width="720" height="540">'
+        '<rect x="-6" y="-4.5" width="12" height="9" fill="white"/>'
+        '<g fill="none" stroke="#111" stroke-width="0.08">' + frag + "</g></svg>",
+        encoding="utf-8",
+    )
+    return True
+
+
+def _freecad_iso(run_dir: Path, steps: list[dict]) -> dict:
+    """True isometric via FreeCAD: wall shell + slab, TechDraw ISO view.
+
+    Crossconnect (1-hop, soft degradation): probes the freecad-mcp REST bridge
+    first and records reachability; the model build itself runs headless
+    freecadcmd (verified, no server dependency). BIM round-trip
+    (wall JSON -> bim_create_wall -> IFC) is demo #2 once verified live.
+    """
+    _freecad_bridge_probe(steps)
+    boxes = [
+        ((0, 0, -0.15), (7.28, 5.46, 0.15)),
+        ((0, 0, 0), (7.28, 0.24, 2.6)),
+        ((0, 5.22, 0), (7.28, 0.24, 2.6)),
+        ((0, 0.24, 0), (0.24, 4.98, 2.6)),
+        ((7.04, 0.24, 0), (0.24, 4.98, 2.6)),
+    ]
+    ok = _freecad_iso_boxes(run_dir, steps, "iso", boxes)
+    if not ok:
+        return {"success": False, "message": "FreeCAD iso failed - 2D set above is the demo"}
+    return {"success": True, "message": "true isometric rendered"}
+
+
+def _fit_viewbox(svg_path, frag_path) -> None:
+    """Tighten an iso SVG viewBox to its drawn bounds (else tiny models blow up strokes).
+
+    Bounds come from the raw fragment file so header/rect numbers cannot pollute them.
+    """
+    import re as _re
+
+    frag = frag_path.read_text(encoding="utf-8")
+    ds = _re.findall(r'd="([^"]+)"', frag)
+    nums: list[float] = []
+    for d in ds:
+        nums += [float(n) for n in _re.findall(r"-?\d+(?:\.\d+)?", d)]
+    pairs = list(zip(nums[::2], nums[1::2], strict=False))
+    if not pairs:
+        return
+    xs = [p[0] for p in pairs]
+    ys = [p[1] for p in pairs]
+    x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
+    pad = max((x1 - x0), (y1 - y0), 0.1) * 0.08
+    w, h = (x1 - x0) + pad * 2, (y1 - y0) + pad * 2
+    stroke = max(min(w, h) / 120.0, 0.005)
+    head = (
+        '<svg xmlns="http://www.w3.org/2000/svg" '
+        f'viewBox="{x0 - pad:.3f} {y0 - pad:.3f} {w:.3f} {h:.3f}" width="720" height="540">'
+        f'<rect x="{x0 - pad:.3f}" y="{y0 - pad:.3f}" width="{w:.3f}" '
+        f'height="{h:.3f}" fill="white"/>'
+        f'<g fill="none" stroke="#111" stroke-width="{stroke:.3f}">'
+    )
+    svg_path.write_text(head + frag + "</g></svg>", encoding="utf-8")
+
+
 def _first_numeric_col(rows: list[list[str]], ncols: int) -> int:
     for c in range(ncols):
         try:
@@ -299,6 +458,18 @@ PHOTO_TOPICS: tuple[str, ...] = (
 VECTOR_TOPICS: tuple[str, ...] = PHOTO_TOPICS
 
 
+INCA_TOPICS: tuple[str, ...] = (
+    "Sacsayhuaman course",
+    "Terrace retaining wall",
+    "Garden dry-stone wall",
+    "Fire pit ring",
+    "Stair cheek walls",
+    "Well head",
+    "Field gate posts",
+    "Sun temple plinth",
+)
+
+
 @dataclass(frozen=True)
 class CraftApp:
     key: str
@@ -313,6 +484,12 @@ class CraftApp:
 
     def installed(self) -> bool:
         return self.cli_path.is_file()
+
+    def runnable(self) -> bool:
+        """A demo can run without its wrappee when a fallback engine exists."""
+        if self.key == "inca":
+            return FREECADCMD.is_file()
+        return self.installed()
 
 
 APPS: tuple[CraftApp, ...] = (
@@ -564,6 +741,25 @@ APPS: tuple[CraftApp, ...] = (
             ),
         ),
     ),
+    CraftApp(
+        "inca",
+        "IncaCraft",
+        "incacraft-cli.exe",
+        "3D dry-stone masonry (PROPOSED wrappee - FreeCAD engine until it exists).",
+        (
+            Demo(
+                "dry-stone-wall",
+                "Demo 1: dry-stone course (pick a wall)",
+                "Ashlar courses generated as real FreeCAD solids, TechDraw "
+                "isometric export. No mortar, no fakes.",
+                "Describe a dry-stone wall program as JSON {title, courses, notes}. No prose.",
+                "cli",
+                topics=INCA_TOPICS,
+                topic_prompt="Describe a dry-stone '{topic}' wall program as JSON "
+                "{{title, courses, notes}}. No prose.",
+            ),
+        ),
+    ),
 )
 
 BY_KEY = {a.key: a for a in APPS}
@@ -657,7 +853,7 @@ def run_demo(
             "message": f"unknown demo '{demo_id}' for {app_key}",
             "known_demos": [d.id for d in app.demos],
         }
-    if not app.installed():
+    if not app.runnable():
         return {
             "success": False,
             "message": f"{app.name} not installed at {app.cli_path}",
@@ -691,6 +887,7 @@ def run_demo(
             "sound",
             "pdf",
             "light",
+            "inca",
         )
     ):
         (run_dir / "brief.md").write_text(ai["text"][:4000], encoding="utf-8")
@@ -792,6 +989,9 @@ def run_demo(
             argv += ["--cmd", f"{cid} {params}"]
         do([*argv, "--save", "elevation-south.dxf", "--export", "elevation-south.png"])
         do(["convert", "elevation-south.dxf", "elevation-south.pdf"])
+        iso = _freecad_iso(run_dir, steps)
+        if isinstance(iso, dict) and iso.get("success"):
+            do(["convert", "iso.svg", "iso.png"])
     elif k == "deck":
         do(["render", "--sample", "--all", "slides"])
     elif k == "design":
@@ -1128,6 +1328,38 @@ def run_demo(
             )
         if rendered:
             do(["info", rendered[0]])
+    elif k == "inca":
+        import hashlib
+        import random as _random
+
+        # Dry-stone wall: deterministic from the topic (same topic, same wall).
+        # Courses of varied ashlar blocks, hairline joints, no mortar.
+        rng = _random.Random(int(hashlib.sha256(topic.encode()).hexdigest(), 16) % (2**32))
+        widths = [1.4, 1.1, 1.7, 0.9, 1.25, 1.55, 1.0, 1.85]
+        heights = [0.7, 0.65, 0.6]
+        boxes: list[tuple[tuple, tuple]] = []
+        z = 0.0
+        for course, h in enumerate(heights):
+            x = -rng.uniform(0.0, 0.5) if course % 2 else 0.0
+            while x < 6.0:
+                w = rng.choice(widths)
+                boxes.append(((round(x, 3), 0.0, round(z, 3)), (round(w - 0.02, 3), 0.6, h)))
+                x += w
+            z = round(z + h, 3)
+        _freecad_bridge_probe(steps)
+        ok = _freecad_iso_boxes(run_dir, steps, "wall", boxes, scale=40.0)
+        if ok:
+            _fit_viewbox(run_dir / "wall.svg", run_dir / "wall-fragments.svg")
+        if ok:
+            import shutil as _shutil
+
+            _shutil.copy(run_dir / "wall.svg", run_dir / "wall-iso.svg")
+            # CADCraft renders TechDraw fragments faithfully (PhotoCraft fills them black).
+            cad = PROGRAM_FILES / "CADCraft" / "cadcraft-cli.exe"
+            if cad.is_file():
+                steps.append(cli_run(cad, ["convert", "wall-iso.svg", "wall-iso.png"], run_dir))
+        else:
+            steps[-1].setdefault("note", "FreeCAD wall failed - brief.md is the demo")
 
     artifacts = sorted({str(f) for f in run_dir.rglob("*") if f.is_file()})
     ok_cli = all(s.get("success") for s in steps) if steps else False
