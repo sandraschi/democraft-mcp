@@ -166,6 +166,7 @@ def test_fig_demo_topic_reaches_canvas(tmp_path):
     assert res["success"] is True
     script = (tmp_path / "fig" / "landing-page" / "landing.jsonl").read_text(encoding="utf-8")
     assert "text.set" in script
+    assert '"id": 8' in script  # brand always set when a topic is picked
     assert (tmp_path / "fig" / "landing-page" / "landing.png").is_file()
 
 

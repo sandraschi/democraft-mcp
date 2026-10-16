@@ -20,7 +20,7 @@ from pathlib import Path
 
 PROGRAM_FILES = Path(os.getenv("DEMOCRAFT_PROGRAM_FILES", r"C:\Program Files"))
 OLLAMA_URL = os.getenv("DEMOCRAFT_OLLAMA_URL", "http://127.0.0.1:11434")
-DEFAULT_MODEL = os.getenv("DEMOCRAFT_MODEL", "gemma4:12b")
+DEFAULT_MODEL = os.getenv("DEMOCRAFT_MODEL", "gemma4:e4b")
 CLI_TIMEOUT_S = 120
 
 
@@ -68,6 +68,37 @@ def _grid_data(ai: dict, topic: str) -> dict:
             pass
     fallback["title"] = topic or fallback["title"]
     return fallback
+
+
+def _ai_json(text: str) -> dict:
+    """Brace-slice + parse one JSON object from model chatter. Returns {} on failure."""
+    import json as _json
+
+    start, end = text.find("{"), text.rfind("}")
+    if start < 0 or end <= start:
+        return {}
+    try:
+        obj = _json.loads(text[start : end + 1])
+        return obj if isinstance(obj, dict) else {}
+    except Exception:
+        return {}
+
+
+def _labeled_lines(text: str, labels: dict[str, str]) -> dict[str, str]:
+    """Parse 'Label: value' lines. Values capped; missing labels stay absent."""
+    out: dict[str, str] = {}
+    lowered = {k: v.lower() for k, v in labels.items()}
+    for line in text.splitlines():
+        s = line.strip().lstrip("#*- ").strip()
+        if ":" not in s:
+            continue
+        head, _, tail = s.partition(":")
+        head = head.strip().lower()
+        for key, label in lowered.items():
+            if head == label.rstrip(":").lower() and tail.strip():
+                out.setdefault(key, tail.strip()[:160])
+                break
+    return out
 
 
 def _first_numeric_col(rows: list[list[str]], ncols: int) -> int:
@@ -350,14 +381,17 @@ APPS: tuple[CraftApp, ...] = (
             Demo(
                 "landing-page",
                 "Demo 1: landing page + copy brief (pick a topic)",
-                "Landing-page template built headless; your topic's headline "
-                "and subline are set into the hero before render + PNG.",
+                "Landing-page template built headless; 14 text nodes (brand, "
+                "hero, features, cards, quote, CTA) set from your topic "
+                "before render + PNG. Stats/person/buttons stay template.",
                 "Write a landing-page copy brief as markdown: # headline, "
                 "3 sections with one line each, one call to action.",
                 topics=FIG_TOPICS,
-                topic_prompt="Return JSON only for a landing page about '{topic}': "
-                '{{"headline": str (<=40 chars), "sub": str (<=90 chars), '
-                '"brief": str (3 sections + CTA as markdown)}}. No preamble.',
+                topic_prompt="Write landing-page copy for '{topic}' as labeled lines, "
+                "one per line, no extra text: Headline: ... / Sub: ... / Features title: ... / "
+                "Features sub: ... / F1 title: ... / F1 text: ... / F2 title: ... / F2 text: ... / "
+                "F3 title: ... / F3 text: ... / Quote: ... (illustrative) / CTA title: ... / "
+                "CTA sub: ... Keep every line under 25 words.",
             ),
         ),
     ),
@@ -716,38 +750,91 @@ def run_demo(
     elif k == "fig":
         import json as _json
 
-        headline, sub, brief_text = topic or "democraft", "", ""
+        # Template text-node map (landing-page, verified by node.get walk):
+        # 8 brand, 24 headline, 25 subline, 39/40 features title/sub,
+        # 47/48, 54/55, 61/62 feature cards, 79 quote, 90/91 CTA.
+        # Untouched template furniture (declared on the page): nav links,
+        # hero picture, Figures stats, quote person, buttons, footer.
+        copy: dict[str, str] = {}
+        brief_text = ""
         if ai.get("success") and ai.get("text"):
-            txt = ai["text"]
-            start, end = txt.find("{"), txt.rfind("}")
-            if start >= 0 and end > start:
-                try:
-                    obj = _json.loads(txt[start : end + 1])
-                    headline = str(obj.get("headline", headline))[:60] or headline
-                    sub = str(obj.get("sub", ""))[:120]
-                    brief_text = str(obj.get("brief", txt))[:4000]
-                except Exception:
-                    brief_text = txt[:4000]
-            else:
-                brief_text = txt[:4000]
+            copy = _labeled_lines(
+                ai["text"],
+                {
+                    "headline": "Headline:",
+                    "sub": "Sub:",
+                    "features_title": "Features title:",
+                    "features_sub": "Features sub:",
+                    "f1t": "F1 title:",
+                    "f1b": "F1 text:",
+                    "f2t": "F2 title:",
+                    "f2b": "F2 text:",
+                    "f3t": "F3 title:",
+                    "f3b": "F3 text:",
+                    "quote": "Quote:",
+                    "cta_title": "CTA title:",
+                    "cta_sub": "CTA sub:",
+                },
+            )
+            brief_text = ai["text"][:4000]
+            if len(copy) < 4:
+                order = [
+                    "headline",
+                    "sub",
+                    "features_title",
+                    "features_sub",
+                    "f1t",
+                    "f1b",
+                    "f2t",
+                    "f2b",
+                    "f3t",
+                    "f3b",
+                    "quote",
+                    "cta_title",
+                    "cta_sub",
+                ]
+                bare = [
+                    ln.strip().lstrip("#*- ").strip()
+                    for ln in ai["text"].splitlines()
+                    if ln.strip()
+                ]
+                for key, line in zip(order, bare, strict=False):
+                    copy.setdefault(key, line[:160])
+        headline = copy.get("headline", "")[:60] or topic or "democraft"
+        sub = copy.get("sub", "")[:120]
+        sets = [
+            (8, topic or "democraft"),
+            (24, headline),
+            (25, sub or headline),
+            (39, copy.get("features_title", "")),
+            (40, copy.get("features_sub", "")),
+            (47, copy.get("f1t", "")),
+            (48, copy.get("f1b", "")),
+            (54, copy.get("f2t", "")),
+            (55, copy.get("f2b", "")),
+            (61, copy.get("f3t", "")),
+            (62, copy.get("f3b", "")),
+            (79, copy.get("quote", "")),
+            (90, copy.get("cta_title", "")),
+            (91, copy.get("cta_sub", "")),
+        ]
         lines = ['{"command": "file.newFromTemplate", "params": {"template": "landing-page"}}']
         customized = bool(topic)
         if customized:
-            lines.append(
-                '{"command": "text.set", "params": {"id": 24, "characters": '
-                + _json.dumps(headline)
-                + "}}"
-            )
-            lines.append(
-                '{"command": "text.set", "params": {"id": 25, "characters": '
-                + _json.dumps(sub or headline)
-                + "}}"
-            )
+            for nid, text in sets:
+                if text:
+                    lines.append(
+                        '{"command": "text.set", "params": {"id": '
+                        + str(nid)
+                        + ", "
+                        + f'"characters": {_json.dumps(text)}'
+                        + "}}"
+                    )
         script = run_dir / "landing.jsonl"
         script.write_text("\n".join(lines) + "\n", encoding="utf-8")
         built = do(["run", str(script), "--out", "landing.figcraft"])
         if customized and not built.get("success"):
-            steps[-1].setdefault("note", "hero text.set failed - template render is the demo")
+            steps[-1].setdefault("note", "copy text.set failed - template render is the demo")
         if (run_dir / "landing.figcraft").is_file():
             do(["render", str(run_dir / "landing.figcraft"), "-o", "landing.png"])
         brief = run_dir / "copy-brief.md"
