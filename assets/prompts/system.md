@@ -366,11 +366,9 @@ Effect title-card: `info` (engine + project summary JSON), `render-frame
 --out title-card.png` (needs open project; headless refusal is the
 documented alternate outcome with note attached to the step).
 
-Fig landing-page: write `landing.jsonl` line
-`{"command":"file.newFromTemplate","params":{"template":"landing-page"}}`,
-`run landing.jsonl --out landing.figcraft` (use the run_dir-qualified path
-for --out when the CLI resolves relative to cwd - run_dir IS cwd, so bare
-names work), `render landing.figcraft -o landing.png`. Expect ~190 nodes,
+Fig landing-page: AI JSON {headline, sub, brief} for the topic (or defaults),
+single script (template + `text.set` hero ids 24/25 when a topic is picked),
+`run landing.jsonl --out landing.figcraft` (run_dir IS cwd, bare names work), `render landing.figcraft -o landing.png`. Expect ~190 nodes,
 Desktop + Phone frames. Artifacts: landing.jsonl, landing.figcraft,
 landing.png.
 

@@ -136,6 +136,119 @@ WORD_TOPICS: tuple[str, ...] = (
 )
 
 
+CAD_TOPICS: tuple[str, ...] = (
+    "Machiya townhouse",
+    "Alpine hut",
+    "Danube houseboat",
+    "Courtyard house",
+    "Tiny cabin",
+    "Corner bakery",
+    "Bike workshop",
+    "Lakeside sauna",
+)
+
+
+DECK_TOPICS: tuple[str, ...] = (
+    "Democraft pitch",
+    "Pelican bike shop launch",
+    "Sourdough bakery plan",
+    "Vienna coffee map",
+    "Night tram photo show",
+    "Urban beekeeping",
+    "Kids bike school",
+    "Tool library opening",
+)
+
+
+DESIGN_TOPICS: tuple[str, ...] = (
+    "Pelican + house spread",
+    "Bakery menu spread",
+    "Bike catalog spread",
+    "Photo essay spread",
+    "Coffee map spread",
+    "Garden year spread",
+    "Lake guide spread",
+    "Workshop manual spread",
+)
+
+
+EFFECT_TOPICS: tuple[str, ...] = (
+    "Democraft title",
+    "Pelican reveal",
+    "Bakery morning",
+    "Night tram",
+    "Lake dawn",
+    "Bike race",
+    "Bread oven",
+    "Rain window",
+)
+
+
+FILM_TOPICS: tuple[str, ...] = (
+    "Pelican storyboard",
+    "Bakery morning",
+    "Night tram",
+    "Danube crossing",
+    "Market day",
+    "Lake swim",
+    "Bike commute",
+    "Storm front",
+)
+
+
+SOUND_TOPICS: tuple[str, ...] = (
+    "Groove analysis",
+    "Mix balance",
+    "Drum sound",
+    "Bass line",
+    "Hat patterns",
+    "Stereo image",
+    "Dynamics",
+    "Arrangement",
+)
+
+
+PDF_TOPICS: tuple[str, ...] = (
+    "Demo outputs portfolio",
+    "Bakery docs",
+    "Bike catalog",
+    "Photo set",
+    "Coffee map pack",
+    "Garden year",
+    "Lake guide",
+    "Workshop manual",
+)
+
+
+LIGHT_TOPICS: tuple[str, ...] = (
+    "Punchy daylight",
+    "Moody evening",
+    "Warm print",
+    "Cool screen",
+    "High contrast",
+    "Soft pastel",
+    "B&W conversion",
+    "Vivid color",
+)
+
+
+PHOTO_TOPICS: tuple[str, ...] = (
+    "Pelican on a bike",
+    "House by the Danube",
+    "Coffee cup steaming",
+    "Bike leaning on a wall",
+    "Sailboat at dawn",
+    "Cat on a windowsill",
+    "Sourdough loaf",
+    "Tram at night",
+    "Mountain hut",
+    "Lighthouse",
+)
+
+
+VECTOR_TOPICS: tuple[str, ...] = PHOTO_TOPICS
+
+
 @dataclass(frozen=True)
 class CraftApp:
     key: str
@@ -161,11 +274,14 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "house-plan",
-                "Demo 1: Japanese small house set",
+                "Demo 1: small house set (pick a type)",
                 "Scripted metric plan (rooms, labels, dims) + south elevation: "
-                "DXF, PNG, PDF, SVG. 2D engine: no true isometric.",
+                "DXF, PNG, PDF, SVG. Topic titles the sheet. 2D engine: no true isometric.",
                 "List rooms of a small Japanese house plan (genkan, washitsu, "
                 "engawa, LD, bath) as JSON list of {room, note}. No prose.",
+                topics=CAD_TOPICS,
+                topic_prompt="Return JSON for a '{topic}' small house: {{\"title\": str, "
+                '"rooms": [{{name, note}} x5]}}. No prose.',
             ),
         ),
     ),
@@ -177,10 +293,14 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "pitch-deck",
-                "Demo 1: 5-slide democraft pitch deck",
-                "Render the sample deck to PNGs, then outline the 5 slides from the slide count.",
+                "Demo 1: pitch deck (pick a subject)",
+                "Render the sample deck to PNGs; local AI outlines 5 slides "
+                "for your subject, saved as outline.md.",
                 "Outline a 5-slide pitch deck for 'democraft-mcp' as JSON "
                 "list of {slide, bullets}. No prose.",
+                topics=DECK_TOPICS,
+                topic_prompt="Outline a 5-slide pitch deck for '{topic}' as JSON "
+                "list of {{slide, bullets}}. No prose.",
             ),
         ),
     ),
@@ -192,10 +312,14 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "print-spread",
-                "Demo 1: print spread of pelican + house plan",
-                "Sample magazine render to PNGs + AI spread reading.",
+                "Demo 1: print spread (pick a subject)",
+                "Sample magazine render to PNGs; local AI describes the "
+                "spread for your subject, saved as brief.md.",
                 "Describe a 2-page spread (house plan + pelican) as JSON "
                 "{left, right, palette}. No prose.",
+                topics=DESIGN_TOPICS,
+                topic_prompt="Describe a 2-page print spread about '{topic}' as JSON "
+                "{{left, right, palette}}. No prose.",
             ),
         ),
     ),
@@ -207,9 +331,13 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "title-card",
-                "Demo 1: title-card still",
-                "Engine capability map, then a still render attempt.",
+                "Demo 1: title-card still (pick a subject)",
+                "Demo project still render; local AI writes the title spec "
+                "for your subject, saved as brief.md.",
                 "Write a title-card spec (text, palette, timing) as JSON. No prose.",
+                topics=EFFECT_TOPICS,
+                topic_prompt="Write a title-card spec for '{topic}' (text, palette, "
+                "timing) as JSON. No prose.",
             ),
         ),
     ),
@@ -222,14 +350,14 @@ APPS: tuple[CraftApp, ...] = (
             Demo(
                 "landing-page",
                 "Demo 1: landing page + copy brief (pick a topic)",
-                "Landing-page template built headless + PNG render; local AI "
-                "writes the landing copy brief for your topic.",
+                "Landing-page template built headless; your topic's headline "
+                "and subline are set into the hero before render + PNG.",
                 "Write a landing-page copy brief as markdown: # headline, "
                 "3 sections with one line each, one call to action.",
                 topics=FIG_TOPICS,
-                topic_prompt="Write a landing-page copy brief for '{topic}' as "
-                "markdown: # headline, 3 sections with one line each, one call "
-                "to action. No preamble.",
+                topic_prompt="Return JSON only for a landing page about '{topic}': "
+                '{{"headline": str (<=40 chars), "sub": str (<=90 chars), '
+                '"brief": str (3 sections + CTA as markdown)}}. No preamble.',
             ),
         ),
     ),
@@ -241,10 +369,14 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "storyboard",
-                "Demo 1: 3-shot pelican storyboard",
-                "Project inspect + AI 3-shot board; sequence assembly is gated on a project file.",
+                "Demo 1: storyboard + AI board (pick a subject)",
+                "Real EDL export; local AI boards 3 shots for your subject, "
+                "saved as brief.md. Assembly stays project-gated.",
                 "Board a 3-shot storyboard (pelican, bike, reveal) as JSON "
                 "list of {shot, lens, action}. No prose.",
+                topics=FILM_TOPICS,
+                topic_prompt="Board a 3-shot storyboard about '{topic}' as JSON "
+                "list of {{shot, lens, action}}. No prose.",
             ),
         ),
     ),
@@ -281,6 +413,9 @@ APPS: tuple[CraftApp, ...] = (
                 "Bundled demo project rendered locally to WAV. No AI composes "
                 "music; the AI step writes only the words describing it.",
                 "Brief the bounced groove (tempo, key, layers heard) as JSON. No prose.",
+                topics=SOUND_TOPICS,
+                topic_prompt="Brief the bounced groove with focus on '{topic}' "
+                "(tempo, key, layers) as JSON. No prose.",
             ),
         ),
     ),
@@ -310,9 +445,13 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "portfolio",
-                "Demo 1: demo-outputs portfolio PDF",
-                "Combine demo PDFs into one portfolio + thumbnail render.",
+                "Demo 1: portfolio PDF (pick a subject)",
+                "Combine demo PDFs into one portfolio + thumbnail render; "
+                "local AI names the sections for your subject, saved as brief.md.",
                 "Name 4 portfolio sections for craft demo outputs as JSON list. No prose.",
+                topics=PDF_TOPICS,
+                topic_prompt="Name 4 portfolio sections for '{topic}' documents "
+                "as JSON list. No prose.",
             ),
         ),
     ),
@@ -324,10 +463,15 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "grade-pelican",
-                "Demo 1: grade the pelican photo",
-                "Grade pass over the demo PNG + AI grade reading.",
+                "Demo 1: grade with intent (pick one)",
+                "Grade pass over the demo PNG; local AI suggests tweaks for "
+                "your intent, saved as brief.md.",
                 "Suggest exposure/contrast/saturation tweaks for a flat PNG "
                 "as JSON {exposure, contrast, saturation, note}. No prose.",
+                topics=LIGHT_TOPICS,
+                topic_prompt="Suggest exposure/contrast/saturation tweaks for a flat "
+                "PNG aiming at '{topic}' as JSON {{exposure, contrast, "
+                "saturation, note}}. No prose.",
             ),
         ),
     ),
@@ -339,15 +483,18 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "pelican-photo",
-                "Demo 1: pelican riding a bike (photo)",
-                "AI SVG concept rendered through the convert/info pipeline. "
-                "No generative verbs exist in this build.",
+                "Demo 1: SVG subject (pick one)",
+                "AI draws your subject as SVG; the convert/info pipeline "
+                "renders it. No generative verbs exist in this build.",
                 "Draw a flat side-view pictogram on an 800x600 canvas: "
                 "pelican body (ellipse), head (circle), long beak (polygon), "
                 "eye (small circle), wing (ellipse), two bike wheels (circles "
                 "with spoke lines), frame lines, ground line. 12-20 shapes. "
                 "Raw SVG only.",
                 "cli",
+                topics=PHOTO_TOPICS,
+                topic_prompt="Draw '{topic}' as a flat pictogram SVG on an 800x600 "
+                "canvas, 12-20 shapes (ellipse/circle/rect/polygon/line). Raw SVG only.",
             ),
         ),
     ),
@@ -359,15 +506,18 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "pelican-vector",
-                "Demo 1: pelican riding a bike (vector)",
-                "AI SVG concept run through the run/export pipeline. Same "
-                "prompt as photo: compare the two.",
+                "Demo 1: SVG subject (pick one)",
+                "AI draws your subject as SVG; the run/export pipeline "
+                "renders it. Same prompt as photo: compare the two.",
                 "Draw a flat side-view pictogram on an 800x600 canvas: "
                 "pelican body (ellipse), head (circle), long beak (polygon), "
                 "eye (small circle), wing (ellipse), two bike wheels (circles "
                 "with spoke lines), frame lines, ground line. 12-20 shapes. "
                 "Raw SVG only.",
                 "cli",
+                topics=VECTOR_TOPICS,
+                topic_prompt="Draw '{topic}' as a flat pictogram SVG on an 800x600 "
+                "canvas, 12-20 shapes (ellipse/circle/rect/polygon/line). Raw SVG only.",
             ),
         ),
     ),
@@ -484,6 +634,24 @@ def run_demo(
     steps: list[dict] = []
     artifacts: list[str] = []
 
+    if (
+        demo.topics
+        and ai.get("success")
+        and ai.get("text")
+        and app_key
+        in (
+            "cad",
+            "deck",
+            "design",
+            "effect",
+            "film",
+            "sound",
+            "pdf",
+            "light",
+        )
+    ):
+        (run_dir / "brief.md").write_text(ai["text"][:4000], encoding="utf-8")
+
     def do(argv: list[str]) -> dict:
         res = cli_run(app.cli_path, argv, run_dir)
         steps.append(res)
@@ -508,6 +676,12 @@ def run_demo(
             ["dimlinear", '{"p1": [0, 0], "p2": [7.28, 0], "at": [3.64, -0.6]}'],
             ["dimlinear", '{"p1": [0, 0], "p2": [0, 5.46], "at": [-0.6, 2.73]}'],
         ]
+        if topic:
+            import json as _json
+
+            plan.insert(
+                0, ["text", _json.dumps({"at": [0, 6.1], "text": topic[:40], "height": 0.3})]
+            )
         argv: list[str] = ["run", "--metric"]
         for cid, params in plan:
             argv += ["--cmd", f"{cid} {params}"]
@@ -540,17 +714,45 @@ def run_demo(
         if not still.get("success"):
             steps[-1]["note"] = "render needs an open project - capability map is the demo"
     elif k == "fig":
+        import json as _json
+
+        headline, sub, brief_text = topic or "democraft", "", ""
+        if ai.get("success") and ai.get("text"):
+            txt = ai["text"]
+            start, end = txt.find("{"), txt.rfind("}")
+            if start >= 0 and end > start:
+                try:
+                    obj = _json.loads(txt[start : end + 1])
+                    headline = str(obj.get("headline", headline))[:60] or headline
+                    sub = str(obj.get("sub", ""))[:120]
+                    brief_text = str(obj.get("brief", txt))[:4000]
+                except Exception:
+                    brief_text = txt[:4000]
+            else:
+                brief_text = txt[:4000]
+        lines = ['{"command": "file.newFromTemplate", "params": {"template": "landing-page"}}']
+        customized = bool(topic)
+        if customized:
+            lines.append(
+                '{"command": "text.set", "params": {"id": 24, "characters": '
+                + _json.dumps(headline)
+                + "}}"
+            )
+            lines.append(
+                '{"command": "text.set", "params": {"id": 25, "characters": '
+                + _json.dumps(sub or headline)
+                + "}}"
+            )
         script = run_dir / "landing.jsonl"
-        script.write_text(
-            '{"command": "file.newFromTemplate", "params": {"template": "landing-page"}}\n',
-            encoding="utf-8",
-        )
-        do(["run", str(script), "--out", "landing.figcraft"])
+        script.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        built = do(["run", str(script), "--out", "landing.figcraft"])
+        if customized and not built.get("success"):
+            steps[-1].setdefault("note", "hero text.set failed - template render is the demo")
         if (run_dir / "landing.figcraft").is_file():
             do(["render", str(run_dir / "landing.figcraft"), "-o", "landing.png"])
         brief = run_dir / "copy-brief.md"
-        if ai.get("success") and ai.get("text"):
-            brief.write_text(ai["text"], encoding="utf-8")
+        if brief_text:
+            brief.write_text(brief_text, encoding="utf-8")
         else:
             brief.write_text(
                 f"# Landing copy: {topic or 'democraft'}\n\n- Hero: one line.\n"

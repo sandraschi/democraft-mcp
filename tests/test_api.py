@@ -136,6 +136,14 @@ def test_grid_fig_topics_exposed():
     assert len(apps["fig"]["demos"][0]["topics"]) == 12
 
 
+def test_all_demos_have_topics():
+    from democraft_mcp.crafts import APPS as _APPS
+
+    for a in _APPS:
+        assert len(a.demos[0].topics) >= 8, a.key
+        assert a.demos[0].topic_prompt, a.key
+
+
 @_needs("grid")
 def test_grid_demo_with_topic(tmp_path):
     from pathlib import Path as _P
@@ -148,6 +156,17 @@ def test_grid_demo_with_topic(tmp_path):
     assert res["success"] is True
     names = [_P(p).name for p in res["artifacts"]]
     assert "report.xlsx" in names and "report.pdf" in names
+
+
+@_needs("fig")
+def test_fig_demo_topic_reaches_canvas(tmp_path):
+    from democraft_mcp.crafts import run_demo
+
+    res = run_demo("fig", "landing-page", tmp_path, topic="Pelican bike shop")
+    assert res["success"] is True
+    script = (tmp_path / "fig" / "landing-page" / "landing.jsonl").read_text(encoding="utf-8")
+    assert "text.set" in script
+    assert (tmp_path / "fig" / "landing-page" / "landing.png").is_file()
 
 
 @_needs("word")
