@@ -1,5 +1,15 @@
 # CHANGELOG.md
 
+## Unreleased (2026-10-18, assfix reassess)
+
+Cold-context reassess (score 49): fixed mcpb-pack staging (package dir, not src
+dir - bundle imports itself again; pyc/bak purge; stable-name copy), README
+Claude Desktop one-liner, skill Configuration section (S1 gate), Tools
+tools-count testid, pytest --cov gate (fail-under 55, measured 73%),
+.env.example FREECADCMD guard lines. Deferred: WEBAPP_PORTS.md registration
+(mcd-side), shim migration (needs manifest relocation + 3-4-100 parity),
+streaming chat, Discord channel.
+
 ## 0.1.1 (2026-10-15, assfix pass)
 
 First assfix (score -215): fixed all 22 HIGH + most MEDIUM. REST: capabilities,

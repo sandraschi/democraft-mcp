@@ -22,6 +22,16 @@ Every attempt lands in the Inbox with artifacts and engine logs. MOCK badges
 mean a missing wrappee or an account-gated feature - onboarding clears them
 by successful runs, never by hand.
 
+## Configuration
+
+Env (see `.env.example`, never commit `.env`): `DEMOCRAFT_PORT` (backend :11246,
+frontend :11245, adjacent per fleet rule), `DEMOCRAFT_MODEL` (default `gemma4:e4b`),
+`DEMOCRAFT_OLLAMA_URL` (`http://127.0.0.1:11434`), `DEMOCRAFT_OUTBOX` (`<repo>/outbox`),
+`DEMOCRAFT_PROGRAM_FILES` (`C:\Program Files`), `DEMOCRAFT_FREECADCMD` (override for
+the FreeCAD console binary; unset means the default path, CAD demo reports
+`wrappee_missing` with recovery text when it does not exist), `DEMOCRAFT_PREFAB_APPS`
+(`1`, `0` skips Prefab tools).
+
 ## Workflow 1: run and verify a demo
 
 1. `app_status` (is the wrappee installed?).

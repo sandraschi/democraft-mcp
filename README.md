@@ -83,3 +83,16 @@ Full reference: `docs/TOOLS.md`.
 ```json
 { "mcpServers": { "democraft": { "command": "uv", "args": ["run", "python", "-m", "democraft_mcp.mcp_stdio"], "cwd": "D:\\Dev\\repos\\democraft-mcp" } } }
 ```
+
+## Install (Claude Desktop on Windows)
+
+Open **Windows PowerShell** and run (labels per MCPB_PACKAGING_STANDARDS.md 2.2b):
+
+```powershell
+irm https://github.com/sandraschi/democraft-mcp/releases/latest/download/install.ps1 | iex
+```
+
+Then quit Claude Desktop completely (tray > Quit) and relaunch - democraft appears
+under Settings > Extensions. The `.mcpb` bundle is a Claude Desktop format; other
+clients (Cursor, VS Code, Claude Code) use the `uv` MCP config above instead -
+`uvx` has no published package to install from (local-only distribution).
