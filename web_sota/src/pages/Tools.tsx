@@ -25,6 +25,9 @@ export default function Tools() {
 			<p className="text-sm text-slate-300">
 				Discovered live from /api/tools - never hardcoded.
 			</p>
+			<span data-testid="tools-count" className="mt-1 text-sm text-slate-300">
+				{tools.length} tools
+			</span>
 			{loading && (
 				<p className="mt-2 text-sm text-slate-300">Loading tools...</p>
 			)}

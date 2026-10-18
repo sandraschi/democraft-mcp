@@ -47,3 +47,5 @@ show_missing = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+# Coverage gate (M3): fail_under mirrors [tool.coverage.report] so `just ci` enforces it.
+addopts = ["--cov=democraft_mcp", "--cov-fail-under=55", "--cov-report=term-missing"]
