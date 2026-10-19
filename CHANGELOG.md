@@ -1,5 +1,13 @@
 # CHANGELOG.md
 
+## Unreleased (2026-10-19, IncaCraft removed)
+
+IncaCraft was a joke app, not a wrappee. Removed the registry entry, its
+dry-stone demo branch, its hero metadata, its topic list, the test that drove it,
+and the one-line mentions in onboarding and llms.txt. The fleet is the 13 real
+ArtCraft apps (CAD through Word); FreeCAD helpers stay because CADCraft's
+optional isometric path still uses them.
+
 ## Unreleased (2026-10-19, transitions + hands-in streaming)
 
 - **Deck transition reel** (`deck/transition-reel`): three AI plates, three real
