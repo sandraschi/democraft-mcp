@@ -1,5 +1,15 @@
 # CHANGELOG.md
 
+## Unreleased (2026-10-19, craft pages hero)
+
+Per-app pages now open with a hero: the app, the tool it is a local alternative
+to, a short description, and **observed gaps** (chips, explicitly not a roadmap).
+Below it, a demo selector; every app has at least two demos. Demo 2 for every
+app is a real capability map: `commands` (or `--help` fallback for PdfCraft)
+dumped to `capabilities.txt`, no AI step. Also fixed CLI output decoding on
+Windows (UTF-8 with replacement; cp1252 was crashing on non-ASCII catalogs).
+Tests: registry contract (hero + >=2 demos + no-AI capability map), 39 passing.
+
 ## Unreleased (2026-10-19, tight assfix + plan)
 
 Tight verification, not a full re-audit: gates green (ruff, 37 tests at 72.75%,
