@@ -1010,6 +1010,10 @@ def _write_manifest(
     (run_dir / "run.json").write_text(json.dumps(data, indent=1), encoding="utf-8")
 
 
+class DemoCancelled(Exception):
+    """Raised between CLI steps when a job was cancelled."""
+
+
 def run_demo(
     app_key: str,
     demo_id: str,
@@ -1017,6 +1021,8 @@ def run_demo(
     model: str = DEFAULT_MODEL,
     topic: str = "",
     on_step=None,
+    should_cancel=None,
+    run_dir: Path | None = None,
 ) -> dict:
     """Run a demo end to end. Returns dialogic {success, message, ...}."""
     app = BY_KEY.get(app_key)
@@ -1042,19 +1048,22 @@ def run_demo(
             "recovery": f"Install {app.name}, then retry. See docs/ONBOARDING.md.",
         }
     outbox.mkdir(parents=True, exist_ok=True)
-    run_dir = outbox / app_key / demo_id
-    started_at = datetime.now(UTC).isoformat(timespec="seconds")
-    # keep every run: archive the previous contents before this one starts
-    if run_dir.exists() and any(run_dir.iterdir()):
-        history = outbox / "_history" / app_key / demo_id
-        history.mkdir(parents=True, exist_ok=True)
-        stamp = datetime.fromtimestamp(run_dir.stat().st_mtime).strftime("%Y%m%d_%H%M%S")
-        dest = history / stamp
-        suffix = 1
-        while dest.exists():
-            dest = history / f"{stamp}-{suffix}"
-            suffix += 1
-        shutil.move(str(run_dir), str(dest))
+    if run_dir is None:
+        run_dir = outbox / app_key / demo_id
+        started_at = datetime.now(UTC).isoformat(timespec="seconds")
+        # keep every run: archive the previous contents before this one starts
+        if run_dir.exists() and any(run_dir.iterdir()):
+            history = outbox / "_history" / app_key / demo_id
+            history.mkdir(parents=True, exist_ok=True)
+            stamp = datetime.fromtimestamp(run_dir.stat().st_mtime).strftime("%Y%m%d_%H%M%S")
+            dest = history / stamp
+            suffix = 1
+            while dest.exists():
+                dest = history / f"{stamp}-{suffix}"
+                suffix += 1
+            shutil.move(str(run_dir), str(dest))
+    else:
+        started_at = datetime.now(UTC).isoformat(timespec="seconds")
     run_dir.mkdir(parents=True, exist_ok=True)
 
     if demo.id == "capability-map":
@@ -1064,6 +1073,17 @@ def run_demo(
             res = cli_run(app.cli_path, ["--help"], run_dir)
             text = (res.get("stdout") or "") + (res.get("stderr") or "")
         (run_dir / "capabilities.txt").write_text(text[:200000] or "(no output)", encoding="utf-8")
+        if on_step:
+            on_step(
+                {
+                    "kind": "step",
+                    "argv": res.get("argv") or ["commands"],
+                    "success": bool(res.get("success")),
+                    "returncode": res.get("returncode"),
+                    "ms": res.get("ms"),
+                    "artifacts": ["capabilities.txt"],
+                }
+            )
         _write_manifest(run_dir, app_key, demo_id, topic, started_at, [])
         arts = [str(p) for p in sorted(run_dir.rglob("*")) if p.is_file()]
         return {
@@ -1115,6 +1135,8 @@ def run_demo(
         (run_dir / "brief.md").write_text(ai["text"][:4000], encoding="utf-8")
 
     def do(argv: list[str]) -> dict:
+        if should_cancel and should_cancel():
+            raise DemoCancelled()
         res = cli_run(app.cli_path, argv, run_dir)
         steps.append(res)
         for f in sorted(run_dir.rglob("*")):

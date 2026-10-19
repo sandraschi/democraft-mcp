@@ -23,6 +23,7 @@ from pydantic import BaseModel
 
 from . import __version__
 from .crafts import APPS, BY_KEY, DEFAULT_MODEL, run_demo
+from .jobs import JobEngine
 
 logger = logging.getLogger("democraft_mcp.api")
 
@@ -50,6 +51,13 @@ class DemoRequest(BaseModel):
     demo: str = ""
     model: str = DEFAULT_MODEL
     topic: str = ""
+
+
+class JobRequest(BaseModel):
+    app: str
+    demo: str = ""
+    topic: str = ""
+    model: str = ""
 
 
 class ChatRequest(BaseModel):
@@ -192,6 +200,67 @@ def create_app(outbox: Path | None = None) -> FastAPI:
             media_type="text/event-stream",
             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
         )
+
+    engine = JobEngine(box)
+
+    @api.post("/api/jobs")
+    def job_create(req: JobRequest) -> dict:
+        a = BY_KEY.get(req.app)
+        if a is None:
+            return {"success": False, "message": f"unknown app '{req.app}'"}
+        demo_id = req.demo or (a.demos[0].id if a.demos else "")
+        job = engine.submit(req.app, demo_id, req.topic.strip()[:200], req.model)
+        log("job", f"{job.id} queued {req.app}/{demo_id}")
+        return {"success": True, "job": job.public()}
+
+    @api.get("/api/jobs")
+    def job_list() -> dict:
+        return {"success": True, "jobs": engine.list()}
+
+    @api.get("/api/jobs/{job_id}")
+    def job_get(job_id: str) -> dict:
+        job = engine.get(job_id)
+        if job is None:
+            return {"success": False, "message": f"unknown job '{job_id}'"}
+        return {"success": True, "job": job.public()}
+
+    @api.post("/api/jobs/{job_id}/cancel")
+    def job_cancel(job_id: str) -> dict:
+        return {"success": engine.cancel(job_id)}
+
+    @api.post("/api/jobs/{job_id}/retry")
+    def job_retry(job_id: str) -> dict:
+        job = engine.retry(job_id)
+        if job is None:
+            return {"success": False, "message": f"unknown job '{job_id}'"}
+        return {"success": True, "job": job.public()}
+
+    @api.get("/api/jobs/{job_id}/events")
+    def job_events(job_id: str):
+        def generate():
+            for event in engine.stream(job_id):
+                yield "data: " + json.dumps(event) + "\n\n"
+
+        return StreamingResponse(
+            generate(),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        )
+
+    @api.get("/api/jobs/{job_id}/artifacts/{path:path}")
+    def job_artifact(job_id: str, path: str):
+        from fastapi.responses import FileResponse
+
+        job = engine.get(job_id)
+        if job is None:
+            return {"success": False, "message": f"unknown job '{job_id}'"}
+        root = job.run_dir.resolve()
+        target = (root / path).resolve()
+        if root != target and root not in target.parents:
+            return {"success": False, "message": "path escapes the run dir"}
+        if not target.is_file():
+            return {"success": False, "message": "artifact not found"}
+        return FileResponse(target)
 
     @api.get("/api/artifacts/{app}/{demo}/{path:path}")
     def artifact(app: str, demo: str, path: str):
