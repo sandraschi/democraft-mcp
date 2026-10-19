@@ -25,6 +25,8 @@ bounce in both modes. Surge XT and Dexed, set as track instruments, rendered
 silence on the same clip while the built-in synth played; the earlier "Surge
 bounced -17.7 dB" claim was the demo mix, not the plugin. Reproduced in the live
 app over `--control 11250`, so it is host-side, not an offline-render artefact.
+Reaper 7.80 renders the same MIDI file through both VST3s (Surge 3.45M, Dexed
+1.13M peak samples), confirming the plugins are fine and SoundCraft is at fault.
 Filed as BUG-082. `docs/FREE_VST3_SET.md` corrected.
 
 ## Unreleased (2026-10-20, lighthouse hands-in demo)

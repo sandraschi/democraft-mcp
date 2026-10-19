@@ -42,12 +42,14 @@ before redistributing.
   Files\VST3`: `engine.vst3_plugins` lists 11 plugins.
 - **VST3 effects process.** Valhalla Supermassive inserted on a melody track
   changes the bounce (dry vs wet), and the effect chain is audible.
-- **VST3 instruments are unresolved.** Surge XT and Dexed, set as track
-  instruments on a MIDI clip, rendered silence in SoundCraft's headless bounce
-  **and in the live app over its control channel**; the built-in subtractive
-  synth on the same clip is audible. Suite VST3 effects process. Tracked as
-  **BUG-082** (`mcp-central-docs/troubleshooting/details/`). Do not claim VST3
-  instrument hosting works in SoundCraft until a patch-loaded instrument renders.
+- **VST3 instruments are unresolved in SoundCraft (host bug).** Surge XT and
+  Dexed, set as track instruments, render silence in SoundCraft's headless
+  bounce **and in the live app over its control channel**; the built-in
+  subtractive synth on the same clip is audible. The same MIDI file and VST3s
+  render correctly in Reaper 7.80 (Surge 3.45M, Dexed 1.13M peak samples), so
+  the plugins are fine and the fault is SoundCraft's instrument path. Tracked as
+  **BUG-082** (`mcp-central-docs/troubleshooting/details/`). Suite VST3 effects
+  process correctly in both hosts.
 - Reaper: `vstpath` and `vstpath64` in `%APPDATA%\REAPER\reaper.ini` now
   include the per-user folder. Restart Reaper, then
   Options > Preferences > Plug-ins > VST > **Re-scan**.
