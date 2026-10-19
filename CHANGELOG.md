@@ -1,5 +1,15 @@
 # CHANGELOG.md
 
+## Unreleased (2026-10-19, tight assfix + plan)
+
+Tight verification, not a full re-audit: gates green (ruff, 37 tests at 72.75%,
+tsc+biome). Closed the open HIGH by registering ports 11245/11246 in
+`mcp-central-docs/operations/WEBAPP_PORTS.md` (verified free across the fleet).
+Score 83 -> 91, self-assessed. Added `HANDOVER.md` and `docs/PLAN.md` (six
+phases: adapter contract, job engine, webapp surfaces, book pipeline, fleet
+handoffs, packaging). Open: streaming chat, vendored pack-script migration,
+Discord channel.
+
 ## Unreleased (2026-10-18, assfix reassess)
 
 Cold-context reassess (score 49): fixed mcpb-pack staging (package dir, not src
