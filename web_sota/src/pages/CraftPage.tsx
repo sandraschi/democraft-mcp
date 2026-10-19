@@ -31,6 +31,9 @@ interface RunResult {
 interface LiveEvent {
 	id?: string;
 	kind: string;
+	app?: string;
+	demo?: string;
+	status?: string;
 	success?: boolean;
 	skipped?: boolean;
 	model?: string;
@@ -59,6 +62,7 @@ export default function CraftPage() {
 	const [playing, setPlaying] = useState(false);
 	const [speed, setSpeed] = useState(1);
 	const [finalResult, setFinalResult] = useState<RunResult | null>(null);
+	const [jobId, setJobId] = useState("");
 
 	const demo = craft?.demos.find((d) => d.id === selectedId) ?? craft?.demos[0];
 
@@ -69,6 +73,7 @@ export default function CraftPage() {
 		setCursor(0);
 		setPlaying(false);
 		setFinalResult(null);
+		setJobId("");
 		setLastDemo(demoId);
 		try {
 			const r = await api<RunResult>("/api/demos/run", {
@@ -95,14 +100,25 @@ export default function CraftPage() {
 		setEvents([]);
 		setCursor(0);
 		setFinalResult(null);
+		setJobId("");
 		setPlaying(true);
 		setLastDemo(demoId);
 		try {
-			const response = await fetch(`${apiBase()}/api/demos/stream`, {
+			const created = await api<{
+				success: boolean;
+				job?: { id: string };
+				message?: string;
+			}>("/api/jobs", {
 				method: "POST",
-				headers: { "content-type": "application/json" },
 				body: JSON.stringify({ app, demo: demoId, topic }),
 			});
+			if (!created.success || !created.job) {
+				throw new Error(created.message ?? "job rejected");
+			}
+			setJobId(created.job.id);
+			const response = await fetch(
+				`${apiBase()}/api/jobs/${created.job.id}/events`,
+			);
 			if (!response.body) throw new Error("no stream body");
 			const reader = response.body.getReader();
 			const decoder = new TextDecoder();
@@ -120,8 +136,16 @@ export default function CraftPage() {
 						const event = JSON.parse(line.slice(6)) as LiveEvent & {
 							result?: RunResult;
 						};
-						if (event.kind === "done" && event.result) {
-							setFinalResult(event.result);
+						if (event.kind === "done") {
+							if (event.result) {
+								setFinalResult(event.result);
+							} else if (event.status === "cancelled") {
+								setToast("Job cancelled.");
+								setPlaying(false);
+							} else if (event.error) {
+								setToast(`Job failed: ${event.error}`);
+								setPlaying(false);
+							}
 						} else if (event.kind === "error") {
 							setToast(`Stream error: ${event.error}`);
 							setPlaying(false);
@@ -139,6 +163,18 @@ export default function CraftPage() {
 			setToast(`Stream failed: ${e}`);
 		} finally {
 			setRunning(false);
+		}
+	}
+
+	async function cancelJob() {
+		if (!jobId) return;
+		try {
+			await api<{ success: boolean }>(`/api/jobs/${jobId}/cancel`, {
+				method: "POST",
+			});
+			setToast("Cancel requested - stops after the current step.");
+		} catch (e) {
+			setToast(`Cancel failed: ${e}`);
 		}
 	}
 
@@ -382,6 +418,15 @@ export default function CraftPage() {
 							>
 								Rewind
 							</button>
+							<button
+								type="button"
+								data-testid="playback-cancel"
+								onClick={cancelJob}
+								disabled={!jobId}
+								className="rounded bg-slate-800 px-2 py-1 disabled:opacity-40"
+							>
+								Cancel job
+							</button>
 							<label className="flex items-center gap-1">
 								Speed
 								<input
@@ -405,7 +450,11 @@ export default function CraftPage() {
 							<li key={e.id} className="break-all">
 								{e.kind === "ai"
 									? `AI ${e.skipped ? "skipped" : "ok"} (${e.model}, ${e.ms}ms)`
-									: `$ ${(e.argv ?? []).join(" ").slice(0, 120)} (rc=${e.returncode}, ${e.ms}ms)`}
+									: e.kind === "queued"
+										? "queued"
+										: e.kind === "start"
+											? `start ${e.app}/${e.demo}`
+											: `$ ${(e.argv ?? []).join(" ").slice(0, 120)} (rc=${e.returncode}, ${e.ms}ms)`}
 								{(e.artifacts ?? []).slice(-3).map((a) => (
 									<a
 										key={a}
