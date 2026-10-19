@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { MockBadge } from "../components/AppLayout";
 import { api, apiBase } from "../lib/api";
@@ -55,6 +55,10 @@ export default function CraftPage() {
 	const [lastDemo, setLastDemo] = useState("");
 	const [watch, setWatch] = useState(params.get("watch") === "1");
 	const [events, setEvents] = useState<LiveEvent[]>([]);
+	const [cursor, setCursor] = useState(0);
+	const [playing, setPlaying] = useState(false);
+	const [speed, setSpeed] = useState(1);
+	const [finalResult, setFinalResult] = useState<RunResult | null>(null);
 
 	const demo = craft?.demos.find((d) => d.id === selectedId) ?? craft?.demos[0];
 
@@ -62,6 +66,9 @@ export default function CraftPage() {
 		setRunning(true);
 		setToast("");
 		setEvents([]);
+		setCursor(0);
+		setPlaying(false);
+		setFinalResult(null);
 		setLastDemo(demoId);
 		try {
 			const r = await api<RunResult>("/api/demos/run", {
@@ -86,6 +93,9 @@ export default function CraftPage() {
 		setToast("");
 		setResult(null);
 		setEvents([]);
+		setCursor(0);
+		setFinalResult(null);
+		setPlaying(true);
 		setLastDemo(demoId);
 		try {
 			const response = await fetch(`${apiBase()}/api/demos/stream`, {
@@ -111,14 +121,10 @@ export default function CraftPage() {
 							result?: RunResult;
 						};
 						if (event.kind === "done" && event.result) {
-							setResult(event.result);
-							setToast(
-								event.result.success
-									? "Demo finished - see artifacts below."
-									: `Demo reported: ${event.result.message}`,
-							);
+							setFinalResult(event.result);
 						} else if (event.kind === "error") {
 							setToast(`Stream error: ${event.error}`);
+							setPlaying(false);
 						} else {
 							setEvents((prev) => [
 								...prev,
@@ -135,6 +141,35 @@ export default function CraftPage() {
 			setRunning(false);
 		}
 	}
+
+	function playback() {
+		if (cursor >= events.length) {
+			setCursor(0);
+			setResult(null);
+		}
+		setPlaying(true);
+	}
+
+	useEffect(() => {
+		if (!playing) return;
+		if (cursor >= events.length) {
+			if (finalResult) {
+				setResult(finalResult);
+				setPlaying(false);
+				setToast(
+					finalResult.success
+						? "Demo finished - see artifacts below."
+						: `Demo reported: ${finalResult.message}`,
+				);
+			}
+			return;
+		}
+		const timer = window.setTimeout(
+			() => setCursor((c) => Math.min(c + 1, events.length)),
+			1500 / speed,
+		);
+		return () => window.clearTimeout(timer);
+	}, [playing, cursor, events.length, speed, finalResult]);
 
 	if (!craft)
 		return apps.length === 0 ? (
@@ -299,11 +334,74 @@ export default function CraftPage() {
 					data-testid="live-steps"
 					className="mt-4 rounded border border-amber-900/50 bg-slate-900 p-4 text-xs"
 				>
-					<p className="text-xs uppercase tracking-widest text-amber-400">
-						Building
-					</p>
+					<div className="flex flex-wrap items-center justify-between gap-2">
+						<p className="text-xs uppercase tracking-widest text-amber-400">
+							{playing
+								? "Building"
+								: cursor >= events.length
+									? "Finished"
+									: "Paused"}
+						</p>
+						<div className="flex flex-wrap items-center gap-2">
+							<button
+								type="button"
+								data-testid="playback-play"
+								onClick={playback}
+								className="rounded bg-amber-500 px-2 py-1 font-semibold text-slate-950"
+							>
+								Play
+							</button>
+							<button
+								type="button"
+								data-testid="playback-pause"
+								onClick={() => setPlaying(false)}
+								className="rounded bg-slate-800 px-2 py-1"
+							>
+								Pause
+							</button>
+							<button
+								type="button"
+								data-testid="playback-stop"
+								onClick={() => {
+									setPlaying(false);
+									setCursor(0);
+									setResult(null);
+								}}
+								className="rounded bg-slate-800 px-2 py-1"
+							>
+								Stop
+							</button>
+							<button
+								type="button"
+								data-testid="playback-rewind"
+								onClick={() => {
+									setResult(null);
+									setCursor((c) => Math.max(0, c - 1));
+								}}
+								className="rounded bg-slate-800 px-2 py-1"
+							>
+								Rewind
+							</button>
+							<label className="flex items-center gap-1">
+								Speed
+								<input
+									type="range"
+									data-testid="playback-speed"
+									min={0.25}
+									max={4}
+									step={0.25}
+									value={speed}
+									onChange={(e) => setSpeed(Number(e.target.value))}
+								/>
+							</label>
+							<span>{speed}x</span>
+							<span className="text-slate-400">
+								{cursor}/{events.length}
+							</span>
+						</div>
+					</div>
 					<ul className="mt-2 space-y-1 font-mono text-slate-300">
-						{events.map((e) => (
+						{events.slice(0, cursor).map((e) => (
 							<li key={e.id} className="break-all">
 								{e.kind === "ai"
 									? `AI ${e.skipped ? "skipped" : "ok"} (${e.model}, ${e.ms}ms)`

@@ -1,5 +1,14 @@
 # CHANGELOG.md
 
+## Unreleased (2026-10-20, hands-in playback controls)
+
+The hands-in stream now tapes the run and plays it back under user control:
+Play / Pause / Stop / Rewind, a 0.25x-4x speed slider, and a step counter.
+Default pace is 1.5 s per step at 1x, so a four-step GridCraft build takes six
+seconds instead of flashing past. The final artifacts stay hidden until the tape
+is played out; Stop rewinds to the first step. Live streaming still runs at real
+speed underneath - the controls govern the viewing, not the engine.
+
 ## Unreleased (2026-10-19, IncaCraft removed)
 
 IncaCraft was a joke app, not a wrappee. Removed the registry entry, its
