@@ -28,6 +28,19 @@ interface RunResult {
 	run_dir?: string;
 }
 
+interface LiveEvent {
+	id?: string;
+	kind: string;
+	success?: boolean;
+	skipped?: boolean;
+	model?: string;
+	ms?: number;
+	argv?: string[];
+	returncode?: number;
+	artifacts?: string[];
+	error?: string;
+}
+
 export default function CraftPage() {
 	const { app = "" } = useParams();
 	const { apps } = useBackend();
@@ -39,12 +52,15 @@ export default function CraftPage() {
 	const [topicCustom, setTopicCustom] = useState("");
 	const [selectedId, setSelectedId] = useState("");
 	const [lastDemo, setLastDemo] = useState("");
+	const [watch, setWatch] = useState(false);
+	const [events, setEvents] = useState<LiveEvent[]>([]);
 
 	const demo = craft?.demos.find((d) => d.id === selectedId) ?? craft?.demos[0];
 
 	async function run(demoId: string, topic: string) {
 		setRunning(true);
 		setToast("");
+		setEvents([]);
 		setLastDemo(demoId);
 		try {
 			const r = await api<RunResult>("/api/demos/run", {
@@ -59,6 +75,61 @@ export default function CraftPage() {
 			);
 		} catch (e) {
 			setToast(`Request failed: ${e}`);
+		} finally {
+			setRunning(false);
+		}
+	}
+
+	async function runStream(demoId: string, topic: string) {
+		setRunning(true);
+		setToast("");
+		setResult(null);
+		setEvents([]);
+		setLastDemo(demoId);
+		try {
+			const response = await fetch(`${apiBase()}/api/demos/stream`, {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ app, demo: demoId, topic }),
+			});
+			if (!response.body) throw new Error("no stream body");
+			const reader = response.body.getReader();
+			const decoder = new TextDecoder();
+			let buffer = "";
+			for (;;) {
+				const { done, value } = await reader.read();
+				if (done) break;
+				buffer += decoder.decode(value, { stream: true });
+				let split = buffer.indexOf("\n\n");
+				while (split >= 0) {
+					const chunk = buffer.slice(0, split);
+					buffer = buffer.slice(split + 2);
+					const line = chunk.split("\n").find((l) => l.startsWith("data: "));
+					if (line) {
+						const event = JSON.parse(line.slice(6)) as LiveEvent & {
+							result?: RunResult;
+						};
+						if (event.kind === "done" && event.result) {
+							setResult(event.result);
+							setToast(
+								event.result.success
+									? "Demo finished - see artifacts below."
+									: `Demo reported: ${event.result.message}`,
+							);
+						} else if (event.kind === "error") {
+							setToast(`Stream error: ${event.error}`);
+						} else {
+							setEvents((prev) => [
+								...prev,
+								{ ...event, id: crypto.randomUUID() },
+							]);
+						}
+					}
+					split = buffer.indexOf("\n\n");
+				}
+			}
+		} catch (e) {
+			setToast(`Stream failed: ${e}`);
 		} finally {
 			setRunning(false);
 		}
@@ -183,10 +254,24 @@ export default function CraftPage() {
 							/>
 						</div>
 					)}
+					<label className="mt-3 flex items-center gap-2 text-sm text-slate-300">
+						<input
+							type="checkbox"
+							data-testid="watch-build"
+							checked={watch}
+							onChange={(e) => setWatch(e.target.checked)}
+						/>
+						Watch it build (stream each step)
+					</label>
 					<button
 						type="button"
 						data-testid="craft-run"
-						onClick={() => run(demo.id, topicCustom.trim() || topicPick)}
+						onClick={() =>
+							(watch ? runStream : run)(
+								demo.id,
+								topicCustom.trim() || topicPick,
+							)
+						}
 						disabled={running || !craft.runnable}
 						className="mt-3 rounded bg-amber-500 px-4 py-2 font-semibold text-slate-950 disabled:opacity-40"
 					>
@@ -205,6 +290,37 @@ export default function CraftPage() {
 							engine.
 						</p>
 					)}
+				</div>
+			)}
+
+			{events.length > 0 && (
+				<div
+					data-testid="live-steps"
+					className="mt-4 rounded border border-amber-900/50 bg-slate-900 p-4 text-xs"
+				>
+					<p className="text-xs uppercase tracking-widest text-amber-400">
+						Building
+					</p>
+					<ul className="mt-2 space-y-1 font-mono text-slate-300">
+						{events.map((e) => (
+							<li key={e.id} className="break-all">
+								{e.kind === "ai"
+									? `AI ${e.skipped ? "skipped" : "ok"} (${e.model}, ${e.ms}ms)`
+									: `$ ${(e.argv ?? []).join(" ").slice(0, 120)} (rc=${e.returncode}, ${e.ms}ms)`}
+								{(e.artifacts ?? []).slice(-3).map((a) => (
+									<a
+										key={a}
+										href={`${apiBase()}/api/artifacts/${app}/${lastDemo}/${a}`}
+										target="_blank"
+										rel="noreferrer"
+										className="ml-2 underline"
+									>
+										{a.split("/").pop()}
+									</a>
+								))}
+							</li>
+						))}
+					</ul>
 				</div>
 			)}
 

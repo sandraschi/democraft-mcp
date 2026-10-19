@@ -7,14 +7,18 @@ every route reads the same registry the MCP tool reads.
 from __future__ import annotations
 
 import collections
+import json
 import logging
+import queue
 import shutil
+import threading
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from . import __version__
@@ -145,6 +149,48 @@ def create_app(outbox: Path | None = None) -> FastAPI:
         res = run_demo(req.app, demo_id, box, req.model, topic=req.topic.strip()[:200])
         log("demo", f"{req.app}/{demo_id} success={res.get('success')}")
         return res
+
+    @api.post("/api/demos/stream")
+    def demos_stream(req: DemoRequest):
+        """Run a demo and stream each step as Server-Sent Events.
+
+        Event kinds: ai (local-LLM step), step (one CLI argv + artifacts so
+        far), done (final result), error. The work runs in a thread; the
+        response yields as events arrive, so the webapp can show the artifact
+        before the demo is finished.
+        """
+        a = BY_KEY.get(req.app)
+        demo_id = req.demo or (a.demos[0].id if a and a.demos else "")
+
+        def generate():
+            events: queue.Queue = queue.Queue()
+
+            def work() -> None:
+                try:
+                    res = run_demo(
+                        req.app,
+                        demo_id,
+                        box,
+                        req.model,
+                        topic=req.topic.strip()[:200],
+                        on_step=events.put,
+                    )
+                    events.put({"kind": "done", "result": res})
+                except Exception as exc:  # noqa: BLE001 - reported to the client
+                    events.put({"kind": "error", "error": f"{type(exc).__name__}: {exc}"})
+
+            threading.Thread(target=work, daemon=True).start()
+            while True:
+                event = events.get()
+                yield "data: " + json.dumps(event) + "\n\n"
+                if event.get("kind") in ("done", "error"):
+                    break
+
+        return StreamingResponse(
+            generate(),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        )
 
     @api.get("/api/artifacts/{app}/{demo}/{path:path}")
     def artifact(app: str, demo: str, path: str):

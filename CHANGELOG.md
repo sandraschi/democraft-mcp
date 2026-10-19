@@ -1,5 +1,21 @@
 # CHANGELOG.md
 
+## Unreleased (2026-10-19, transitions + hands-in streaming)
+
+- **Deck transition reel** (`deck/transition-reel`): three AI plates, three real
+  transitions (push, wipe, split). DeckCraft exports the deck, a slide GIF,
+  per-slide PNGs and renders actual transition frames; a 12-frame GIF is
+  assembled from them. Verified: 5 CLI steps, 22 artifacts, mid-wipe frame shows
+  the incoming slide over the outgoing one.
+- **Hands-in streaming**: `POST /api/demos/stream` runs a demo in a thread and
+  emits SSE events (`ai`, `step`, `done`, `error`) as each CLI step finishes,
+  with artifacts so far. Webapp gets a "Watch it build" checkbox that reads the
+  stream and lists steps plus artifact links live. Verified against GridCraft:
+  6 events, 4 steps.
+- **Pelican brief replaced**: the photo/vector benchmark now asks for a
+  three-colour lighthouse poster instead of the bicycle pelican; titles say
+  "poster benchmark". IDs unchanged so outbox paths stay stable.
+
 ## Unreleased (2026-10-19, PhotoCraft batch demo)
 
 `photo/batch-treatment`: PhotoCraft's batch/actions engine applied one recorded

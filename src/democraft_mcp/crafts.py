@@ -522,8 +522,18 @@ APPS: tuple[CraftApp, ...] = (
         "Slides: sample render + scripted runs.",
         (
             Demo(
+                "transition-reel",
+                "Demo 1: transition reel (three AI plates)",
+                "Three slides, three transitions (push, wipe, split). DeckCraft "
+                "exports the deck, a slide GIF, per-slide PNGs, and renders the "
+                "real transition frames; a 12-frame GIF is assembled from those "
+                "frames. Deterministic, no AI step.",
+                "",
+                "cli",
+            ),
+            Demo(
                 "pitch-deck",
-                "Demo 1: pitch deck (pick a subject)",
+                "Demo 2: pitch deck (pick a subject)",
                 "Render the sample deck to PNGs; local AI outlines 5 slides "
                 "for your subject, saved as outline.md.",
                 "Outline a 5-slide pitch deck for 'democraft-mcp' as JSON "
@@ -736,10 +746,11 @@ APPS: tuple[CraftApp, ...] = (
             ),
             Demo(
                 "pelican-photo",
-                "Demo 3: pelican benchmark (pick a subject)",
+                "Demo 3: poster benchmark (pick a subject)",
                 "Same plain prompt on every contender model, each rendered "
                 "through convert/info. Quality deltas are the models'.",
-                "Draw an SVG of a pelican riding a bicycle. Raw SVG only.",
+                "Draw an SVG travel poster: a lighthouse in a storm, three flat "
+                "colours, bold silhouette, no text. Raw SVG only.",
                 "cli",
                 topics=PHOTO_TOPICS,
                 topic_prompt="Draw an SVG of {topic}. Raw SVG only.",
@@ -754,10 +765,11 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "pelican-vector",
-                "Demo 1: pelican benchmark (pick a subject)",
+                "Demo 1: poster benchmark (pick a subject)",
                 "Same plain prompt on every contender model, each rendered "
                 "through run/export. Compare with photo.",
-                "Draw an SVG of a pelican riding a bicycle. Raw SVG only.",
+                "Draw an SVG travel poster: a lighthouse in a storm, three flat "
+                "colours, bold silhouette, no text. Raw SVG only.",
                 "cli",
                 topics=VECTOR_TOPICS,
                 topic_prompt="Draw an SVG of {topic}. Raw SVG only.",
@@ -1009,7 +1021,12 @@ def cli_run(exe: Path, argv: list[str], cwd: Path, timeout_s: int = CLI_TIMEOUT_
 
 
 def run_demo(
-    app_key: str, demo_id: str, outbox: Path, model: str = DEFAULT_MODEL, topic: str = ""
+    app_key: str,
+    demo_id: str,
+    outbox: Path,
+    model: str = DEFAULT_MODEL,
+    topic: str = "",
+    on_step=None,
 ) -> dict:
     """Run a demo end to end. Returns dialogic {success, message, ...}."""
     app = BY_KEY.get(app_key)
@@ -1062,6 +1079,16 @@ def run_demo(
         else (demo.topic_prompt.format(topic=topic) if demo.topic_prompt else demo.ai_prompt),
         model,
     )
+    if on_step:
+        on_step(
+            {
+                "kind": "ai",
+                "success": bool(ai.get("success")),
+                "skipped": bool(ai.get("skipped")),
+                "model": ai.get("model"),
+                "ms": ai.get("ms"),
+            }
+        )
     steps: list[dict] = []
     artifacts: list[str] = []
 
@@ -1090,6 +1117,19 @@ def run_demo(
         for f in sorted(run_dir.rglob("*")):
             if f.is_file() and str(f) not in artifacts:
                 artifacts.append(str(f))
+        if on_step:
+            on_step(
+                {
+                    "kind": "step",
+                    "argv": argv,
+                    "success": bool(res.get("success")),
+                    "returncode": res.get("returncode"),
+                    "ms": res.get("ms"),
+                    "artifacts": [
+                        str(Path(a).relative_to(run_dir)).replace("\\", "/") for a in artifacts
+                    ][-12:],
+                }
+            )
         return res
 
     k = app_key
@@ -1184,6 +1224,82 @@ def run_demo(
         iso = _freecad_iso(run_dir, steps)
         if isinstance(iso, dict) and iso.get("success"):
             do(["convert", "iso.svg", "iso.png"])
+    elif k == "deck" and demo.id == "transition-reel":
+        import json as _json
+        import shutil
+
+        root = Path(__file__).resolve().parents[2]
+        plates = [
+            ("demon-christ.jpg", "Demon Christ", "push"),
+            ("postapoc-city.jpg", "Postapocalyptic City", "wipe"),
+            ("ruins.jpg", "Ruins", "split"),
+        ]
+        for name, _title, _kind in plates:
+            src = root / "assets" / "ai-art" / name
+            if not src.is_file():
+                return {
+                    "success": False,
+                    "message": f"demo asset missing: {src}",
+                    "error_type": "asset_missing",
+                    "recovery": "Restore assets/ai-art/.",
+                }
+            shutil.copy2(src, run_dir / name)
+
+        cmds = ['slide.delete={"index":0}']
+        for name, title, _kind in plates:
+            cmds.append(f"slide.new={_json.dumps({'layout': 'titleOnly', 'title': title})}")
+            cmds.append(
+                f"insert.picture={_json.dumps({'path': name, 'rect': [80, 150, 420, 280]})}"
+            )
+        for i, (_n, _t, kind) in enumerate(plates):
+            cmds.append(
+                f"transition.set={_json.dumps({'kind': kind, 'duration': 900, 'index': i})}"
+            )
+        argv = ["run"]
+        for c in cmds:
+            argv += ["--cmd", c]
+        argv += [
+            "--save",
+            "reel.deckcraft",
+            "--export",
+            "reel.gif",
+            "--export-params",
+            _json.dumps({"width": "large", "secondsPerSlide": 2, "loop": True}),
+        ]
+        do(argv)
+        do(["convert", "reel.deckcraft", "reel.pptx"])
+        do(["render", "reel.deckcraft", "--all", "slides"])
+        for i in (1, 2):
+            do(
+                [
+                    "render-transition",
+                    "reel.deckcraft",
+                    "--slide",
+                    str(i),
+                    "--t",
+                    "0,0.2,0.4,0.6,0.8,1",
+                    f"tr{i}.png",
+                ]
+            )
+        from PIL import Image
+
+        frames = []
+        for i in (1, 2):
+            for t in ("0.000", "0.200", "0.400", "0.600", "0.800", "1.000"):
+                p = run_dir / f"tr{i}-t{t}.png"
+                if p.is_file():
+                    with Image.open(p) as im:
+                        frames.append(im.convert("P", palette=Image.ADAPTIVE))
+        if frames:
+            frames[0].save(
+                run_dir / "transitions.gif",
+                save_all=True,
+                append_images=frames[1:],
+                duration=[120] * (len(frames) - 1) + [1500],
+                loop=0,
+                disposal=2,
+            )
+            artifacts.append(str(run_dir / "transitions.gif"))
     elif k == "deck":
         do(["render", "--sample", "--all", "slides"])
     elif k == "design":
