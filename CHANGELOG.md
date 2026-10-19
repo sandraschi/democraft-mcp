@@ -1,5 +1,31 @@
 # CHANGELOG.md
 
+## 0.1.2b1 - 0.1 beta (2026-10-20)
+
+First beta of the demo hub. 13 Craft apps, real headless runs, a job engine with
+provenance and cancellation, a Depot that keeps every run, and hands-in playback
+with speed control. Ships no engines: install the apps from
+<https://getartcraft.com> first (`docs/ONBOARDING.md`).
+
+Highlights since 0.1.1: PhotoCraft plate-grade and batch demos; DeckCraft
+transition reel (real intro/outro frames); Grid data-to-chart with streaming;
+job engine (`/api/jobs`, SSE events, cancel, retry); Depot cards/list with
+history and source links; Hands-in page with taped playback; IncaCraft removed.
+
+## Unreleased (2026-10-20, Phase 2 job engine)
+
+`src/democraft_mcp/jobs.py`: bounded two-worker queue, per-job run directory
+(`outbox/<app>/<demo>/jobs/<id>/`), `job.json` + `events.jsonl`, SSE
+replay-then-follow, cancel at the step boundary, retry as a new job, artifact
+serving per job. API: `POST/GET /api/jobs`, `GET /api/jobs/{id}`,
+`GET /api/jobs/{id}/events`, `POST /api/jobs/{id}/cancel|retry`,
+`GET /api/jobs/{id}/artifacts/...`. The hands-in player now runs a job and can
+Cancel it; its tape includes queued/start/step/done. Tests: lifecycle +
+provenance, cancel-while-queued, retry. Verified end to end through TestClient:
+create -> running -> succeeded, capabilities.txt served. Caveats recorded in
+`docs/PLAN.md`: in-memory queue (no crash recovery), cancel lands at the step
+boundary, Depot not yet listing jobs.
+
 ## Unreleased (2026-10-20, hands-in playback controls)
 
 The hands-in stream now tapes the run and plays it back under user control:

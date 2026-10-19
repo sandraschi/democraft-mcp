@@ -4,19 +4,29 @@ Demo fleet for the ArtCraft family. One page per Craft app, every demo a real
 headless CLI/MCP run plus a real local-LLM step. No fake pixels: account-gated
 engine features return `needs_account`, missing wrappees return `wrappee_missing`.
 
-![FastMCP 3.4.4+](https://img.shields.io/badge/FastMCP-3.4.4%2B-blue) ![MCPB](https://img.shields.io/badge/packaging-MCPB-green) ![Windows CI](https://img.shields.io/badge/CI-Windows-lightgrey)
+![FastMCP 3.4.4+](https://img.shields.io/badge/FastMCP-3.4.4%2B-blue) ![MCPB](https://img.shields.io/badge/packaging-MCPB-green) ![Windows CI](https://img.shields.io/badge/CI-Windows-lightgrey) ![beta](https://img.shields.io/badge/status-0.1%20beta-orange)
+
+## Before you start - install the Craft apps
+
+**This repo ships no engines.** Every demo shells to an installed
+`<Craft>\*-cli.exe`; without the apps the API returns `wrappee_missing` and the
+page tells you to install. Thirteen apps: CAD, Deck, Design, Effect, Fig, Film,
+Grid, Light, PDF, Photo, Sound, Vector, Word.
+
+- **Get the apps:** <https://getartcraft.com> (official site / installer)
+- **Per-app install notes, licences and sanity checks:** `docs/ONBOARDING.md`
+- The vault is not bundled: demos work in `outbox/` and never modify your
+  Craft documents.
 
 ## Preview
 
-Same prompt ("pelican riding a bike" as AI-drafted SVG), two real pipelines:
+Real engine output, not mockups. PhotoCraft grades a public-domain plate through
+Black & White, Curves and Gradient Map adjustment layers; DeckCraft renders a
+real wipe-transition frame between two AI plates.
 
-| PhotoCraft (`convert` + `info`) | VectorCraft (`run` + `export`) |
+| PhotoCraft plate grade | DeckCraft wipe (t = 0.4) |
 |---|---|
-| ![pelican via PhotoCraft](docs/screenshots/pelican-photo.png) | ![pelican via VectorCraft](docs/screenshots/pelican-vector.png) |
-
-Plus a real EffectCraft demo-project still (1920x1080):
-
-![EffectCraft title-card still](docs/screenshots/effect-still.png)
+| ![plate grade](docs/screenshots/plate-grade.jpg) | ![wipe](docs/screenshots/transition-wipe.jpg) |
 
 Shapes are AI-drawn, pixels are engine-rendered - the compare page shows both
 engine logs side by side.
@@ -32,7 +42,7 @@ Craft documents - they work in `outbox/` only.
 
 ## Quickstart
 
-1. Install the Craft apps (see `docs/ONBOARDING.md` - wrappees are the product).
+1. Install the Craft apps from <https://getartcraft.com> (see `docs/ONBOARDING.md` - wrappees are the product).
 2. Double-click `start.bat` (backend :11246, frontend :11245).
 3. Open the Dashboard, pick a Craft page, run demo #1.
 

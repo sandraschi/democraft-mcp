@@ -27,6 +27,12 @@ with all apps absent.
 
 ## Phase 2 — Job engine
 
+**Status: implemented 2026-10-20** (`src/democraft_mcp/jobs.py`). Bounded pool
+(two workers), per-job run dir under `outbox/<app>/<demo>/jobs/<id>/`, `job.json`
+and `events.jsonl` provenance, SSE replay-then-follow, cancel at the step
+boundary, retry as a new job. Not yet: crash recovery (queue is in memory),
+mid-CLI kill, and job listing in the Depot UI.
+
 Demos are synchronous subprocess calls. Real work needs a queue.
 
 - Job manifest: id, app, operation, params, started/finished, exit code,
