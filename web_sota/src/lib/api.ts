@@ -40,6 +40,7 @@ export interface CraftDemo {
 	blurb: string;
 	requires: string;
 	topics?: string[];
+	live?: boolean;
 }
 export interface CraftApp {
 	key: string;
