@@ -737,12 +737,23 @@ APPS: tuple[CraftApp, ...] = (
                 "cli",
             ),
             Demo(
+                "lighthouse-live",
+                "Demo 3: lighthouse, drawn live",
+                "Nine stroke stages on a blank 1200x800 canvas - sea, tower, bands, "
+                "gallery, lantern, beam, rocks, waves, rain. Each stage saves and "
+                "exports a frame, so hands-in playback is the drawing itself. No AI.",
+                "",
+                "cli",
+                live=True,
+            ),
+            Demo(
                 "pelican-photo",
-                "Demo 3: poster benchmark (pick a subject)",
-                "Same plain prompt on every contender model, each rendered "
-                "through convert/info. Quality deltas are the models'.",
-                "Draw an SVG travel poster: a lighthouse in a storm, three flat "
-                "colours, bold silhouette, no text. Raw SVG only.",
+                "Demo 4: pelican benchmark (Simon Willison)",
+                "Willison's deliberately awkward prompt: a pelican on a bicycle "
+                "is hard to draw and easy to compare. Same prompt on every "
+                "contender model, rendered through convert/info; the ugliness is "
+                "the measurement.",
+                "Draw an SVG of a pelican riding a bicycle. Raw SVG only.",
                 "cli",
                 topics=PHOTO_TOPICS,
                 topic_prompt="Draw an SVG of {topic}. Raw SVG only.",
@@ -757,11 +768,10 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "pelican-vector",
-                "Demo 1: poster benchmark (pick a subject)",
-                "Same plain prompt on every contender model, each rendered "
-                "through run/export. Compare with photo.",
-                "Draw an SVG travel poster: a lighthouse in a storm, three flat "
-                "colours, bold silhouette, no text. Raw SVG only.",
+                "Demo 1: pelican benchmark (Simon Willison)",
+                "Willison's deliberately awkward prompt, rendered through "
+                "run/export. Compare with photo: same prompt, different pipeline.",
+                "Draw an SVG of a pelican riding a bicycle. Raw SVG only.",
                 "cli",
                 topics=VECTOR_TOPICS,
                 topic_prompt="Draw an SVG of {topic}. Raw SVG only.",
@@ -1652,6 +1662,34 @@ def run_demo(
         do(["convert", "plate-grade.pcraft", "plate-grade.png"])
         do(["convert", "plate-grade.pcraft", "plate-grade.jpg", "--quality", "88"])
         do(["info", "plate-grade.pcraft"])
+    elif k == "photo" and demo.id == "lighthouse-live":
+        from .strokes import LIGHTHOUSE_STAGES
+
+        previous = ""
+        for index, stage in enumerate(LIGHTHOUSE_STAGES, 1):
+            out = f"stage-{index:02d}.pcraft"
+            argv = ["run"]
+            if not previous:
+                argv += [
+                    "--new",
+                    json.dumps({"width": 1200, "height": 800, "background": "#0b1220"}),
+                ]
+            else:
+                argv += [previous]
+            for stroke in stage["strokes"]:
+                params = {
+                    "points": stroke,
+                    "size": stage["size"],
+                    "hardness": 0.85,
+                    "opacity": stage["opacity"],
+                    "color": stage["color"],
+                }
+                argv += ["--cmd", "paint.stroke", "--params", json.dumps(params)]
+            argv += ["--out", out]
+            do(argv)
+            do(["convert", out, f"frame-{index:02d}.png"])
+            previous = out
+        do(["info", previous])
     elif k == "photo" and demo.id == "batch-treatment":
         root = Path(__file__).resolve().parents[2]
         actions = root / "assets" / "photo" / "batch-actions.json"
