@@ -12,10 +12,13 @@ Verified 2026-10-15: no generative verbs in any of the 13 CLIs.
 
 from __future__ import annotations
 
+import json
 import os
+import shutil
 import subprocess
 import time
 from dataclasses import dataclass, field, replace
+from datetime import UTC, datetime
 from pathlib import Path
 
 PROGRAM_FILES = Path(os.getenv("DEMOCRAFT_PROGRAM_FILES", r"C:\Program Files"))
@@ -33,6 +36,7 @@ class Demo:
     requires: str = "cli"  # cli | artcraft-account
     topics: tuple[str, ...] = ()  # combobox choices; empty = free text only
     topic_prompt: str = ""  # {topic} template used when a topic is picked; else ai_prompt
+    live: bool = False  # worth watching step by step ("hands-in")
 
 
 def _grid_data(ai: dict, topic: str) -> dict:
@@ -530,6 +534,7 @@ APPS: tuple[CraftApp, ...] = (
                 "frames. Deterministic, no AI step.",
                 "",
                 "cli",
+                live=True,
             ),
             Demo(
                 "pitch-deck",
@@ -641,6 +646,7 @@ APPS: tuple[CraftApp, ...] = (
                 topic_prompt="Return JSON only about '{topic}': {{\"title\": str, "
                 '"headers": [3-5 short column names], "rows": [[6-10 rows of '
                 "short plain values, numbers bare]]}}. No prose.",
+                live=True,
             ),
         ),
     ),
@@ -734,6 +740,7 @@ APPS: tuple[CraftApp, ...] = (
                 "Write a three-line restoration note for a 19th-century painting "
                 "plate: tone, grain, contrast. No other text.",
                 "cli",
+                live=True,
             ),
             Demo(
                 "batch-treatment",
@@ -1020,6 +1027,32 @@ def cli_run(exe: Path, argv: list[str], cwd: Path, timeout_s: int = CLI_TIMEOUT_
         }
 
 
+def _write_manifest(
+    run_dir: Path,
+    app_key: str,
+    demo_id: str,
+    topic: str,
+    started_at: str,
+    inputs: list[str] | None = None,
+) -> None:
+    """Provenance for one run: what ran, when, and which files it touched."""
+    files = sorted(
+        str(f.relative_to(run_dir)).replace("\\", "/")
+        for f in run_dir.rglob("*")
+        if f.is_file() and f.name != "run.json"
+    )
+    data = {
+        "app": app_key,
+        "demo": demo_id,
+        "topic": topic,
+        "started": started_at,
+        "finished": datetime.now(UTC).isoformat(timespec="seconds"),
+        "artifacts": files,
+        "inputs": inputs or [],
+    }
+    (run_dir / "run.json").write_text(json.dumps(data, indent=1), encoding="utf-8")
+
+
 def run_demo(
     app_key: str,
     demo_id: str,
@@ -1053,6 +1086,18 @@ def run_demo(
         }
     outbox.mkdir(parents=True, exist_ok=True)
     run_dir = outbox / app_key / demo_id
+    started_at = datetime.now(UTC).isoformat(timespec="seconds")
+    # keep every run: archive the previous contents before this one starts
+    if run_dir.exists() and any(run_dir.iterdir()):
+        history = outbox / "_history" / app_key / demo_id
+        history.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.fromtimestamp(run_dir.stat().st_mtime).strftime("%Y%m%d_%H%M%S")
+        dest = history / stamp
+        suffix = 1
+        while dest.exists():
+            dest = history / f"{stamp}-{suffix}"
+            suffix += 1
+        shutil.move(str(run_dir), str(dest))
     run_dir.mkdir(parents=True, exist_ok=True)
 
     if demo.id == "capability-map":
@@ -1062,6 +1107,7 @@ def run_demo(
             res = cli_run(app.cli_path, ["--help"], run_dir)
             text = (res.get("stdout") or "") + (res.get("stderr") or "")
         (run_dir / "capabilities.txt").write_text(text[:200000] or "(no output)", encoding="utf-8")
+        _write_manifest(run_dir, app_key, demo_id, topic, started_at, [])
         arts = [str(p) for p in sorted(run_dir.rglob("*")) if p.is_file()]
         return {
             "success": bool(res.get("success")),
@@ -1091,6 +1137,7 @@ def run_demo(
         )
     steps: list[dict] = []
     artifacts: list[str] = []
+    inputs: list[str] = []
 
     if (
         demo.topics
@@ -1226,7 +1273,6 @@ def run_demo(
             do(["convert", "iso.svg", "iso.png"])
     elif k == "deck" and demo.id == "transition-reel":
         import json as _json
-        import shutil
 
         root = Path(__file__).resolve().parents[2]
         plates = [
@@ -1244,6 +1290,7 @@ def run_demo(
                     "recovery": "Restore assets/ai-art/.",
                 }
             shutil.copy2(src, run_dir / name)
+            inputs.append(name)
 
         cmds = ['slide.delete={"index":0}']
         for name, title, _kind in plates:
@@ -1602,6 +1649,8 @@ def run_demo(
             }
         if ai.get("success") and ai.get("text"):
             (run_dir / "brief.md").write_text(ai["text"][:2000], encoding="utf-8")
+        shutil.copy2(src, run_dir / "source.jpg")
+        inputs.append("source.jpg")
         do(
             [
                 "run",
@@ -1732,6 +1781,7 @@ def run_demo(
         else:
             steps[-1].setdefault("note", "FreeCAD wall failed - brief.md is the demo")
 
+    _write_manifest(run_dir, app_key, demo_id, topic, started_at, inputs)
     artifacts = sorted({str(f) for f in run_dir.rglob("*") if f.is_file()})
     ok_cli = all(s.get("success") for s in steps) if steps else False
     msg = f"{app.name}/{demo.id}: {len(steps)} CLI steps, {len(artifacts)} artifacts"

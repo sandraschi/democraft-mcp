@@ -134,6 +134,7 @@ def create_app(outbox: Path | None = None) -> FastAPI:
                             "blurb": d.blurb,
                             "requires": d.requires,
                             "topics": list(d.topics),
+                            "live": d.live,
                         }
                         for d in a.demos
                     ],
@@ -218,26 +219,67 @@ def create_app(outbox: Path | None = None) -> FastAPI:
 
     @api.get("/api/runs")
     def runs() -> dict:
-        items = []
+        def entry(run_dir: Path, app: str, demo: str, run_id: str) -> dict:
+            manifest: dict = {}
+            manifest_file = run_dir / "run.json"
+            if manifest_file.is_file():
+                try:
+                    manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+                except (OSError, ValueError):
+                    manifest = {}
+            files = sorted(
+                str(f.relative_to(run_dir)).replace("\\", "/")
+                for f in run_dir.rglob("*")
+                if f.is_file() and f.name != "run.json"
+            )
+            return {
+                "app": app,
+                "demo": demo,
+                "run_id": run_id,
+                "started": manifest.get("started"),
+                "topic": manifest.get("topic", ""),
+                "artifacts": len(files),
+                "files": files[:20],
+                "inputs": manifest.get("inputs", []),
+                "latest": run_id == "latest",
+            }
+
+        items: list[dict] = []
         if box.is_dir():
             for app_dir in sorted(box.iterdir()):
-                if not app_dir.is_dir():
+                if not app_dir.is_dir() or app_dir.name == "_history":
                     continue
                 for run_dir in sorted(app_dir.iterdir()):
-                    if not run_dir.is_dir():
+                    if run_dir.is_dir():
+                        items.append(entry(run_dir, app_dir.name, run_dir.name, "latest"))
+            history = box / "_history"
+            if history.is_dir():
+                for app_dir in sorted(history.iterdir()):
+                    if not app_dir.is_dir():
                         continue
-                    files = sorted(
-                        str(f.relative_to(run_dir)) for f in run_dir.rglob("*") if f.is_file()
-                    )
-                    items.append(
-                        {
-                            "app": app_dir.name,
-                            "demo": run_dir.name,
-                            "artifacts": len(files),
-                            "files": files[:20],
-                        }
-                    )
+                    for demo_dir in sorted(app_dir.iterdir()):
+                        if not demo_dir.is_dir():
+                            continue
+                        for run_dir in sorted(demo_dir.iterdir()):
+                            if run_dir.is_dir():
+                                items.append(
+                                    entry(run_dir, app_dir.name, demo_dir.name, run_dir.name)
+                                )
+        items.sort(key=lambda x: (x.get("started") or "", x["app"], x["demo"]), reverse=True)
         return {"success": True, "runs": items}
+
+    @api.get("/api/history/{app}/{demo}/{run_id}/{path:path}")
+    def history_artifact(app: str, demo: str, run_id: str, path: str):
+        """Serve an archived run artifact (outbox/_history/...)."""
+        from fastapi.responses import FileResponse
+
+        root = (box / "_history" / app / demo / run_id).resolve()
+        target = (root / path).resolve()
+        if root != target and root not in target.parents:
+            return {"success": False, "message": "path escapes the run dir"}
+        if not target.is_file():
+            return {"success": False, "message": "artifact not found"}
+        return FileResponse(target)
 
     @api.get("/api/tools")
     def tools() -> dict:
