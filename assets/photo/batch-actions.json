@@ -1,0 +1,30 @@
+{
+  "steps": [
+    {
+      "command": "image.adjustments.blackWhite",
+      "params": {
+        "reds": 45,
+        "yellows": 70,
+        "greens": 35,
+        "cyans": 55,
+        "blues": 10,
+        "magentas": 60
+      }
+    },
+    {
+      "command": "image.adjustments.curves",
+      "params": {
+        "points": [[0, 8], [64, 50], [128, 128], [192, 204], [255, 244]]
+      }
+    },
+    {
+      "command": "filter.noise.addNoise",
+      "params": {
+        "amount": 5,
+        "distribution": "gaussian",
+        "monochromatic": true,
+        "seed": 11
+      }
+    }
+  ]
+}
