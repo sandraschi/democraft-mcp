@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { MockBadge } from "../components/AppLayout";
 import { api, apiBase } from "../lib/api";
 import { useBackend } from "../store/backend";
@@ -43,6 +43,7 @@ interface LiveEvent {
 
 export default function CraftPage() {
 	const { app = "" } = useParams();
+	const [params] = useSearchParams();
 	const { apps } = useBackend();
 	const craft = apps.find((a) => a.key === app);
 	const [running, setRunning] = useState(false);
@@ -50,9 +51,9 @@ export default function CraftPage() {
 	const [toast, setToast] = useState("");
 	const [topicPick, setTopicPick] = useState("");
 	const [topicCustom, setTopicCustom] = useState("");
-	const [selectedId, setSelectedId] = useState("");
+	const [selectedId, setSelectedId] = useState(params.get("demo") ?? "");
 	const [lastDemo, setLastDemo] = useState("");
-	const [watch, setWatch] = useState(false);
+	const [watch, setWatch] = useState(params.get("watch") === "1");
 	const [events, setEvents] = useState<LiveEvent[]>([]);
 
 	const demo = craft?.demos.find((d) => d.id === selectedId) ?? craft?.demos[0];
