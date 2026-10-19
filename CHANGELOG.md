@@ -1,5 +1,14 @@
 # CHANGELOG.md
 
+## Unreleased (2026-10-19, PhotoCraft batch demo)
+
+`photo/batch-treatment`: PhotoCraft's batch/actions engine applied one recorded
+action (Black & White, Curves, Gaussian grain in `assets/photo/batch-actions.json`)
+to three 2024 AI generations from the local archive, re-encoded as JPEG. Proves
+the batch path that plate-grade does not: three inputs, one action, three outputs,
+per-file warnings surfaced. Inputs and provenance in `assets/ai-art/CREDITS.md`
+(model/seed/prompt were not recorded with the files).
+
 ## Unreleased (2026-10-19, PhotoCraft flagship demo)
 
 `photo/plate-grade`: a real public-domain plate (Böcklin, *Isle of the Dead*,

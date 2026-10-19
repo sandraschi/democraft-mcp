@@ -726,8 +726,17 @@ APPS: tuple[CraftApp, ...] = (
                 "cli",
             ),
             Demo(
+                "batch-treatment",
+                "Demo 2: batch treatment (three 2024 AI plates)",
+                "PhotoCraft's batch/actions engine: one recorded action (Black & "
+                "White, Curves, Gaussian grain) applied to three AI generations "
+                "from 2024, re-encoded as JPEG. Deterministic, no AI step.",
+                "",
+                "cli",
+            ),
+            Demo(
                 "pelican-photo",
-                "Demo 2: pelican benchmark (pick a subject)",
+                "Demo 3: pelican benchmark (pick a subject)",
                 "Same plain prompt on every contender model, each rendered "
                 "through convert/info. Quality deltas are the models'.",
                 "Draw an SVG of a pelican riding a bicycle. Raw SVG only.",
@@ -1500,6 +1509,33 @@ def run_demo(
         do(["convert", "plate-grade.pcraft", "plate-grade.png"])
         do(["convert", "plate-grade.pcraft", "plate-grade.jpg", "--quality", "88"])
         do(["info", "plate-grade.pcraft"])
+    elif k == "photo" and demo.id == "batch-treatment":
+        root = Path(__file__).resolve().parents[2]
+        actions = root / "assets" / "photo" / "batch-actions.json"
+        src_dir = root / "assets" / "ai-art"
+        if not actions.is_file() or not src_dir.is_dir():
+            return {
+                "success": False,
+                "message": "batch demo assets missing",
+                "error_type": "asset_missing",
+                "recovery": "Restore assets/photo/batch-actions.json and assets/ai-art/.",
+            }
+        do(
+            [
+                "batch",
+                "--actions",
+                str(actions),
+                "--in",
+                str(src_dir),
+                "--out",
+                "batch-out",
+                "--format",
+                "jpg",
+                "--quality",
+                "88",
+            ]
+        )
+        do(["info", "batch-out/demon-christ.jpg"])
     elif k in ("photo", "vector"):
         # Pelican benchmark: the SAME plain prompt on every contender model,
         # each rendered through the real engine pipeline. Quality deltas are
