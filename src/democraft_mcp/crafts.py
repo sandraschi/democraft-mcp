@@ -462,18 +462,6 @@ PHOTO_TOPICS: tuple[str, ...] = (
 VECTOR_TOPICS: tuple[str, ...] = PHOTO_TOPICS
 
 
-INCA_TOPICS: tuple[str, ...] = (
-    "Sacsayhuaman course",
-    "Terrace retaining wall",
-    "Garden dry-stone wall",
-    "Fire pit ring",
-    "Stair cheek walls",
-    "Well head",
-    "Field gate posts",
-    "Sun temple plinth",
-)
-
-
 @dataclass(frozen=True)
 class CraftApp:
     key: str
@@ -493,9 +481,6 @@ class CraftApp:
         return self.cli_path.is_file()
 
     def runnable(self) -> bool:
-        """A demo can run without its wrappee when a fallback engine exists."""
-        if self.key == "inca":
-            return FREECADCMD.is_file()
         return self.installed()
 
 
@@ -783,25 +768,6 @@ APPS: tuple[CraftApp, ...] = (
             ),
         ),
     ),
-    CraftApp(
-        "inca",
-        "IncaCraft",
-        "incacraft-cli.exe",
-        "3D dry-stone masonry (PROPOSED wrappee - FreeCAD engine until it exists).",
-        (
-            Demo(
-                "dry-stone-wall",
-                "Demo 1: dry-stone course (pick a wall)",
-                "Ashlar courses generated as real FreeCAD solids, TechDraw "
-                "isometric export. No mortar, no fakes.",
-                "Describe a dry-stone wall program as JSON {title, courses, notes}. No prose.",
-                "cli",
-                topics=INCA_TOPICS,
-                topic_prompt="Describe a dry-stone '{topic}' wall program as JSON "
-                "{{title, courses, notes}}. No prose.",
-            ),
-        ),
-    ),
 )
 
 HERO: dict[str, dict[str, object]] = {
@@ -917,15 +883,6 @@ HERO: dict[str, dict[str, object]] = {
         "gaps": (
             "No DOCX import/export in the catalog",
             "No image-placement verbs",
-        ),
-    },
-    "inca": {
-        "clone_of": "Autodesk Inventor / FreeCAD",
-        "description": "Parametric CAD demos with a FreeCAD fallback when the "
-        "IncaCraft wrappee is absent.",
-        "gaps": (
-            "Wrappee not installed on this machine (FreeCAD fallback)",
-            "Parametric feature tree limited to the demo set",
         ),
     },
 }
@@ -1153,7 +1110,6 @@ def run_demo(
             "sound",
             "pdf",
             "light",
-            "inca",
         )
     ):
         (run_dir / "brief.md").write_text(ai["text"][:4000], encoding="utf-8")
@@ -1748,39 +1704,6 @@ def run_demo(
             )
         if rendered:
             do(["info", rendered[0]])
-    elif k == "inca":
-        import hashlib
-        import random as _random
-
-        # Dry-stone wall: deterministic from the topic (same topic, same wall).
-        # Courses of varied ashlar blocks, hairline joints, no mortar.
-        rng = _random.Random(int(hashlib.sha256(topic.encode()).hexdigest(), 16) % (2**32))
-        widths = [1.4, 1.1, 1.7, 0.9, 1.25, 1.55, 1.0, 1.85]
-        heights = [0.7, 0.65, 0.6]
-        boxes: list[tuple[tuple, tuple]] = []
-        z = 0.0
-        for course, h in enumerate(heights):
-            x = -rng.uniform(0.0, 0.5) if course % 2 else 0.0
-            while x < 6.0:
-                w = rng.choice(widths)
-                boxes.append(((round(x, 3), 0.0, round(z, 3)), (round(w - 0.02, 3), 0.6, h)))
-                x += w
-            z = round(z + h, 3)
-        _freecad_bridge_probe(steps)
-        ok = _freecad_iso_boxes(run_dir, steps, "wall", boxes, scale=40.0)
-        if ok:
-            _fit_viewbox(run_dir / "wall.svg", run_dir / "wall-fragments.svg")
-        if ok:
-            import shutil as _shutil
-
-            _shutil.copy(run_dir / "wall.svg", run_dir / "wall-iso.svg")
-            # CADCraft renders TechDraw fragments faithfully (PhotoCraft fills them black).
-            cad = PROGRAM_FILES / "CADCraft" / "cadcraft-cli.exe"
-            if cad.is_file():
-                steps.append(cli_run(cad, ["convert", "wall-iso.svg", "wall-iso.png"], run_dir))
-        else:
-            steps[-1].setdefault("note", "FreeCAD wall failed - brief.md is the demo")
-
     _write_manifest(run_dir, app_key, demo_id, topic, started_at, inputs)
     artifacts = sorted({str(f) for f in run_dir.rglob("*") if f.is_file()})
     ok_cli = all(s.get("success") for s in steps) if steps else False

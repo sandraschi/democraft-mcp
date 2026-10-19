@@ -18,9 +18,9 @@ def _needs(app_key: str):
     )
 
 
-def test_registry_has_14_apps():
-    assert len(APPS) == 14
-    assert len(BY_KEY) == 14
+def test_registry_has_13_apps():
+    assert len(APPS) == 13
+    assert len(BY_KEY) == 13
     for a in APPS:
         assert a.demos, f"{a.key} has no demo"
 
@@ -77,7 +77,7 @@ def test_api_crafts_lists_13():
     client = TestClient(build_api())
     r = client.get("/api/crafts")
     assert r.status_code == 200
-    assert len(r.json()["apps"]) == 14
+    assert len(r.json()["apps"]) == 13
 
 
 def test_prompts_meet_3_4_100():
