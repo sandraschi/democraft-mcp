@@ -120,6 +120,9 @@ def create_app(outbox: Path | None = None) -> FastAPI:
                     "installed": a.installed(),
                     "runnable": a.runnable(),
                     "tagline": a.tagline,
+                    "clone_of": a.clone_of,
+                    "description": a.description,
+                    "gaps": list(a.gaps),
                     "demos": [
                         {
                             "id": d.id,

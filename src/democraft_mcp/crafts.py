@@ -15,7 +15,7 @@ from __future__ import annotations
 import os
 import subprocess
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 PROGRAM_FILES = Path(os.getenv("DEMOCRAFT_PROGRAM_FILES", r"C:\Program Files"))
@@ -477,6 +477,9 @@ class CraftApp:
     cli: str  # exe name under C:\Program Files\<Name>\
     tagline: str
     demos: tuple[Demo, ...] = field(default_factory=tuple)
+    clone_of: str = ""
+    description: str = ""
+    gaps: tuple[str, ...] = ()
 
     @property
     def cli_path(self) -> Path:
@@ -762,6 +765,151 @@ APPS: tuple[CraftApp, ...] = (
     ),
 )
 
+HERO: dict[str, dict[str, object]] = {
+    "cad": {
+        "clone_of": "AutoCAD / BricsCAD",
+        "description": "2D drafting with a scripted command surface: metric plans, "
+        "elevations, room schedules, DXF/PDF/SVG export.",
+        "gaps": (
+            "No AutoLISP dialect (generic scripting only)",
+            "2D engine: no true isometric or 3D solids",
+            "No dynamic-block parametrics in the catalog",
+        ),
+    },
+    "deck": {
+        "clone_of": "Microsoft PowerPoint / Keynote",
+        "description": "Slide decks rendered headless from the CLI, with an AI outline "
+        "step that writes the brief before the engine draws.",
+        "gaps": (
+            "No Office round-trip verified (pptx import/export)",
+            "No third-party template ecosystem",
+        ),
+    },
+    "design": {
+        "clone_of": "Adobe InDesign",
+        "description": "Page layout with threaded stories, facing pages, styles, "
+        "tables, footnotes, PDF and EPUB export.",
+        "gaps": (
+            "No master-page command surface (parent pages are script-level)",
+            "No cloud collaboration or review",
+            "Book sync is script-level, not a UI workflow",
+        ),
+    },
+    "effect": {
+        "clone_of": "Adobe After Effects",
+        "description": "Motion-graphics projects rendered headless: keyframes, "
+        "expressions, cameras, audio, export.",
+        "gaps": (
+            "No particle system in the command catalog",
+            "No third-party plugin ecosystem",
+        ),
+    },
+    "fig": {
+        "clone_of": "Figma",
+        "description": "Interface design with frames, auto layout, components, "
+        "variants, styles and prototyping.",
+        "gaps": (
+            "No multiplayer editing",
+            "No community/plugin marketplace",
+            "No cloud file history",
+        ),
+    },
+    "film": {
+        "clone_of": "Adobe Premiere Pro",
+        "description": "Timeline editing with keyframes, audio, transitions, color, "
+        "subtitles and proxy workflows.",
+        "gaps": (
+            "No hardware-accelerated proxy pipeline verified",
+            "No third-party plugin ecosystem",
+        ),
+    },
+    "grid": {
+        "clone_of": "Microsoft Excel",
+        "description": "Workbook engine: formulas, charts, pivots, macros, import and export.",
+        "gaps": (
+            "No VBA/macro compatibility",
+            "No xlsx round-trip verified",
+        ),
+    },
+    "light": {
+        "clone_of": "Blender / Cinema 4D (lighting)",
+        "description": "Scene lighting and rendering from the command surface.",
+        "gaps": (
+            "No material or HDRI authoring in the catalog",
+            "No bake pipeline",
+        ),
+    },
+    "pdf": {
+        "clone_of": "Adobe Acrobat Pro",
+        "description": "PDF operations from the CLI: the working set the other "
+        "crafts hand their exports to.",
+        "gaps": (
+            "No command catalog (the CLI has no `commands` verb)",
+            "Verbs beyond the shipped set are not discoverable from the app",
+        ),
+    },
+    "photo": {
+        "clone_of": "Adobe Photoshop",
+        "description": "Raster editing with layers, masks, filters, RAW handling and batch export.",
+        "gaps": (
+            "No generative fill (editor, not generator)",
+            "No cloud asset sync",
+        ),
+    },
+    "sound": {
+        "clone_of": "Ableton Live / Pro Tools",
+        "description": "Session audio: MIDI, mixing, effects, recording and export.",
+        "gaps": (
+            "No VST plugin hosting verified",
+            "No cloud collaboration",
+        ),
+    },
+    "vector": {
+        "clone_of": "Adobe Illustrator",
+        "description": "Vector paths, gradients, text and SVG/PDF export.",
+        "gaps": (
+            "No boolean path operations in the catalog",
+            "No plugin ecosystem",
+        ),
+    },
+    "word": {
+        "clone_of": "Microsoft Word",
+        "description": "Document editing with styles, tables and PDF export.",
+        "gaps": (
+            "No DOCX import/export in the catalog",
+            "No image-placement verbs",
+        ),
+    },
+    "inca": {
+        "clone_of": "Autodesk Inventor / FreeCAD",
+        "description": "Parametric CAD demos with a FreeCAD fallback when the "
+        "IncaCraft wrappee is absent.",
+        "gaps": (
+            "Wrappee not installed on this machine (FreeCAD fallback)",
+            "Parametric feature tree limited to the demo set",
+        ),
+    },
+}
+
+CAPABILITY_DEMO = Demo(
+    "capability-map",
+    "Demo 2: capability map",
+    "Dumps the app's real command catalog (or --help fallback) to capabilities.txt. "
+    "No AI step: this is the surface the other demos choose from.",
+    "",
+)
+
+APPS = tuple(
+    replace(
+        app,
+        clone_of=str(HERO.get(app.key, {}).get("clone_of", "")),
+        description=str(HERO.get(app.key, {}).get("description", app.tagline)),
+        gaps=tuple(HERO.get(app.key, {}).get("gaps", ())),
+        demos=(*app.demos, CAPABILITY_DEMO),
+    )
+    for app in APPS
+)
+
 BY_KEY = {a.key: a for a in APPS}
 
 _FALLBACK_SVG = (
@@ -807,7 +955,13 @@ def cli_run(exe: Path, argv: list[str], cwd: Path, timeout_s: int = CLI_TIMEOUT_
     started = time.time()
     try:
         p = subprocess.run(
-            [str(exe), *argv], cwd=str(cwd), capture_output=True, text=True, timeout=timeout_s
+            [str(exe), *argv],
+            cwd=str(cwd),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout_s,
         )
         return {
             "success": p.returncode == 0,
@@ -863,6 +1017,24 @@ def run_demo(
     outbox.mkdir(parents=True, exist_ok=True)
     run_dir = outbox / app_key / demo_id
     run_dir.mkdir(parents=True, exist_ok=True)
+
+    if demo.id == "capability-map":
+        res = cli_run(app.cli_path, ["commands"], run_dir)
+        text = (res.get("stdout") or "") + (res.get("stderr") or "")
+        if not res.get("success") or not text.strip():
+            res = cli_run(app.cli_path, ["--help"], run_dir)
+            text = (res.get("stdout") or "") + (res.get("stderr") or "")
+        (run_dir / "capabilities.txt").write_text(text[:200000] or "(no output)", encoding="utf-8")
+        arts = [str(p) for p in sorted(run_dir.rglob("*")) if p.is_file()]
+        return {
+            "success": bool(res.get("success")),
+            "message": f"{app.name} capability map written ({len(text)} chars).",
+            "ai_step": {"skipped": True, "model": model, "reason": "no AI step"},
+            "cli_steps": [res],
+            "artifacts": arts,
+            "all_cli_ok": bool(res.get("success")),
+            "run_dir": str(run_dir),
+        }
 
     ai = ai_step(
         demo.ai_prompt
