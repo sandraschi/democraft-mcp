@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## Unreleased (2026-10-19, PhotoCraft flagship demo)
+
+`photo/plate-grade`: a real public-domain plate (Böcklin, *Isle of the Dead*,
+1880) through PhotoCraft's non-destructive stack — Black & White, Curves and
+Gradient Map adjustment layers — saved as `.pcraft` with the layer tree intact,
+then flattened to PNG and JPG. Deterministic recipe; the AI step only writes the
+restoration note. Asset bundled at `assets/photo/isle-of-the-dead.jpg` (247 KB,
+PD). Verified end to end: 4 CLI steps, 4 artifacts, four layers in the `.pcraft`.
+Topic-test relaxed to "every app has at least one topic-driven demo"; deterministic
+demos (plate-grade, capability map) are allowed.
+
 ## Unreleased (2026-10-19, craft pages hero)
 
 Per-app pages now open with a hero: the app, the tool it is a local alternative

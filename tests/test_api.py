@@ -136,12 +136,17 @@ def test_grid_fig_topics_exposed():
     assert len(apps["fig"]["demos"][0]["topics"]) == 12
 
 
-def test_all_demos_have_topics():
+def test_each_app_has_a_topic_driven_demo():
     from democraft_mcp.crafts import APPS as _APPS
 
+    # Deterministic demos (plate-grade, capability-map) carry no topics by
+    # design; every app must still offer at least one topic-driven demo.
     for a in _APPS:
-        assert len(a.demos[0].topics) >= 8, a.key
-        assert a.demos[0].topic_prompt, a.key
+        topic_demos = [d for d in a.demos if d.topics]
+        assert topic_demos, a.key
+        for d in topic_demos:
+            assert len(d.topics) >= 8, (a.key, d.id)
+            assert d.topic_prompt, (a.key, d.id)
 
 
 def test_inca_wall_runs_headless(tmp_path):

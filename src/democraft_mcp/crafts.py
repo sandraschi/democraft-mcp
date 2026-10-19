@@ -712,11 +712,22 @@ APPS: tuple[CraftApp, ...] = (
         "photo",
         "PhotoCraft",
         "photocraft-cli.exe",
-        "Photo: convert + info pipeline.",
+        "Photo: non-destructive adjustment stacks, masks, filters, batch.",
         (
             Demo(
+                "plate-grade",
+                "Demo 1: plate restoration (Böcklin, 1880)",
+                "A real public-domain plate through PhotoCraft's non-destructive "
+                "stack: Black & White, Curves and Gradient Map adjustment layers, "
+                "saved as .pcraft with the layer tree intact, then flattened to "
+                "PNG/JPG. Deterministic recipe; the AI step only writes the note.",
+                "Write a three-line restoration note for a 19th-century painting "
+                "plate: tone, grain, contrast. No other text.",
+                "cli",
+            ),
+            Demo(
                 "pelican-photo",
-                "Demo 1: pelican benchmark (pick a subject)",
+                "Demo 2: pelican benchmark (pick a subject)",
                 "Same plain prompt on every contender model, each rendered "
                 "through convert/info. Quality deltas are the models'.",
                 "Draw an SVG of a pelican riding a bicycle. Raw SVG only.",
@@ -893,7 +904,7 @@ HERO: dict[str, dict[str, object]] = {
 
 CAPABILITY_DEMO = Demo(
     "capability-map",
-    "Demo 2: capability map",
+    "Capability map",
     "Dumps the app's real command catalog (or --help fallback) to capabilities.txt. "
     "No AI step: this is the surface the other demos choose from.",
     "",
@@ -1453,6 +1464,42 @@ def run_demo(
             cmds = cli_run(app.cli_path, ["commands"], run_dir)
         steps.append(cmds)
         do(["run", "--import", "grade-in.png", "develop.auto", "app.export", "path=grade-out.png"])
+    elif k == "photo" and demo.id == "plate-grade":
+        src = Path(__file__).resolve().parents[2] / "assets" / "photo" / "isle-of-the-dead.jpg"
+        if not src.is_file():
+            return {
+                "success": False,
+                "message": f"demo asset missing at {src}",
+                "error_type": "asset_missing",
+                "recovery": (
+                    "Restore assets/photo/isle-of-the-dead.jpg (public domain, Böcklin 1880)."
+                ),
+            }
+        if ai.get("success") and ai.get("text"):
+            (run_dir / "brief.md").write_text(ai["text"][:2000], encoding="utf-8")
+        do(
+            [
+                "run",
+                str(src),
+                "--cmd",
+                "layer.newAdjustmentLayer.blackWhite",
+                "--params",
+                '{"reds":45,"yellows":70,"greens":35,"cyans":55,"blues":10,"magentas":60}',
+                "--cmd",
+                "layer.newAdjustmentLayer.curves",
+                "--params",
+                '{"points":[[0,10],[64,52],[128,128],[192,202],[255,242]]}',
+                "--cmd",
+                "layer.newAdjustmentLayer.gradientMap",
+                "--params",
+                '{"stops":[[0,"#0b1020"],[0.5,"#8a7656"],[1,"#f4e8d0"]]}',
+                "--out",
+                "plate-grade.pcraft",
+            ]
+        )
+        do(["convert", "plate-grade.pcraft", "plate-grade.png"])
+        do(["convert", "plate-grade.pcraft", "plate-grade.jpg", "--quality", "88"])
+        do(["info", "plate-grade.pcraft"])
     elif k in ("photo", "vector"):
         # Pelican benchmark: the SAME plain prompt on every contender model,
         # each rendered through the real engine pipeline. Quality deltas are
