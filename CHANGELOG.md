@@ -20,10 +20,12 @@ Supermassive (VST3) and bounces it wet. Nine seconds, three CLI steps, plus a
 waveform and piano-roll frame. No AI writes the notes.
 
 Finding, recorded rather than papered over: **VST3 effects process, VST3
-instruments do not (yet).** Valhalla audibly changes the bounce. Surge XT and
-Dexed, set as track instruments, rendered silence on the same clip while the
-built-in synth played; the earlier "Surge bounced -17.7 dB" claim was the demo
-mix, not the plugin. `docs/FREE_VST3_SET.md` corrected.
+instruments do not (yet) - live or headless.** Valhalla audibly changes the
+bounce in both modes. Surge XT and Dexed, set as track instruments, rendered
+silence on the same clip while the built-in synth played; the earlier "Surge
+bounced -17.7 dB" claim was the demo mix, not the plugin. Reproduced in the live
+app over `--control 11250`, so it is host-side, not an offline-render artefact.
+Filed as BUG-082. `docs/FREE_VST3_SET.md` corrected.
 
 ## Unreleased (2026-10-20, lighthouse hands-in demo)
 

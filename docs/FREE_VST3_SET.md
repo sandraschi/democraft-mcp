@@ -43,9 +43,11 @@ before redistributing.
 - **VST3 effects process.** Valhalla Supermassive inserted on a melody track
   changes the bounce (dry vs wet), and the effect chain is audible.
 - **VST3 instruments are unresolved.** Surge XT and Dexed, set as track
-  instruments on a MIDI clip, rendered silence in SoundCraft's headless bounce;
-  the built-in subtractive synth on the same clip is audible. Do not claim
-  instrument hosting works until a patch-loaded instrument renders audio.
+  instruments on a MIDI clip, rendered silence in SoundCraft's headless bounce
+  **and in the live app over its control channel**; the built-in subtractive
+  synth on the same clip is audible. Suite VST3 effects process. Tracked as
+  **BUG-082** (`mcp-central-docs/troubleshooting/details/`). Do not claim VST3
+  instrument hosting works in SoundCraft until a patch-loaded instrument renders.
 - Reaper: `vstpath` and `vstpath64` in `%APPDATA%\REAPER\reaper.ini` now
   include the per-user folder. Restart Reaper, then
   Options > Preferences > Plug-ins > VST > **Re-scan**.
