@@ -12,6 +12,19 @@ transition reel (real intro/outro frames); Grid data-to-chart with streaming;
 job engine (`/api/jobs`, SSE events, cancel, retry); Depot cards/list with
 history and source links; Hands-in page with taped playback; IncaCraft removed.
 
+## Unreleased (2026-10-20, SoundCraft melody hands-in demo)
+
+`sound/melody-vst3`: writes a 16-note MIDI file, imports it into SoundCraft,
+solos the new track, bounces it dry on the built-in synth, inserts Valhalla
+Supermassive (VST3) and bounces it wet. Nine seconds, three CLI steps, plus a
+waveform and piano-roll frame. No AI writes the notes.
+
+Finding, recorded rather than papered over: **VST3 effects process, VST3
+instruments do not (yet).** Valhalla audibly changes the bounce. Surge XT and
+Dexed, set as track instruments, rendered silence on the same clip while the
+built-in synth played; the earlier "Surge bounced -17.7 dB" claim was the demo
+mix, not the plugin. `docs/FREE_VST3_SET.md` corrected.
+
 ## Unreleased (2026-10-20, lighthouse hands-in demo)
 
 `photo/lighthouse-live`: thirteen stroke stages on a blank 1200x800 canvas, drawn

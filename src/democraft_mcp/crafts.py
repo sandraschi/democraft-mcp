@@ -642,8 +642,18 @@ APPS: tuple[CraftApp, ...] = (
         "Audio: demo project inspect + bounce.",
         (
             Demo(
+                "melody-vst3",
+                "Demo 1: melody, dry vs VST3 reverb",
+                "Imports a 16-note MIDI melody, bounces it dry on the built-in "
+                "synth, then inserts Valhalla Supermassive (VST3) and bounces it "
+                "wet. Frames: waveform and piano roll. No AI writes the notes.",
+                "",
+                "cli",
+                live=True,
+            ),
+            Demo(
                 "ident-jingle",
-                "Demo 1: Midnight Groove bounce (~56s)",
+                "Demo 2: Midnight Groove bounce (~56s)",
                 "Bundled demo project rendered locally to WAV. No AI composes "
                 "music; the AI step writes only the words describing it.",
                 "Brief the bounced groove (tempo, key, layers heard) as JSON. No prose.",
@@ -1022,6 +1032,22 @@ def _write_manifest(
 
 class DemoCancelled(Exception):
     """Raised between CLI steps when a job was cancelled."""
+
+
+def _find_vst3(cli: Path, work: Path, name: str) -> str:
+    """Look up a VST3 class id by display name; fall back to the built-in synth."""
+    res = cli_run(cli, ["run", "--demo", "--cmd", "engine.vst3_plugins"], work)
+    for line in (res.get("stdout") or "").splitlines():
+        if not line.startswith("engine.vst3_plugins:"):
+            continue
+        try:
+            plugins = json.loads(line.split(":", 1)[1])
+        except ValueError:
+            continue
+        for plugin in plugins:
+            if plugin.get("name") == name:
+                return str(plugin.get("id"))
+    return "subtractive_synth"
 
 
 def run_demo(
@@ -1549,6 +1575,71 @@ def run_demo(
         else:
             final = "report-chart.xlsx"
         do(["cat", final, "--csv"])
+    elif k == "sound" and demo.id == "melody-vst3":
+        from .midi_util import render_piano_roll, render_waveform, write_melody
+
+        notes = write_melody(run_dir / "melody.mid")
+        reverb = _find_vst3(app.cli_path, run_dir, "ValhallaSupermassive")
+        do(
+            [
+                "run",
+                "--demo",
+                "--cmd",
+                'event.tempo={"bpm":112}',
+                "--cmd",
+                'file.import_midi={"path":"melody.mid","at":0}',
+                "--save",
+                "stage1.scraft",
+            ]
+        )
+        do(
+            [
+                "run",
+                "--in",
+                "stage1.scraft",
+                "--cmd",
+                'mix.solo={"tracks":["MIDI 1"],"value":true,"exclusive":true}',
+                "--bounce",
+                "melody-dry.wav",
+                "--start",
+                "0",
+                "--end",
+                "9",
+                "--save",
+                "stage2.scraft",
+            ]
+        )
+        do(
+            [
+                "run",
+                "--in",
+                "stage2.scraft",
+                "--cmd",
+                f'mix.insert={{"track":"MIDI 1","plugin":"{reverb}","slot":"a"}}',
+                "--bounce",
+                "melody-wet.wav",
+                "--start",
+                "0",
+                "--end",
+                "9",
+                "--save",
+                "stage3.scraft",
+            ]
+        )
+        if (run_dir / "melody-dry.wav").is_file():
+            render_waveform(run_dir / "melody-dry.wav", run_dir / "waveform.png")
+            render_piano_roll(run_dir / "piano-roll.png")
+            artifacts.extend([str(run_dir / "waveform.png"), str(run_dir / "piano-roll.png")])
+        if reverb == "subtractive_synth":
+            steps.append(
+                {
+                    "argv": ["vst3", "ValhallaSupermassive"],
+                    "success": True,
+                    "returncode": 0,
+                    "ms": 0,
+                    "note": f"Valhalla not found; {notes} notes bounced dry",
+                }
+            )
     elif k == "sound":
         do(["run", "--demo", "--inspect"])
         bounced = dict(

@@ -40,10 +40,12 @@ before redistributing.
 
 - SoundCraft scans both the per-user folder and `C:\Program Files\Common
   Files\VST3`: `engine.vst3_plugins` lists 11 plugins.
-- Surge XT loaded on an instrument track and rendered two seconds of audio
-  (`peak -17.7 dB`), so the scan is not just a file listing.
-- Valhalla Supermassive loaded on an aux track and bounced one second of audio;
-  Cardinal loaded as an instrument and did the same.
+- **VST3 effects process.** Valhalla Supermassive inserted on a melody track
+  changes the bounce (dry vs wet), and the effect chain is audible.
+- **VST3 instruments are unresolved.** Surge XT and Dexed, set as track
+  instruments on a MIDI clip, rendered silence in SoundCraft's headless bounce;
+  the built-in subtractive synth on the same clip is audible. Do not claim
+  instrument hosting works until a patch-loaded instrument renders audio.
 - Reaper: `vstpath` and `vstpath64` in `%APPDATA%\REAPER\reaper.ini` now
   include the per-user folder. Restart Reaper, then
   Options > Preferences > Plug-ins > VST > **Re-scan**.
