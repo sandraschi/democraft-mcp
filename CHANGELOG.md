@@ -12,6 +12,16 @@ transition reel (real intro/outro frames); Grid data-to-chart with streaming;
 job engine (`/api/jobs`, SSE events, cancel, retry); Depot cards/list with
 history and source links; Hands-in page with taped playback; IncaCraft removed.
 
+## Unreleased (2026-10-20, lighthouse hands-in demo)
+
+`photo/lighthouse-live`: thirteen stroke stages on a blank 1200x800 canvas, drawn
+with `paint.stroke` point streams (sea, haze, tower, bands, gallery, lantern,
+roof, beam, glow, door, rocks, waves, rain). Each stage saves a `.pcraft` and
+exports a frame, so hands-in playback is the drawing itself - 27 CLI steps, no
+AI. Pelican benchmark restored (photo + vector) with the Willison credit: it is
+a measurement, not a showcase; changing the prompt would have broken
+comparability.
+
 ## Unreleased (2026-10-20, Phase 2 job engine)
 
 `src/democraft_mcp/jobs.py`: bounded two-worker queue, per-job run directory

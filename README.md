@@ -24,9 +24,14 @@ Real engine output, not mockups. PhotoCraft grades a public-domain plate through
 Black & White, Curves and Gradient Map adjustment layers; DeckCraft renders a
 real wipe-transition frame between two AI plates.
 
-| PhotoCraft plate grade | DeckCraft wipe (t = 0.4) |
-|---|---|
-| ![plate grade](docs/screenshots/plate-grade.jpg) | ![wipe](docs/screenshots/transition-wipe.jpg) |
+| PhotoCraft plate grade | DeckCraft wipe (t = 0.4) | PhotoCraft lighthouse (stroke demo) |
+|---|---|---|
+| ![plate grade](docs/screenshots/plate-grade.jpg) | ![wipe](docs/screenshots/transition-wipe.jpg) | ![lighthouse](docs/screenshots/lighthouse-live.jpg) |
+
+The lighthouse is drawn stroke by stroke in PhotoCraft (13 stages, no AI), the
+way hands-in playback shows it. The pelican-on-a-bike prompt is kept separately
+as Simon Willison's benchmark: deliberately awkward to draw, easy to compare
+across models - not a showcase.
 
 Shapes are AI-drawn, pixels are engine-rendered - the compare page shows both
 engine logs side by side.
@@ -45,6 +50,12 @@ Craft documents - they work in `outbox/` only.
 1. Install the Craft apps from <https://getartcraft.com> (see `docs/ONBOARDING.md` - wrappees are the product).
 2. Double-click `start.bat` (backend :11246, frontend :11245).
 3. Open the Dashboard, pick a Craft page, run demo #1.
+
+## Free VST3 set
+
+SoundCraft (and Reaper, once its path is set) can use a curated free set
+installed per-user: Surge XT, Surge XT Effects, Dexed, and the four Dragonfly
+reverbs. Details, licences and re-scan steps: `docs/FREE_VST3_SET.md`.
 
 ## Stack
 
