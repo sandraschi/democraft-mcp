@@ -19,6 +19,8 @@ C:\Users\sandr\AppData\Local\Programs\Common\VST3
 | Dragonfly Room Reverb | Effect | 3.2.10 | same | small/medium rooms |
 | Dragonfly Plate Reverb | Effect | 3.2.10 | same | plates |
 | Dragonfly Early Reflections | Effect | 3.2.10 | same | ER-only, pairs with the others |
+| Valhalla Supermassive | Effect | 5.0.0 | valhalladsp.com (free) | 22 reverb/echo modes, the "massive space" one; installed to Program Files\Common Files\VST3 |
+| Cardinal | Instrument + FX | 26.02 | github.com/DISTRHO/Cardinal (winget) | VCV-Rack-based modular playground, ~1.1 GB; three VST3s: Cardinal, Cardinal Synth, Cardinal FX |
 
 All four Dragonfly plugins are separate VST3s, so they can sit on different
 sends. All are open source; check each upstream repo for the exact licence
@@ -36,10 +38,12 @@ before redistributing.
 
 ## Verified
 
-- SoundCraft scans the per-user folder automatically: `engine.vst3_plugins`
-  lists all seven.
+- SoundCraft scans both the per-user folder and `C:\Program Files\Common
+  Files\VST3`: `engine.vst3_plugins` lists 11 plugins.
 - Surge XT loaded on an instrument track and rendered two seconds of audio
   (`peak -17.7 dB`), so the scan is not just a file listing.
+- Valhalla Supermassive loaded on an aux track and bounced one second of audio;
+  Cardinal loaded as an instrument and did the same.
 - Reaper: `vstpath` and `vstpath64` in `%APPDATA%\REAPER\reaper.ini` now
   include the per-user folder. Restart Reaper, then
   Options > Preferences > Plug-ins > VST > **Re-scan**.
@@ -47,18 +51,23 @@ before redistributing.
 ## Other DAWs
 
 Add `%LOCALAPPDATA%\Programs\Common\VST3` to the plugin search path. VST3 hosts
-that only scan `C:\Program Files\Common Files\VST3` will not see these without
-that path, and the machine-wide folder is not writable without elevation.
+that only scan `C:\Program Files\Common Files\VST3` will still see Valhalla and
+Cardinal (machine-wide), but not Surge/Dexed/Dragonfly.
 
 ## Worth adding later (all need an installer or a big download)
 
 | Plugin | Why | Catch |
 |---|---|---|
-| Cardinal | modular playground, the "crazy" one | portable zip is ~1.1 GB |
-| Valhalla Supermassive | best free halls/delay, tiny CPU | installer (admin) |
 | Vital | spectral-warp synth, free tier | installer/account |
 | ChowKick / BYOD | kick synth / build-your-own distortion | installers |
 | SFizz | SFZ sampler | the win64 release ships no VST3 (checked 1.2.3) |
+
+## Notes
+
+- Cardinal writes scan/initialisation logs to stdout, so tooling that expects
+  pure JSON from SoundCraft should filter lines by prefix (`engine.vst3_plugins:`).
+- Surge XT here is a nightly build (1.4.0). The stable installer needs
+  elevation and replaces it in Program Files.
 
 ## Remove
 

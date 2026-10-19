@@ -53,9 +53,10 @@ Craft documents - they work in `outbox/` only.
 
 ## Free VST3 set
 
-SoundCraft (and Reaper, once its path is set) can use a curated free set
-installed per-user: Surge XT, Surge XT Effects, Dexed, and the four Dragonfly
-reverbs. Details, licences and re-scan steps: `docs/FREE_VST3_SET.md`.
+SoundCraft (and Reaper, once its path is set) can use a curated free set:
+Surge XT, Surge XT Effects, Dexed, the four Dragonfly reverbs, Valhalla
+Supermassive, and Cardinal (modular). Details, licences and re-scan steps:
+`docs/FREE_VST3_SET.md`.
 
 ## Stack
 
