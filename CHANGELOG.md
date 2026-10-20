@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## Unreleased (2026-10-20, Studio embedding)
+
+`/studio` embeds GridCraft's **web build** in an iframe through the app's
+same-origin `?host=parent` bridge: the page hands it a CSV, receives
+`gridcraft:save` bytes, and tracks `dirty`/`failed`. This is UI embedding, not
+the control channel - the web build has no TCP control port. The wasm bundle is
+fetched by `scripts/fetch-gridcraft-web.ps1` into gitignored
+`web_sota/public/gridcraft-web/` (~19 MB). Chrome stays visible until upstream
+exposes `?chrome=0`; asked on PR #1877. Verified: tsc + biome, production build,
+static bundle present; the frame is not interactively browser-tested yet.
+
 ## Unreleased (2026-10-20, flows)
 
 Multi-app flows: twelve seeded chains across the 13 apps, stored as JSON and

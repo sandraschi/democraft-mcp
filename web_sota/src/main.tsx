@@ -15,6 +15,7 @@ import Logs from "./pages/Logs";
 import Onboarding from "./pages/Onboarding";
 import Settings from "./pages/Settings";
 import Skills from "./pages/Skills";
+import Studio from "./pages/Studio";
 import Tools from "./pages/Tools";
 import "./index.css";
 
@@ -29,6 +30,7 @@ createRoot(rootEl).render(
 					<Route path="depot" element={<Depot />} />
 					<Route path="inbox" element={<Navigate to="/depot" replace />} />
 					<Route path="hands-in" element={<HandsIn />} />
+					<Route path="studio" element={<Studio />} />
 					<Route path="flows" element={<Flows />} />
 					<Route path="flows/new" element={<FlowEditor />} />
 					<Route path="flows/:id" element={<FlowDetail />} />

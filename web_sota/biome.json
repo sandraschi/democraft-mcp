@@ -6,6 +6,7 @@
 			"**",
 			"!dist",
 			"!node_modules",
+			"!public/gridcraft-web",
 			"!test-results",
 			"!playwright-report"
 		]

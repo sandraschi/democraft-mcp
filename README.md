@@ -82,6 +82,22 @@ the UI (`/flows/new`). Blocked flows say why (FilmCraft timeline, SoundCraft VST
 instruments). Seed catalog: `src/democraft_mcp/flows.py`; design notes:
 `mcp-central-docs/patterns/CRAFT_MULTI_APP_FLOWS.md`.
 
+## Studio (embedded GridCraft)
+
+`/studio` embeds GridCraft's **web build** in an iframe through the app's
+same-origin `?host=parent` bridge: the page hands it a CSV, receives
+`gridcraft:save` bytes, and shows `dirty`/`failed` state. This is real UI
+embedding, not the control channel - the web build has no TCP control port.
+
+```powershell
+pwsh scripts/fetch-gridcraft-web.ps1   # downloads gridcraft-web-<version>.zip
+```
+
+The wasm bundle lands in `web_sota/public/gridcraft-web/` (gitignored, ~19 MB
+uncompressed). Chrome is visible: the `?host=parent` mode does not yet hide
+GridCraft's title bar and File tab; that needs the small `?chrome=0` follow-up
+discussed on upstream PR #1877.
+
 ## Stack
 
 Python 3.11+ (uv) - FastMCP 3.4.4+ - FastAPI + Pydantic v2 - Uvicorn -
