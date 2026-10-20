@@ -8,6 +8,8 @@ web_sota/dist/
 src-tauri/target/
 src-tauri/binaries/
 mcpb/src/
+mcpb/assets/
+mcpb/.mcpbignore
 data/
 *.sqlite3
 *.db*

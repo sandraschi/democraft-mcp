@@ -9,5 +9,3 @@ target/
 .env
 __pycache__/
 *.pyc
-# Staging artifact (rebuilt by scripts/mcpb-pack.ps1 on every pack) - never ships.
-mcpb/

@@ -1,0 +1,28 @@
+{
+  "manifest_version": "0.2",
+  "name": "democraft-mcp",
+  "version": "0.2.0b2",
+  "description": "Demo fleet for the ArtCraft family (13 apps): real headless CLI runs, a job engine with provenance, a Depot of every run, and hands-in playback. Ships no engines - install the apps from getartcraft.com first.",
+  "author": { "name": "Sandra Schipal" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sandraschi/democraft-mcp"
+  },
+  "server": {
+    "type": "python",
+    "entry_point": "src/democraft_mcp/mcp_stdio.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["run", "--directory", "${__dirname}", "python", "-m", "democraft_mcp.mcp_stdio"],
+      "env": {
+        "PYTHONPATH": "${__dirname}/src",
+        "PYTHONUNBUFFERED": "1"
+      }
+    }
+  },
+  "tools": [
+    { "name": "craft", "description": "Portmanteau: list_apps, app_status, run_demo, craft_commands, ollama_models, ai_flow, help, shutdown" },
+    { "name": "show_apps_prefab_card", "description": "Prefab card: the 13-app registry with installed/runnable state" },
+    { "name": "show_demo_prefab_card", "description": "Prefab card: one demo's last artifacts and engine log" }
+  ]
+}
