@@ -52,6 +52,31 @@ def test_craft_tool_unknown_app_is_structured():
 
 
 @_needs("cad")
+def test_focus_is_reported_in_result_and_manifest(tmp_path, monkeypatch):
+    from democraft_mcp import crafts
+
+    monkeypatch.setattr(
+        crafts, "ensure_foreground", lambda cli: {"ok": True, "window": "CADCraft", "fake": True}
+    )
+    res = run_demo("cad", "capability-map", tmp_path, focus=True)
+    assert res["success"] is True
+    assert res["focus"]["window"] == "CADCraft"
+    manifest = json.loads((tmp_path / "cad" / "capability-map" / "run.json").read_text("utf-8"))
+    assert manifest["focus"]["ok"] is True
+
+
+@_needs("cad")
+def test_focus_is_off_by_default(tmp_path, monkeypatch):
+    from democraft_mcp import crafts
+
+    called = []
+    monkeypatch.setattr(crafts, "ensure_foreground", lambda cli: called.append(cli))
+    res = run_demo("cad", "capability-map", tmp_path)
+    assert res["focus"] is None
+    assert called == []
+
+
+@_needs("cad")
 def test_cad_demo_runs_headless(tmp_path):
     res = run_demo("cad", "house-plan", tmp_path)
     assert res["success"] is True
