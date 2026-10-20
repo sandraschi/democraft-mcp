@@ -10,14 +10,21 @@ export default function Dashboard() {
 	const [kpis, setKpis] = useState<{ label: string; value: number | string }[]>(
 		[],
 	);
+	const [flowsPreview, setFlowsPreview] = useState<
+		{ id: string; name: string; status: string }[]
+	>([]);
 	const [loading, setLoading] = useState(true);
 	const [failed, setFailed] = useState(false);
 	useEffect(() => {
 		refresh();
 		refreshLlm();
-		api<{ kpis: { label: string; value: number | string }[] }>("/api/dashboard")
+		api<{
+			kpis: { label: string; value: number | string }[];
+			flows_preview?: { id: string; name: string; status: string }[];
+		}>("/api/dashboard")
 			.then((j) => {
 				setKpis(j.kpis ?? []);
+				setFlowsPreview(j.flows_preview ?? []);
 				setLoading(false);
 			})
 			.catch(() => {
@@ -26,12 +33,15 @@ export default function Dashboard() {
 			});
 	}, [refresh, refreshLlm]);
 	const llmOk = providers.some((p) => p.ok);
+	const kpiValue = (label: string) =>
+		kpis.find((k) => k.label === label)?.value ?? "-";
 	return (
 		<div>
 			<h1 className="text-3xl font-bold">Demo the whole Craft family.</h1>
 			<p className="mt-2 text-slate-300">
-				One page per Craft app. Every demo runs the real headless CLI plus a
-				local-LLM step.
+				One page per Craft app, real headless demos, a job engine with
+				provenance, and twelve readymade multi-app flows you can run or edit.
+				Every demo shells to the installed CLI - no mock pixels.
 			</p>
 			<div
 				data-testid="dashboard"
@@ -75,6 +85,13 @@ export default function Dashboard() {
 				>
 					Run the CAD house plan
 				</Link>
+				<Link
+					to="/flows"
+					data-testid="flows-cta"
+					className="rounded bg-slate-800 px-5 py-2"
+				>
+					Browse flows
+				</Link>
 				<Link to="/help" className="rounded border border-slate-700 px-5 py-2">
 					How it works
 				</Link>
@@ -90,6 +107,70 @@ export default function Dashboard() {
 					{missing.length > 4 ? "..." : ""}) - install them to clear MOCK badges
 				</Link>
 			)}
+			<div className="mt-6 grid gap-3 md:grid-cols-3">
+				<Link
+					to="/flows"
+					className="rounded border border-slate-800 bg-slate-900 p-4 hover:border-amber-500/50"
+				>
+					<p className="text-xs uppercase tracking-widest text-amber-400">
+						Multi-app
+					</p>
+					<p className="mt-1 text-lg font-semibold">Flows</p>
+					<p className="text-sm text-slate-300">
+						{kpiValue("Flows")} readymade chains - grade, lay out, assemble -
+						with a CRUD step editor.
+					</p>
+				</Link>
+				<Link
+					to="/hands-in"
+					className="rounded border border-slate-800 bg-slate-900 p-4 hover:border-amber-500/50"
+				>
+					<p className="text-xs uppercase tracking-widest text-amber-400">
+						Watch it build
+					</p>
+					<p className="mt-1 text-lg font-semibold">Hands-in</p>
+					<p className="text-sm text-slate-300">
+						{kpiValue("Live demos")} demos stream each CLI step, with playback
+						controls.
+					</p>
+				</Link>
+				<Link
+					to="/depot"
+					className="rounded border border-slate-800 bg-slate-900 p-4 hover:border-amber-500/50"
+				>
+					<p className="text-xs uppercase tracking-widest text-amber-400">
+						Every run
+					</p>
+					<p className="mt-1 text-lg font-semibold">Depot</p>
+					<p className="text-sm text-slate-300">
+						{kpiValue("Demo runs")} demo runs kept with artifacts and source
+						links.
+					</p>
+				</Link>
+			</div>
+
+			{flowsPreview.length > 0 && (
+				<div className="mt-4">
+					<p className="text-xs uppercase tracking-widest text-slate-400">
+						Readymade
+					</p>
+					<div className="mt-2 flex flex-wrap gap-2">
+						{flowsPreview.map((flow) => (
+							<Link
+								key={flow.id}
+								to={`/flows/${flow.id}`}
+								className="rounded bg-slate-800 px-2 py-1 text-xs text-slate-200 hover:bg-slate-700"
+							>
+								{flow.name}
+								{flow.status === "blocked" && (
+									<span className="ml-1 text-amber-300">blocked</span>
+								)}
+							</Link>
+						))}
+					</div>
+				</div>
+			)}
+
 			<div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
 				{kpis.map((k) => (
 					<div

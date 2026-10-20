@@ -11,7 +11,9 @@ edit, delete). The runner copies each step's artifacts into
 flows refuse to start with the reason. API: `/api/flows` CRUD,
 `/api/flows/{id}/run`, `/api/flows/runs/{id}`, `/api/flow-artifacts/{path}`.
 Verified end to end with a two-step capability-map flow: succeeded, 2 bundles.
-Docs: `mcp-central-docs/patterns/CRAFT_MULTI_APP_FLOWS.md`.
+Dashboard updated: eight KPIs (apps, installed, demos, live demos, flows, flow
+runs, jobs, demo runs), quick cards for Flows/Hands-in/Depot, and a readymade
+flow strip. Docs: `mcp-central-docs/patterns/CRAFT_MULTI_APP_FLOWS.md`.
 
 ## 0.2.0b2 - packaging (2026-10-20)
 

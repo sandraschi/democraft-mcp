@@ -513,16 +513,26 @@ def create_app(outbox: Path | None = None) -> FastAPI:
             runs_count = sum(
                 1
                 for a in box.iterdir()
-                if a.is_dir()
-                for _ in (x for x in a.iterdir() if x.is_dir())
+                if a.is_dir() and a.name not in ("_flows", "_history")
+                for d in a.iterdir()
+                if d.is_dir() and (d / "run.json").is_file()
             )
+        flows = flow_store.list()
+        live_demos = sum(1 for a in APPS for d in a.demos if d.live)
         return {
             "success": True,
             "kpis": [
                 {"label": "Craft apps", "value": len(APPS)},
                 {"label": "Installed", "value": len(installed)},
                 {"label": "Demos defined", "value": sum(len(a.demos) for a in APPS)},
+                {"label": "Live demos", "value": live_demos},
+                {"label": "Flows", "value": len(flows)},
+                {"label": "Flow runs", "value": len(flow_runner.runs)},
+                {"label": "Jobs", "value": len(engine.list())},
                 {"label": "Demo runs", "value": runs_count},
+            ],
+            "flows_preview": [
+                {"id": f["id"], "name": f["name"], "status": f["status"]} for f in flows[:6]
             ],
         }
 
