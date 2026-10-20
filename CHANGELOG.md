@@ -1,5 +1,18 @@
 # CHANGELOG.md
 
+## Unreleased (2026-10-20, flows)
+
+Multi-app flows: twelve seeded chains across the 13 apps, stored as JSON and
+validated against the real app/demo registry. `/flows` lists them with status
+(ready / exploratory / blocked), `/flows/{id}` shows the steps and runs them
+sequentially, and `/flows/{id}/edit` is a CRUD editor (add, remove, reorder,
+edit, delete). The runner copies each step's artifacts into
+`outbox/_flows/<run_id>/<NN>-<app>-<demo>/` and reports per-step status; blocked
+flows refuse to start with the reason. API: `/api/flows` CRUD,
+`/api/flows/{id}/run`, `/api/flows/runs/{id}`, `/api/flow-artifacts/{path}`.
+Verified end to end with a two-step capability-map flow: succeeded, 2 bundles.
+Docs: `mcp-central-docs/patterns/CRAFT_MULTI_APP_FLOWS.md`.
+
 ## 0.2.0b2 - packaging (2026-10-20)
 
 MCPB packaging fixed and shipped. Replaced the vendored pack script with the

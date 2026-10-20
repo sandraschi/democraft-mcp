@@ -42,6 +42,23 @@ export interface CraftDemo {
 	topics?: string[];
 	live?: boolean;
 }
+
+export interface FlowStep {
+	app: string;
+	demo: string;
+	note?: string;
+	topic?: string;
+	_key?: string;
+}
+
+export interface Flow {
+	id: string;
+	name: string;
+	description?: string;
+	status: string;
+	blocked_reason?: string;
+	steps: FlowStep[];
+}
 export interface CraftApp {
 	key: string;
 	name: string;

@@ -10,6 +10,7 @@ import {
 	ScrollText,
 	Settings,
 	Terminal,
+	Workflow,
 	Wrench,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -30,6 +31,7 @@ const NAV = [
 		icon: PlayCircle,
 		testid: "nav-hands-in",
 	},
+	{ to: "/flows", label: "Flows", icon: Workflow, testid: "nav-flows" },
 	{ to: "/depot", label: "Depot", icon: Archive, testid: "nav-depot" },
 	{ to: "/tools", label: "Tools", icon: Wrench, testid: "nav-tools" },
 	{ to: "/skills", label: "Skills", icon: ScrollText, testid: "nav-skills" },

@@ -71,6 +71,17 @@ Supermassive, and Cardinal (modular). Details, licences and re-scan steps:
   transition reel with real transition frames, a lighthouse drawn stroke by
   stroke, and a SoundCraft melody bounced dry and through a VST3 reverb.
 
+## Flows
+
+`/flows` ships twelve readymade multi-app chains - cover factory, photo book,
+data deck, CAD board, poster lab, data report, brand kit, storyboard, lyric
+sheet, audiobook art, title sequence, score-driven cut. Each is an ordered list
+of real demos across apps; the runner executes them sequentially and bundles the
+artifacts under `outbox/_flows/<run>/`. Create, edit, reorder and delete flows in
+the UI (`/flows/new`). Blocked flows say why (FilmCraft timeline, SoundCraft VST3
+instruments). Seed catalog: `src/democraft_mcp/flows.py`; design notes:
+`mcp-central-docs/patterns/CRAFT_MULTI_APP_FLOWS.md`.
+
 ## Stack
 
 Python 3.11+ (uv) - FastMCP 3.4.4+ - FastAPI + Pydantic v2 - Uvicorn -

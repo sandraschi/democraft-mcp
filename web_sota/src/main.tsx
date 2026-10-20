@@ -6,6 +6,9 @@ import Chat from "./pages/Chat";
 import CraftPage from "./pages/CraftPage";
 import Dashboard from "./pages/Dashboard";
 import Depot from "./pages/Depot";
+import FlowDetail from "./pages/FlowDetail";
+import FlowEditor from "./pages/FlowEditor";
+import Flows from "./pages/Flows";
 import HandsIn from "./pages/HandsIn";
 import Help from "./pages/Help";
 import Logs from "./pages/Logs";
@@ -26,6 +29,10 @@ createRoot(rootEl).render(
 					<Route path="depot" element={<Depot />} />
 					<Route path="inbox" element={<Navigate to="/depot" replace />} />
 					<Route path="hands-in" element={<HandsIn />} />
+					<Route path="flows" element={<Flows />} />
+					<Route path="flows/new" element={<FlowEditor />} />
+					<Route path="flows/:id" element={<FlowDetail />} />
+					<Route path="flows/:id/edit" element={<FlowEditor />} />
 					<Route path="tools" element={<Tools />} />
 					<Route path="skills" element={<Skills />} />
 					<Route path="chat" element={<Chat />} />
