@@ -1,25 +1,37 @@
 # HANDOVER — democraft-mcp
 
-**As of:** 2026-10-19. **Version:** 0.1.1. **Assess score:** 83 → 91 (ports HIGH
-closed; self-assessed, cold rescore still preferred).
+**As of:** 2026-10-20. **Version:** 0.2.0b2 (uncommitted work below).
+**Assess score:** 91 self-assessed; cold rescore still preferred.
 
 ## What this repo is
 
 The demo fleet for the ArtCraft family: one page per Craft app, every demo a
-real headless `<app>-cli.exe` run plus a real local-LLM step. No fake pixels.
-Account-gated engine features return `needs_account`; missing wrappees return
-`wrappee_missing`. Thirteen apps, one registry (`src/democraft_mcp/crafts.py`),
-one portmanteau MCP tool (`craft`, 8 ops), one webapp.
+real headless `<app>-cli.exe` run plus an optional local-LLM step. Thirteen
+apps, one registry (`src/democraft_mcp/crafts.py`), one portmanteau MCP tool
+(`craft`, 8 ops), one webapp. 32 demos, 6 of them streamable ("hands-in"),
+12 multi-app flows.
 
-Ports: **11245** frontend, **11246** backend (now in `WEBAPP_PORTS.md`).
-Gates: `just ci` (ruff, pytest, pyright, tsc, biome, build). Last measured:
-37 tests, 72.75% coverage.
+Ports: **11245** frontend, **11246** backend (registered in `WEBAPP_PORTS.md`).
+Gates: `just ci` (ruff check + format, pytest with coverage,
+tsc, biome, vite build). Last measured: 46 tests, 58.99% coverage, README
+structure check strict pass.
 
 ## Last concrete action
 
-Tight assfix, 2026-10-19: re-ran gates (green), registered 11245/11246 in
-`mcp-central-docs/operations/WEBAPP_PORTS.md` (the open HIGH from the 2026-10-18
-run). Full report: `docs/assess-reports/2026-10-19.md`.
+2026-10-20, two pieces of work, both uncommitted:
+
+1. **FilmCraft NLE demo** (`film/timeline-cut`): real cut, cross dissolve,
+   H.264 export, two rendered frames; the two film flows now point at it.
+   Fixed while verifying: the dissolve was applied inside the export process
+   without `--save`, so `cut.fcproj` and the later `transition.png` had no
+   transition. It is now a real `exec --save` step, with regression test
+   `test_film_timeline_cut_persists_transition`.
+2. **Docs pass**: README rebuilt to the fleet wrapper/webapp structure,
+   INSTALL rewritten with Options A/A2/B/C/D, new `docs/WRAPPEE.md`,
+   `docs/apps/` (13 per-app pages + index), `docs/screenshots/README.md`,
+   real Playwright captures (dashboard, hands-in, depot), 16 GitHub topics and
+   a new repo description. `effect-still.png` (614 KB) replaced by a 63 KB
+   JPEG. `docs/TOOLS.md` corrected from 14 to 13 apps.
 
 ## Next step
 
@@ -30,25 +42,32 @@ declare capability, not code.
 
 ## Blockers / open items
 
-- **Streaming chat endpoint** (`POST /api/chat/stream`) — MEDIUM, open. The
-  non-streaming chat works; token streaming is not implemented.
-- **Vendored MCPB pack script** — MEDIUM, open. Shim migration needs the
-  manifest relocation and 3-4-100 prompt parity checked first.
-- **Discord fleet-democraft channel** — LOW, open (no Discord tool in session).
+- **Streaming chat endpoint** (`POST /api/chat/stream`) — MEDIUM, open.
+- **Vendored MCPB pack script** — MEDIUM, open (manifest relocation + 3-4-100
+  prompt parity before the shim migration).
+- **`needs_account` is taxonomy only** — no engine currently gates a feature
+  through it; `crafts.py` says so in its header. Do not advertise it as live.
+- **Dashboard KPI "demo runs" counts only runs with a `started` timestamp**
+  (5 today) while `/api/runs` lists 29; older folders predate manifests. If the
+  KPI is meant to match the Depot, decide which number is authoritative.
+- **Project page** `mcp-central-docs/projects/democraft-mcp/` does not exist
+  yet (project-page standard).
 - **Cold-context rescore** — recommended; the 91 is self-assessed.
 
 ## Deliberately not done
 
-- **Thirteen repos.** No `designcraft-mcp`, `photocraft-mcp`, etc. The apps ship
-  MCP; a wrapper repo each would be thirteen CI pipelines and thirteen tool
-  surfaces. One hub, many adapters.
+- **Thirteen repos.** No `designcraft-mcp`, `photocraft-mcp`, etc. One hub,
+  many adapters.
 - **Fake artifacts.** No placeholder renders, no "demo mode" that draws a
-  rectangle and calls it a photo. If the engine does not run, the demo fails
-  loudly with stderr.
-- **Generative verbs.** The CLIs are editors, not generators (verified
-  2026-10-15). The AI step drafts parameters, not pixels.
+  rectangle and calls it a photo.
+- **Generative verbs.** The CLIs are editors, not generators. The AI step
+  drafts parameters or prose, not pixels.
 - **Auto-install.** Wrappees are the product; `docs/ONBOARDING.md` instructs,
   the demo does not silently download paid software.
+- **NSIS installer.** The webapp is source-run (`start.bat`); README and
+  INSTALL say so instead of implying a one-click app.
+- **Cloud LLM.** `ai_step` posts to Ollama's `/api/generate`; an
+  OpenAI-compatible provider is not wired in. INSTALL says so.
 
 ## How to pick it up
 
@@ -56,4 +75,4 @@ declare capability, not code.
 2. `docs/PLAN.md` — phases and acceptance criteria; start at Phase 1.
 3. `src/democraft_mcp/crafts.py` — the registry is the truth for apps and demos.
 4. `web_sota/src` — one page per app, generated from the same registry.
-5. `outbox/<app>/<demo>/` — every artifact, with the engine log beside it.
+5. `outbox/<app>/<demo>/` — every artifact, with `run.json` and engine output.
