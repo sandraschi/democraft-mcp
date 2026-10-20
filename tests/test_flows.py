@@ -16,7 +16,7 @@ def test_seed_catalog_loads(tmp_path: Path) -> None:
     flows = store.list()
     assert len(flows) == 12
     assert store.get("cover-factory") is not None
-    assert store.get("title-sequence")["status"] == "blocked"
+    assert store.get("title-sequence")["status"] == "exploratory"
 
 
 def test_create_update_delete(tmp_path: Path) -> None:
@@ -70,6 +70,14 @@ def test_api_crud_and_blocked_run(tmp_path: Path) -> None:
     )
     assert client.delete("/api/flows/api-flow").json()["success"] is True
 
-    blocked = client.post("/api/flows/title-sequence/run").json()
+    blocked_flow = {
+        "id": "blocked-flow",
+        "name": "Blocked flow",
+        "status": "blocked",
+        "blocked_reason": "test",
+        "steps": [{"app": "design", "demo": "capability-map"}],
+    }
+    assert client.post("/api/flows", json=blocked_flow).json()["success"] is True
+    blocked = client.post("/api/flows/blocked-flow/run").json()
     assert blocked["success"] is False
     assert "blocked" in blocked["message"]

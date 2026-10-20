@@ -144,25 +144,29 @@ SEED_FLOWS: list[dict] = [
         "id": "title-sequence",
         "name": "Title sequence",
         "description": "Title card, motion pass, assembly.",
-        "status": "blocked",
-        "blocked_reason": "FilmCraft has no timeline yet; ends at the motion still",
+        "status": "exploratory",
+        "blocked_reason": (
+            "FilmCraft has a timeline; our film step is storyboard-only, so this "
+            "ends at the motion still"
+        ),
         "steps": [
             {"app": "design", "demo": "print-spread", "note": "title card"},
             {"app": "effect", "demo": "title-card", "note": "motion still"},
-            {"app": "film", "demo": "storyboard", "note": "assembly (blocked)"},
+            {"app": "film", "demo": "storyboard", "note": "assembly (storyboard-only)"},
         ],
     },
     {
         "id": "score-driven-cut",
         "name": "Score-driven cut",
         "description": "Music bed, cut to it.",
-        "status": "blocked",
+        "status": "exploratory",
         "blocked_reason": (
-            "FilmCraft timeline pending; SoundCraft VST3 instruments silent (BUG-082)"
+            "FilmCraft timeline exists; our film step is storyboard-only. "
+            "SoundCraft VST3 instruments silent (BUG-082); built-in synth works."
         ),
         "steps": [
             {"app": "sound", "demo": "ident-jingle", "note": "music bed"},
-            {"app": "film", "demo": "storyboard", "note": "cut (blocked)"},
+            {"app": "film", "demo": "storyboard", "note": "cut (storyboard-only)"},
         ],
     },
 ]

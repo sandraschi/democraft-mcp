@@ -22,6 +22,9 @@ edit, delete). The runner copies each step's artifacts into
 flows refuse to start with the reason. API: `/api/flows` CRUD,
 `/api/flows/{id}/run`, `/api/flows/runs/{id}`, `/api/flow-artifacts/{path}`.
 Verified end to end with a two-step capability-map flow: succeeded, 2 bundles.
+Correction (2026-10-20): FilmCraft already has a timeline (sequences, clips,
+EDL/XML/FCPXML/OTIO/AAF export); the two film chains are exploratory because our
+`film:storyboard` step is storyboard-only, not because the app lacks a timeline.
 Dashboard updated: eight KPIs (apps, installed, demos, live demos, flows, flow
 runs, jobs, demo runs), quick cards for Flows/Hands-in/Depot, and a readymade
 flow strip. Docs: `mcp-central-docs/patterns/CRAFT_MULTI_APP_FLOWS.md`.

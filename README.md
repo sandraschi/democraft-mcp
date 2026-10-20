@@ -78,8 +78,10 @@ data deck, CAD board, poster lab, data report, brand kit, storyboard, lyric
 sheet, audiobook art, title sequence, score-driven cut. Each is an ordered list
 of real demos across apps; the runner executes them sequentially and bundles the
 artifacts under `outbox/_flows/<run>/`. Create, edit, reorder and delete flows in
-the UI (`/flows/new`). Blocked flows say why (FilmCraft timeline, SoundCraft VST3
-instruments). Seed catalog: `src/democraft_mcp/flows.py`; design notes:
+the UI (`/flows/new`). Blocks are rare: the FilmCraft chains are exploratory
+because our film step is storyboard-only (FilmCraft itself has a timeline), and
+SoundCraft VST3 instruments are silent (BUG-082). Seed catalog:
+`src/democraft_mcp/flows.py`; design notes:
 `mcp-central-docs/patterns/CRAFT_MULTI_APP_FLOWS.md`.
 
 ## Studio (embedded GridCraft)
