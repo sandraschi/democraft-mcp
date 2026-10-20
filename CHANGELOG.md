@@ -1,5 +1,20 @@
 # CHANGELOG.md
 
+## Unreleased (2026-10-20, build probes)
+
+`craft_commands` and `/api/crafts` now read the version and command catalog
+from the installed binary instead of assuming a release. The probe walks a
+dialect ladder (`commands --json` / `tools --json` / `commands`), records a
+baseline per CLI in `data/craft_compat.json` (gitignored), and reports a
+changed version or verb set as drift. `craft_commands` refuses to look green
+on an unacknowledged upgrade (`error_type: engine_drift`) until `force=True`
+accepts the build. Measured 2026-10-20: 13/13 installed, PhotoCraft 0.11.1
+against a 0.10.0 baseline (drift reported, then accepted); `/api/crafts`
+takes 660 ms cold for 13 probes and is cached after that. New `/apps` page
+lists version, build time and drift per app; the dashboard gained a build
+strip. Also fixed: `craft(operation="run_demo", app=<unknown>)` raised
+KeyError instead of returning a structured error (test added).
+
 ## Unreleased (2026-10-20, FilmCraft NLE demo)
 
 `film/timeline-cut`: two demo clips imported (`OceanSunset`, `Aurora`), a 24 fps
