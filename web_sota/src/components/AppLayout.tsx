@@ -4,6 +4,7 @@ import {
 	ChevronRight,
 	ExternalLink,
 	LayoutDashboard,
+	LayoutGrid,
 	MessagesSquare,
 	Minimize2,
 	PlayCircle,
@@ -26,6 +27,7 @@ const NAV = [
 		icon: LayoutDashboard,
 		testid: "nav-dashboard",
 	},
+	{ to: "/apps", label: "Apps", icon: LayoutGrid, testid: "nav-apps" },
 	{
 		to: "/hands-in",
 		label: "Hands-in",

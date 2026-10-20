@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
+import Apps from "./pages/Apps";
 import Chat from "./pages/Chat";
 import CraftPage from "./pages/CraftPage";
 import Dashboard from "./pages/Dashboard";
@@ -27,6 +28,7 @@ createRoot(rootEl).render(
 			<Routes>
 				<Route element={<AppLayout />}>
 					<Route index element={<Dashboard />} />
+					<Route path="apps" element={<Apps />} />
 					<Route path="depot" element={<Depot />} />
 					<Route path="inbox" element={<Navigate to="/depot" replace />} />
 					<Route path="hands-in" element={<HandsIn />} />

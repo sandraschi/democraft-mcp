@@ -25,6 +25,14 @@ export function apiBase(): string {
 	return BASE;
 }
 
+/** Local calendar date as YYYY-MM-DD (modified times are local, not UTC). */
+export function todayLocal(): string {
+	const d = new Date();
+	const m = String(d.getMonth() + 1).padStart(2, "0");
+	const day = String(d.getDate()).padStart(2, "0");
+	return `${d.getFullYear()}-${m}-${day}`;
+}
+
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
 	const r = await fetch(`${BASE}${path}`, {
 		headers: { "content-type": "application/json" },
@@ -69,4 +77,12 @@ export interface CraftApp {
 	description: string;
 	gaps: string[];
 	demos: CraftDemo[];
+	/** Installed CLI version, read from the binary on this machine. */
+	version?: string | null;
+	/** CLI file mtime, local time, ISO-ish (YYYY-MM-DDTHH:MM:SS). */
+	modified?: string | null;
+	/** Last accepted baseline version; differs from `version` after an upgrade. */
+	baseline_version?: string | null;
+	/** True when the installed build differs from the accepted baseline. */
+	drift?: boolean;
 }

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { api } from "../lib/api";
+import { api, todayLocal } from "../lib/api";
 import { useBackend } from "../store/backend";
 import { useLlm } from "../store/llm";
 
 export default function Dashboard() {
-	const { missing, health, refresh } = useBackend();
+	const { apps, missing, health, refresh } = useBackend();
 	const { providers, refresh: refreshLlm } = useLlm();
 	const [kpis, setKpis] = useState<{ label: string; value: number | string }[]>(
 		[],
@@ -148,6 +148,51 @@ export default function Dashboard() {
 					</p>
 				</Link>
 			</div>
+
+			{apps.length > 0 && (
+				<div
+					data-testid="dashboard-builds"
+					className="mt-4 rounded border border-slate-800 bg-slate-900 p-4"
+				>
+					<div className="flex items-center justify-between gap-2">
+						<p className="text-xs uppercase tracking-widest text-slate-400">
+							Installed builds
+						</p>
+						<Link to="/apps" className="text-xs text-amber-400 hover:underline">
+							versions table
+						</Link>
+					</div>
+					<div className="mt-2 flex flex-wrap gap-2">
+						{apps.map((a) => (
+							<Link
+								key={a.key}
+								to={`/craft/${a.key}`}
+								data-testid={`dash-app-${a.key}`}
+								className={`rounded px-2 py-1 text-xs ${
+									a.installed
+										? "bg-slate-800 text-slate-200 hover:bg-slate-700"
+										: "border border-slate-700 text-slate-400"
+								}`}
+							>
+								{a.name}{" "}
+								<span className="font-mono text-slate-400">
+									{a.version ?? (a.installed ? "?" : "missing")}
+								</span>
+								{a.drift && <span className="ml-1 text-amber-300">drift</span>}
+							</Link>
+						))}
+					</div>
+					<p className="mt-2 text-xs text-slate-400">
+						{apps.filter((a) => a.installed).length}/{apps.length} installed,{" "}
+						{
+							apps.filter((a) => (a.modified ?? "").startsWith(todayLocal()))
+								.length
+						}{" "}
+						built today, {apps.filter((a) => a.drift).length} drifting from the
+						accepted baseline.
+					</p>
+				</div>
+			)}
 
 			{flowsPreview.length > 0 && (
 				<div className="mt-4">
