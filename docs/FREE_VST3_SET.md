@@ -42,7 +42,8 @@ before redistributing.
   Files\VST3`: `engine.vst3_plugins` lists 11 plugins.
 - **VST3 effects process.** Valhalla Supermassive inserted on a melody track
   changes the bounce (dry vs wet), and the effect chain is audible.
-- **VST3 instruments are unresolved in SoundCraft (host bug).** Surge XT and
+- **VST3 instruments are unresolved in SoundCraft (host bug).** Retested on
+  SoundCraft 0.10.0 (2026-10-20): still silent (peak -144 dB). Surge XT and
   Dexed, set as track instruments, render silence in SoundCraft's headless
   bounce **and in the live app over its control channel**; the built-in
   subtractive synth on the same clip is audible. The same MIDI file and VST3s
