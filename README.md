@@ -4,7 +4,7 @@ Demo fleet for the ArtCraft family. One page per Craft app, every demo a real
 headless CLI/MCP run plus a real local-LLM step. No fake pixels: account-gated
 engine features return `needs_account`, missing wrappees return `wrappee_missing`.
 
-![FastMCP 3.4.4+](https://img.shields.io/badge/FastMCP-3.4.4%2B-blue) ![MCPB](https://img.shields.io/badge/packaging-MCPB-green) ![Windows CI](https://img.shields.io/badge/CI-Windows-lightgrey) ![beta](https://img.shields.io/badge/status-0.1%20beta-orange)
+![FastMCP 3.4.4+](https://img.shields.io/badge/FastMCP-3.4.4%2B-blue) ![MCPB](https://img.shields.io/badge/packaging-MCPB-green) ![Windows CI](https://img.shields.io/badge/CI-Windows-lightgrey) ![beta](https://img.shields.io/badge/status-0.2%20beta-orange)
 
 ## Before you start - install the Craft apps
 
@@ -57,6 +57,19 @@ SoundCraft (and Reaper, once its path is set) can use a curated free set:
 Surge XT, Surge XT Effects, Dexed, the four Dragonfly reverbs, Valhalla
 Supermassive, and Cardinal (modular). Details, licences and re-scan steps:
 `docs/FREE_VST3_SET.md`.
+
+## What 0.2 adds
+
+- **Job engine**: `POST /api/jobs`, per-run provenance (`job.json`,
+  `events.jsonl`), SSE event stream, cancel at the step boundary, retry as a new
+  job.
+- **Depot** (was Inbox): every run kept, cards/list toggle, source and artifact
+  links, history browsing.
+- **Hands-in**: a dedicated page and taped playback with Play / Pause / Stop /
+  Rewind and a 0.25x-4x speed slider.
+- **New demos**: PhotoCraft plate grade and batch treatment, DeckCraft
+  transition reel with real transition frames, a lighthouse drawn stroke by
+  stroke, and a SoundCraft melody bounced dry and through a VST3 reverb.
 
 ## Stack
 

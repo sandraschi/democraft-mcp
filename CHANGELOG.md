@@ -1,5 +1,20 @@
 # CHANGELOG.md
 
+## 0.2.0b1 - beta 2 (2026-10-20)
+
+Second beta. The hub gained a real job engine, a Depot that keeps every run, and
+a Hands-in page with taped playback. New demos: PhotoCraft plate grade and batch
+treatment, DeckCraft transition reel with real transition frames, a lighthouse
+drawn stroke by stroke, and a SoundCraft melody bounced dry and through a VST3
+reverb. The free VST3 set was installed and verified; the SoundCraft VST3
+instrument silence was isolated as a host bug (BUG-082, upstream PR #347) with
+Reaper as the control.
+
+Known: the job queue is in memory (no crash recovery); SoundCraft VST3
+instruments stay silent until upstream #347 lands; the CLI still ships no
+engines - install the apps from <https://getartcraft.com> first. Detailed dated
+entries follow.
+
 ## 0.1.2b1 - 0.1 beta (2026-10-20)
 
 First beta of the demo hub. 13 Craft apps, real headless runs, a job engine with

@@ -5,4 +5,4 @@ local-LLM step (Ollama). AI writes words and SVG concepts only - engines do
 all rendering locally; no cloud generation exists in these builds.
 """
 
-__version__ = "0.1.2b1"
+__version__ = "0.2.0b1"
