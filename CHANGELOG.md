@@ -14,6 +14,19 @@ instead of `storyboard`; they stay exploratory because the cut builds its own
 footage rather than ingesting the previous step's artifact, and because
 SoundCraft VST3 instruments are silent (BUG-082).
 
+## Unreleased (2026-10-20, docs)
+
+Fleet-standard documentation pass: `README.md` rebuilt to the wrapper + webapp
+structure (What this wraps, Preview, What You Can Do with hands-in/out and the
+headless callout, app index, install, companions, documentation, licence), and
+`INSTALL.md` rewritten with Options A/A2/B/C/D, winget prerequisites and the
+Ollama-only AI note. New `docs/WRAPPEE.md` (what ArtCraft is, app table,
+disambiguation), `docs/apps/` with one page per Craft app (13), and
+`docs/screenshots/README.md`. Preview images are real Playwright captures of
+the running webapp (dashboard, hands-in, depot); the 614 KB effect still was
+re-encoded to a 63 KB JPEG to meet the 300 KB rule. `docs/TOOLS.md` corrected
+from 14 to 13 apps. `llms.txt` gained the execution/artifacts block.
+
 ## Unreleased (2026-10-20, Studio embedding)
 
 `/studio` embeds GridCraft's **web build** in an iframe through the app's

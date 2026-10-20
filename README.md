@@ -1,162 +1,150 @@
 # democraft-mcp
 
-Demo fleet for the ArtCraft family. One page per Craft app, every demo a real
-headless CLI/MCP run plus a real local-LLM step. No fake pixels: account-gated
-engine features return `needs_account`, missing wrappees return `wrappee_missing`.
+<p align="center">
+  <a href="https://github.com/casey/just"><img src="https://img.shields.io/badge/just-ready_to_go-7c5cfc?style=flat-square&logo=just&logoColor=white" alt="Just"></a>
+  <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff"></a>
+  <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"></a>
+  <a href="https://biomejs.dev"><img src="https://img.shields.io/badge/Linted_with-Biome-60a5fa?style=flat-square&logo=biome&logoColor=white" alt="Biome"></a>
+  <a href="https://github.com/PrefectHQ/fastmcp"><img src="https://img.shields.io/badge/FastMCP-3.4.4%2B-7c5cfc?style=flat-square" alt="FastMCP"></a>
+  <a href="https://github.com/sandraschi/democraft-mcp/releases"><img src="https://img.shields.io/github/v/release/sandraschi/democraft-mcp?include_prereleases&style=flat-square&logo=github" alt="Release"></a>
+  <a href="https://github.com/sandraschi/democraft-mcp/releases"><img src="https://img.shields.io/badge/packaging-.mcpb-2ea44f?style=flat-square" alt="MCPB"></a>
+  <a href="https://getartcraft.com"><img src="https://img.shields.io/badge/Craft_apps-13-f59e0b?style=flat-square" alt="13 Craft apps"></a>
+</p>
 
-![FastMCP 3.4.4+](https://img.shields.io/badge/FastMCP-3.4.4%2B-blue) ![MCPB](https://img.shields.io/badge/packaging-MCPB-green) ![Windows CI](https://img.shields.io/badge/CI-Windows-lightgrey) ![beta](https://img.shields.io/badge/status-0.2%20beta-orange)
+**Watch the ArtCraft family build: 13 creative apps, 32 demos, real CLI output you can see and hear.**
 
-## Before you start - install the Craft apps
+Every demo drives an installed `<App>\<app>-cli.exe`, streams its steps while it runs, and
+leaves the artifacts on disk with a manifest and the engine log beside them. No mock pixels,
+no progress theatre.
 
-**This repo ships no engines.** Every demo shells to an installed
-`<Craft>\*-cli.exe`; without the apps the API returns `wrappee_missing` and the
-page tells you to install. Thirteen apps: CAD, Deck, Design, Effect, Fig, Film,
-Grid, Light, PDF, Photo, Sound, Vector, Word.
+## What this wraps
 
-- **Get the apps:** <https://getartcraft.com> (official site / installer)
-- **Per-app install notes, licences and sanity checks:** `docs/ONBOARDING.md`
-- The vault is not bundled: demos work in `outbox/` and never modify your
-  Craft documents.
+The **ArtCraft** family: thirteen local creative apps, each a desktop alternative to an
+industry standard - CADCraft (AutoCAD), DeckCraft (PowerPoint), DesignCraft (InDesign),
+EffectCraft (After Effects), FigCraft (Figma), FilmCraft (Premiere Pro), GridCraft (Excel),
+SoundCraft (Ableton Live), WordCraft (Word), PdfCraft (Acrobat Pro), LightCraft (studio
+lighting), PhotoCraft (Photoshop), VectorCraft (Illustrator).
+
+Nothing is bundled. Install the apps you care about from <https://getartcraft.com>; this repo
+is the control surface and the demo bench. What each app is, and where it lives:
+[docs/WRAPPEE.md](docs/WRAPPEE.md).
 
 ## Preview
 
-Real engine output, not mockups. PhotoCraft grades a public-domain plate through
-Black & White, Curves and Gradient Map adjustment layers; DeckCraft renders a
-real wipe-transition frame between two AI plates.
-
-| PhotoCraft plate grade | DeckCraft wipe (t = 0.4) | PhotoCraft lighthouse (stroke demo) |
+| Dashboard | Hands-in: watch it build | Depot: every run kept |
 |---|---|---|
-| ![plate grade](docs/screenshots/plate-grade.jpg) | ![wipe](docs/screenshots/transition-wipe.jpg) | ![lighthouse](docs/screenshots/lighthouse-live.jpg) |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Hands-in](docs/screenshots/hands-in.png) | ![Depot](docs/screenshots/depot.png) |
 
-The lighthouse is drawn stroke by stroke in PhotoCraft (13 stages, no AI), the
-way hands-in playback shows it. The pelican-on-a-bike prompt is kept separately
-as Simon Willison's benchmark: deliberately awkward to draw, easy to compare
-across models - not a showcase.
+*Our webapp (:11245), not the Craft apps' native UIs: one page per engine, live steps, and the
+run history the engines do not keep for you.*
 
-Shapes are AI-drawn, pixels are engine-rendered - the compare page shows both
-engine logs side by side.
+## What You Can Do
 
-## How it runs
+**How it runs**: headless by default. Each demo shells to the installed CLI and writes into
+`outbox/<app>/<demo>/`. Tick **Watch it build** and the same run streams every step over SSE,
+artifacts appearing as each step finishes; a failed step shows its return code and stderr
+instead of a green tick. The Craft apps do not need to be open, and the demos never touch your
+Craft documents.
 
-Headless by default: each demo shells to the installed `<Craft>\*-cli.exe`
-(`C:\Program Files\...`) and renders artifacts into `outbox/<app>/<demo>/`.
-With an app open on its control port, the same demos can drive the live app
-(`--connect`); the API reports which path ran. Hands-in: run any demo from the
-webapp or chat and inspect real outputs. Hands-out: demos never modify your
-Craft documents - they work in `outbox/` only.
+| Direction | Artifacts | Notes |
+|---|---|---|
+| **Hands-in** | prompts, topics, demo footage, source plates, MIDI | typed in the webapp; MCP `run_demo` uses each demo's default prompt |
+| **Hands-out** | DXF/PDF/SVG, DOCX, XLSX, PPTX+GIF, MP4, WAV, `.pcraft`, EDL, PNG/JPG | `outbox/<app>/<demo>/` with `run.json` and the engine log |
 
-## Quickstart
+- **Watch a cut happen**: FilmCraft imports two clips, builds a 24 fps sequence, applies a
+  12-frame cross dissolve, exports H.264 and renders the frame inside the dissolve.
+- **Hear the difference**: SoundCraft bounces a 16-note MIDI melody dry on the built-in synth,
+  then through Valhalla Supermassive and bounces it wet, with waveform and piano-roll frames.
+- **Watch a drawing appear**: PhotoCraft draws a lighthouse in nine stroke stages; playback is
+  the drawing itself.
+- **Compare models honestly**: the pelican-on-a-bicycle benchmark, same prompt through
+  PhotoCraft and VectorCraft. The ugliness is the measurement.
+- **Keep every run**: each run gets a folder and a manifest; older runs move to `_history`
+  instead of being overwritten.
+- **Chain apps**: twelve readymade multi-app flows (cover factory, photo book, data deck,
+  audiobook art, score-driven cut) that you can run, edit or reorder.
+- **Local first**: AI steps use Ollama; if it is down the CLI half still runs and the AI step is
+  marked skipped, never faked.
 
-1. Install the Craft apps from <https://getartcraft.com> (see `docs/ONBOARDING.md` - wrappees are the product).
-2. Double-click `start.bat` (backend :11246, frontend :11245).
-3. Open the Dashboard, pick a Craft page, run demo #1.
+## The thirteen apps
 
-## Free VST3 set
+| App | Local alternative to | Demos | Watch / listen | Details |
+|---|---|---|---|---|
+| CADCraft | AutoCAD / BricsCAD | 2 | - | [cad](docs/apps/cad.md) |
+| DeckCraft | PowerPoint / Keynote | 3 | transition reel | [deck](docs/apps/deck.md) |
+| DesignCraft | Adobe InDesign | 2 | - | [design](docs/apps/design.md) |
+| EffectCraft | After Effects | 2 | - | [effect](docs/apps/effect.md) |
+| FigCraft | Figma | 2 | - | [fig](docs/apps/fig.md) |
+| FilmCraft | Premiere Pro | 3 | timeline cut | [film](docs/apps/film.md) |
+| GridCraft | Excel | 2 | topic report | [grid](docs/apps/grid.md) |
+| SoundCraft | Ableton Live / Pro Tools | 3 | dry vs VST3 | [sound](docs/apps/sound.md) |
+| WordCraft | Microsoft Word | 2 | - | [word](docs/apps/word.md) |
+| PdfCraft | Acrobat Pro | 2 | - | [pdf](docs/apps/pdf.md) |
+| LightCraft | studio lighting | 2 | - | [light](docs/apps/light.md) |
+| PhotoCraft | Photoshop | 5 | plate grade, lighthouse | [photo](docs/apps/photo.md) |
+| VectorCraft | Illustrator | 2 | - | [vector](docs/apps/vector.md) |
 
-SoundCraft (and Reaper, once its path is set) can use a curated free set:
-Surge XT, Surge XT Effects, Dexed, the four Dragonfly reverbs, Valhalla
-Supermassive, and Cardinal (modular). Details, licences and re-scan steps:
-`docs/FREE_VST3_SET.md`.
+Full catalog and the demo contract: [docs/apps/README.md](docs/apps/README.md).
 
-## What 0.2 adds
+## Hands-in: see it, hear it
 
-- **Job engine**: `POST /api/jobs`, per-run provenance (`job.json`,
-  `events.jsonl`), SSE event stream, cancel at the step boundary, retry as a new
-  job.
-- **Depot** (was Inbox): every run kept, cards/list toggle, source and artifact
-  links, history browsing.
-- **Hands-in**: a dedicated page and taped playback with Play / Pause / Stop /
-  Rewind and a 0.25x-4x speed slider.
-- **New demos**: PhotoCraft plate grade and batch treatment, DeckCraft
-  transition reel with real transition frames, a lighthouse drawn stroke by
-  stroke, and a SoundCraft melody bounced dry and through a VST3 reverb.
+**Hands-in** is the page for demos worth watching. Six runs stream their CLI steps, and the
+craft page replays them with Play / Pause / Stop / Rewind and a 0.25x-4x speed slider while
+artifacts appear as they land.
 
-## Flows
+Sound makes the point literally: the melody demo writes `melody_dry.wav` and
+`melody_surge.wav`, so you hear the same notes with and without the reverb instead of reading
+a claim about it. The lighthouse demo saves a frame per stroke, so playback is the drawing.
 
-`/flows` ships twelve readymade multi-app chains - cover factory, photo book,
-data deck, CAD board, poster lab, data report, brand kit, storyboard, lyric
-sheet, audiobook art, title sequence, score-driven cut. Each is an ordered list
-of real demos across apps; the runner executes them sequentially and bundles the
-artifacts under `outbox/_flows/<run>/`. Create, edit, reorder and delete flows in
-the UI (`/flows/new`). Blocks are rare: the FilmCraft chains are exploratory
-because our film step is storyboard-only (FilmCraft itself has a timeline), and
-SoundCraft VST3 instruments are silent (BUG-082). Seed catalog:
-`src/democraft_mcp/flows.py`; design notes:
-`mcp-central-docs/patterns/CRAFT_MULTI_APP_FLOWS.md`.
+## Install
 
-## Studio (embedded GridCraft)
+1. **Install the Craft apps** you want to demo from <https://getartcraft.com>. This repo ships
+   no engines; a missing app returns `wrappee_missing` and its page shows a MOCK badge.
+2. **Claude Desktop**: download `democraft-mcp.mcpb` from the
+   [latest release](https://github.com/sandraschi/democraft-mcp/releases/latest) and open it.
+   The bundle registers the MCP server only; it does not install the webapp.
+3. **Webapp**: with uv and Node.js installed, run `start.bat`, then open
+   <http://127.0.0.1:11245> (backend on :11246). There is no installer for the webapp yet.
 
-`/studio` embeds GridCraft's **web build** in an iframe through the app's
-same-origin `?host=parent` bridge: the page hands it a CSV, receives
-`gridcraft:save` bytes, and shows `dirty`/`failed` state. This is real UI
-embedding, not the control channel - the web build has no TCP control port.
+Manual config, other clients and validation: [INSTALL.md](INSTALL.md).
 
-```powershell
-pwsh scripts/fetch-gridcraft-web.ps1   # downloads gridcraft-web-<version>.zip
-```
+## Example prompts
 
-The wasm bundle lands in `web_sota/public/gridcraft-web/` (gitignored, ~19 MB
-uncompressed). Chrome is visible: the `?host=parent` mode does not yet hide
-GridCraft's title bar and File tab; that needs the small `?chrome=0` follow-up
-discussed on upstream PR #1877.
+- "List the Craft apps installed here, then run the FilmCraft timeline cut and show me the
+  transition frame."
+- "Run the SoundCraft melody demo and compare the dry and reverb bounces."
+- "Build a photo-book flow: grade the plate, lay out the spread, combine the PDF."
 
-## Stack
+## Companions
 
-Python 3.11+ (uv) - FastMCP 3.4.4+ - FastAPI + Pydantic v2 - Uvicorn -
-prefab-ui. Webapp: React 19 - Vite 6 - TailwindCSS 4 - Lucide - Framer Motion -
-Zustand - React Router - TypeScript - Biome - Playwright. Package managers:
-uv (Python) + Bun (JS). Gates: `just ci` (ruff, pytest, pyright, tsc, biome, build).
-
-## Tools
-
-| Tool | Pattern | What |
-|------|---------|------|
-| `craft` | portmanteau (8 ops) | list_apps, app_status, run_demo, craft_commands, ollama_models, ai_flow, help, shutdown |
-| `show_apps_prefab_card` | Prefab | Installed-apps card |
-| `show_demo_prefab_card` | Prefab | Single-demo card |
-| prompt `democraft_demo_guide` | prompt | Per-app demo instructions |
-| resource `democraft://apps` | resource | Live registry JSON |
-
-Full reference: `docs/TOOLS.md`.
-
-## Env vars
-
-| Var | Default |
-|-----|---------|
-| `DEMOCRAFT_PORT` | `11246` (frontend :11245) |
-| `DEMOCRAFT_MODEL` | `gemma4:e4b` |
-| `DEMOCRAFT_OLLAMA_URL` | `http://127.0.0.1:11434` |
-| `DEMOCRAFT_OUTBOX` | `<repo>/outbox` |
-| `DEMOCRAFT_PROGRAM_FILES` | `C:\Program Files` |
-| `DEMOCRAFT_PREFAB_APPS` | `1` (0 skips Prefab tools) |
+| Companion | Role | Required? |
+|---|---|---|
+| ArtCraft apps | the engines every demo drives | yes, per app you demo |
+| Ollama | local AI steps (topics, briefs, notes) | optional - the CLI half still runs |
+| GridCraft web build | embedded in `/studio` via `scripts/fetch-gridcraft-web.ps1` | optional |
 
 ## Documentation
 
-| Doc | What |
-|-----|------|
-| `docs/ONBOARDING.md` | Wrappee install, AI model setup, first demo |
-| `docs/CONFIGURATION.md` | Env vars, ports |
-| `docs/DEVELOPMENT.md` | Dev loop, tests, CI |
-| `docs/TOOLS.md` | `craft` operations reference |
-| `docs/TROUBLESHOOTING.md` | Engine errors, Ollama down, missing wrappees |
-| `INSTALL.md` | Naked-PC install |
-| `CHANGELOG.md` | Releases |
+| Doc | Contents |
+|---|---|
+| [INSTALL.md](INSTALL.md) | All install paths, MCP config, validation |
+| [docs/ONBOARDING.md](docs/ONBOARDING.md) | Install the apps, pick a model, first demo |
+| [docs/WRAPPEE.md](docs/WRAPPEE.md) | What ArtCraft is, app by app |
+| [docs/apps/](docs/apps/README.md) | One page per Craft app: demos, artifacts, gaps |
+| [docs/TOOLS.md](docs/TOOLS.md) | `craft` operations, prompts, resources |
+| [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Env vars and ports |
+| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Dev loop, tests, gates |
+| [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Missing wrappee, Ollama down, engine stderr |
+| [docs/FREE_VST3_SET.md](docs/FREE_VST3_SET.md) | Free VST3s used by the audio demos |
+| [CHANGELOG.md](CHANGELOG.md) | Releases |
 
-## MCP config
+## Requirements
 
-```json
-{ "mcpServers": { "democraft": { "command": "uv", "args": ["run", "python", "-m", "democraft_mcp.mcp_stdio"], "cwd": "D:\\Dev\\repos\\democraft-mcp" } } }
-```
+Windows 11 - the demos target the installed Windows CLIs. One or more Craft apps. Ollama with a
+pulled model for the AI steps. Running the webapp from source needs uv, Node.js and Bun; see
+[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
-## Install (Claude Desktop on Windows)
+## Licence
 
-Open **Windows PowerShell** and run (labels per MCPB_PACKAGING_STANDARDS.md 2.2b):
-
-```powershell
-irm https://github.com/sandraschi/democraft-mcp/releases/latest/download/install.ps1 | iex
-```
-
-Then quit Claude Desktop completely (tray > Quit) and relaunch - democraft appears
-under Settings > Extensions. The `.mcpb` bundle is a Claude Desktop format; other
-clients (Cursor, VS Code, Claude Code) use the `uv` MCP config above instead -
-`uvx` has no published package to install from (local-only distribution).
+The code in this repo is (c) Sandra Schipal; no licence file is present yet, so ask before
+redistributing. The Craft apps and their engines are licensed separately by ArtCraft.
