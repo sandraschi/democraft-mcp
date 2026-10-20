@@ -81,3 +81,17 @@ def test_api_crud_and_blocked_run(tmp_path: Path) -> None:
     blocked = client.post("/api/flows/blocked-flow/run").json()
     assert blocked["success"] is False
     assert "blocked" in blocked["message"]
+
+
+def test_new_seeds_reach_an_existing_store(tmp_path: Path) -> None:
+    path = tmp_path / "flows.json"
+    path.write_text(
+        '{"flows": [{"id": "mine", "name": "Mine", "status": "ready", '
+        '"description": "", "steps": [{"app": "pdf", "demo": "portfolio"}]}]}',
+        encoding="utf-8",
+    )
+    store = FlowStore(path)
+    flows = store.list()
+    assert store.get("mine") is not None
+    assert store.get("video-delivery") is not None
+    assert len(flows) == len(SEED_FLOWS) + 1

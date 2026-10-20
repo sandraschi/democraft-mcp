@@ -256,7 +256,14 @@ class FlowStore:
     def _load(self) -> dict[str, dict]:
         if self.path.is_file():
             data = json.loads(self.path.read_text(encoding="utf-8"))
-            return {flow["id"]: flow for flow in data.get("flows", [])}
+            flows = {flow["id"]: flow for flow in data.get("flows", [])}
+            # Seeds added in a later release must reach installs that already
+            # have a flows.json. Existing ids stay exactly as the user left them.
+            missing = {s["id"]: s for s in SEED_FLOWS if s["id"] not in flows}
+            if missing:
+                flows.update(missing)
+                self._write(flows)
+            return flows
         seeded = {flow["id"]: flow for flow in SEED_FLOWS}
         self._write(seeded)
         return seeded
