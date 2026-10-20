@@ -152,3 +152,16 @@ def test_missing_cli_is_reported_not_raised(tmp_path, monkeypatch):
     res = compat.check(tmp_path / "absent.exe")
     assert res["error"] == "wrappee_missing"
     assert res["installed"] is False
+
+
+def test_engine_stamp_reports_the_installed_build():
+    from democraft_mcp.crafts import BY_KEY, _engine_stamp
+
+    assert _engine_stamp("no-such-app") == {"installed": False}
+    if BY_KEY["pdf"].installed():
+        stamp = _engine_stamp("pdf")
+        assert stamp["installed"] is True
+        assert stamp["version"][0].isdigit()
+        assert stamp["probe"] == "cli --version at run time"
+    else:
+        assert _engine_stamp("pdf") == {"installed": False}

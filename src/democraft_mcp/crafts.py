@@ -21,6 +21,8 @@ from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from pathlib import Path
 
+from . import __version__
+from .compat import probe_version
 from .windows import ensure_foreground
 
 PROGRAM_FILES = Path(os.getenv("DEMOCRAFT_PROGRAM_FILES", r"C:\Program Files"))
@@ -1016,6 +1018,27 @@ def cli_run(exe: Path, argv: list[str], cwd: Path, timeout_s: int = CLI_TIMEOUT_
         }
 
 
+def _engine_stamp(app_key: str) -> dict:
+    """Which installed build produced this run.
+
+    The version is read from the binary itself at run time, not from a release
+    feed: measured 2026-10-20 the launcher wrote new builds into
+    ``C:\\Program Files`` about four hours before GitHub published the tags.
+    """
+    app = BY_KEY.get(app_key)
+    if app is None or not app.installed():
+        return {"installed": False}
+    ver = probe_version(app.cli_path)
+    return {
+        "installed": True,
+        "cli": str(app.cli_path),
+        "version": ver.get("version"),
+        "built": ver.get("modified"),
+        "bytes": ver.get("size"),
+        "probe": "cli --version at run time",
+    }
+
+
 def _write_manifest(
     run_dir: Path,
     app_key: str,
@@ -1024,8 +1047,8 @@ def _write_manifest(
     started_at: str,
     inputs: list[str] | None = None,
     focus: dict | None = None,
-) -> None:
-    """Provenance for one run: what ran, when, and which files it touched."""
+) -> dict:
+    """Provenance for one run: what ran, when, which files, and which build."""
     files = sorted(
         str(f.relative_to(run_dir)).replace("\\", "/")
         for f in run_dir.rglob("*")
@@ -1039,10 +1062,13 @@ def _write_manifest(
         "finished": datetime.now(UTC).isoformat(timespec="seconds"),
         "artifacts": files,
         "inputs": inputs or [],
+        "democraft": __version__,
+        "engine": _engine_stamp(app_key),
     }
     if focus is not None:
         data["focus"] = focus
     (run_dir / "run.json").write_text(json.dumps(data, indent=1), encoding="utf-8")
+    return data
 
 
 class DemoCancelled(Exception):
@@ -1977,7 +2003,9 @@ def run_demo(
             )
         if rendered:
             do(["info", rendered[0]])
-    _write_manifest(run_dir, app_key, demo_id, topic, started_at, inputs, focus=focus_info)
+    manifest = _write_manifest(
+        run_dir, app_key, demo_id, topic, started_at, inputs, focus=focus_info
+    )
     artifacts = sorted({str(f) for f in run_dir.rglob("*") if f.is_file()})
     ok_cli = all(s.get("success") for s in steps) if steps else False
     msg = f"{app.name}/{demo.id}: {len(steps)} CLI steps, {len(artifacts)} artifacts"
@@ -1994,4 +2022,5 @@ def run_demo(
         "all_cli_ok": ok_cli,
         "run_dir": str(run_dir),
         "focus": focus_info,
+        "engine": manifest.get("engine"),
     }
