@@ -1,6 +1,6 @@
 [project]
 name = "democraft-mcp"
-version = "0.2.0b1"
+version = "0.2.0b2"
 description = "Demo fleet for the ArtCraft family: one page per Craft app, every demo a real headless CLI/MCP run with an AI flow."
 readme = "README.md"
 requires-python = ">=3.11"
