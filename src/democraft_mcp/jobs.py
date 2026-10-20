@@ -37,6 +37,7 @@ class Job:
     topic: str
     model: str
     run_dir: Path
+    focus: bool = False
     status: str = "queued"
     created: str = field(default_factory=_now)
     started: str | None = None
@@ -62,6 +63,7 @@ class Job:
             "demo": self.demo,
             "topic": self.topic,
             "model": self.model,
+            "focus": self.focus,
             "status": self.status,
             "created": self.created,
             "started": self.started,
@@ -85,11 +87,21 @@ class JobEngine:
         self.pool = ThreadPoolExecutor(max_workers=workers, thread_name_prefix="democraft-job")
 
     # -- lifecycle ---------------------------------------------------------
-    def submit(self, app: str, demo: str, topic: str = "", model: str = "") -> Job:
+    def submit(
+        self, app: str, demo: str, topic: str = "", model: str = "", focus: bool = False
+    ) -> Job:
         job_id = time.strftime("%Y%m%d-%H%M%S") + "-" + uuid.uuid4().hex[:6]
         run_dir = self.outbox / app / demo / "jobs" / job_id
         run_dir.mkdir(parents=True, exist_ok=True)
-        job = Job(id=job_id, app=app, demo=demo, topic=topic, model=model, run_dir=run_dir)
+        job = Job(
+            id=job_id,
+            app=app,
+            demo=demo,
+            topic=topic,
+            model=model,
+            run_dir=run_dir,
+            focus=focus,
+        )
         with self.lock:
             self.jobs[job_id] = job
         self._emit(job, {"kind": "queued", "job": job_id, "app": app, "demo": demo})
@@ -120,7 +132,7 @@ class JobEngine:
         old = self.get(job_id)
         if old is None:
             return None
-        job = self.submit(old.app, old.demo, old.topic, old.model)
+        job = self.submit(old.app, old.demo, old.topic, old.model, old.focus)
         job.attempts = old.attempts + 1
         return job
 
@@ -152,6 +164,7 @@ class JobEngine:
                     on_step=on_step,
                     should_cancel=should_cancel,
                     run_dir=job.run_dir,
+                    focus=job.focus,
                 )
             else:
                 result = self.runner(

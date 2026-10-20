@@ -21,6 +21,8 @@ from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from pathlib import Path
 
+from .windows import ensure_foreground
+
 PROGRAM_FILES = Path(os.getenv("DEMOCRAFT_PROGRAM_FILES", r"C:\Program Files"))
 OLLAMA_URL = os.getenv("DEMOCRAFT_OLLAMA_URL", "http://127.0.0.1:11434")
 DEFAULT_MODEL = os.getenv("DEMOCRAFT_MODEL", "gemma4:e4b")
@@ -1021,6 +1023,7 @@ def _write_manifest(
     topic: str,
     started_at: str,
     inputs: list[str] | None = None,
+    focus: dict | None = None,
 ) -> None:
     """Provenance for one run: what ran, when, and which files it touched."""
     files = sorted(
@@ -1037,6 +1040,8 @@ def _write_manifest(
         "artifacts": files,
         "inputs": inputs or [],
     }
+    if focus is not None:
+        data["focus"] = focus
     (run_dir / "run.json").write_text(json.dumps(data, indent=1), encoding="utf-8")
 
 
@@ -1069,6 +1074,7 @@ def run_demo(
     on_step=None,
     should_cancel=None,
     run_dir: Path | None = None,
+    focus: bool = False,
 ) -> dict:
     """Run a demo end to end. Returns dialogic {success, message, ...}."""
     app = BY_KEY.get(app_key)
@@ -1112,6 +1118,12 @@ def run_demo(
         started_at = datetime.now(UTC).isoformat(timespec="seconds")
     run_dir.mkdir(parents=True, exist_ok=True)
 
+    # Hands-in: put the app on screen before the work starts. Off by default -
+    # an agent or a flow must not steal the foreground.
+    focus_info = ensure_foreground(app.cli_path) if focus else None
+    if focus_info is not None and on_step:
+        on_step({"kind": "focus", "focus": focus_info})
+
     if demo.id == "capability-map":
         res = cli_run(app.cli_path, ["commands"], run_dir)
         text = (res.get("stdout") or "") + (res.get("stderr") or "")
@@ -1130,7 +1142,7 @@ def run_demo(
                     "artifacts": ["capabilities.txt"],
                 }
             )
-        _write_manifest(run_dir, app_key, demo_id, topic, started_at, [])
+        _write_manifest(run_dir, app_key, demo_id, topic, started_at, [], focus=focus_info)
         arts = [str(p) for p in sorted(run_dir.rglob("*")) if p.is_file()]
         return {
             "success": bool(res.get("success")),
@@ -1140,6 +1152,7 @@ def run_demo(
             "artifacts": arts,
             "all_cli_ok": bool(res.get("success")),
             "run_dir": str(run_dir),
+            "focus": focus_info,
         }
 
     ai = ai_step(
@@ -1964,7 +1977,7 @@ def run_demo(
             )
         if rendered:
             do(["info", rendered[0]])
-    _write_manifest(run_dir, app_key, demo_id, topic, started_at, inputs)
+    _write_manifest(run_dir, app_key, demo_id, topic, started_at, inputs, focus=focus_info)
     artifacts = sorted({str(f) for f in run_dir.rglob("*") if f.is_file()})
     ok_cli = all(s.get("success") for s in steps) if steps else False
     msg = f"{app.name}/{demo.id}: {len(steps)} CLI steps, {len(artifacts)} artifacts"
@@ -1980,4 +1993,5 @@ def run_demo(
         "artifacts": artifacts,
         "all_cli_ok": ok_cli,
         "run_dir": str(run_dir),
+        "focus": focus_info,
     }

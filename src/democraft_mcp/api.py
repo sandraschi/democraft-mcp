@@ -53,6 +53,7 @@ class DemoRequest(BaseModel):
     demo: str = ""
     model: str = DEFAULT_MODEL
     topic: str = ""
+    focus: bool = False
 
 
 class JobRequest(BaseModel):
@@ -60,6 +61,7 @@ class JobRequest(BaseModel):
     demo: str = ""
     topic: str = ""
     model: str = ""
+    focus: bool = False
 
 
 class FlowStepIn(BaseModel):
@@ -183,7 +185,14 @@ def create_app(outbox: Path | None = None) -> FastAPI:
     def demos_run(req: DemoRequest) -> dict:
         a = BY_KEY.get(req.app)
         demo_id = req.demo or (a.demos[0].id if a and a.demos else "")
-        res = run_demo(req.app, demo_id, box, req.model, topic=req.topic.strip()[:200])
+        res = run_demo(
+            req.app,
+            demo_id,
+            box,
+            req.model,
+            topic=req.topic.strip()[:200],
+            focus=req.focus,
+        )
         log("demo", f"{req.app}/{demo_id} success={res.get('success')}")
         return res
 
@@ -211,6 +220,7 @@ def create_app(outbox: Path | None = None) -> FastAPI:
                         req.model,
                         topic=req.topic.strip()[:200],
                         on_step=events.put,
+                        focus=req.focus,
                     )
                     events.put({"kind": "done", "result": res})
                 except Exception as exc:  # noqa: BLE001 - reported to the client
@@ -302,7 +312,7 @@ def create_app(outbox: Path | None = None) -> FastAPI:
         if a is None:
             return {"success": False, "message": f"unknown app '{req.app}'"}
         demo_id = req.demo or (a.demos[0].id if a.demos else "")
-        job = engine.submit(req.app, demo_id, req.topic.strip()[:200], req.model)
+        job = engine.submit(req.app, demo_id, req.topic.strip()[:200], req.model, focus=req.focus)
         log("job", f"{job.id} queued {req.app}/{demo_id}")
         return {"success": True, "job": job.public()}
 
