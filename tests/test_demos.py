@@ -66,6 +66,25 @@ def test_word_round_trip(tmp_path):
     assert "brief.docx" in names and "brief.pdf" in names
 
 
+@_needs("film")
+def test_film_timeline_cut_persists_transition(tmp_path):
+    """A dissolve that only lives in the export process is lost by the next render."""
+    res = run_demo("film", "timeline-cut", tmp_path)
+    assert res["success"] is True
+    assert res["all_cli_ok"] is True
+    assert any(
+        "sequence.applyVideoTransition" in " ".join(step.get("argv") or [])
+        for step in res["cli_steps"]
+    ), "the transition must be a real CLI step, not a note"
+    project = tmp_path / "film" / "timeline-cut" / "cut.fcproj"
+    assert "cross_dissolve" in project.read_text(encoding="utf-8"), (
+        "the saved project must carry the transition; otherwise poster.png and "
+        "transition.png (rendered in later processes) show a hard cut"
+    )
+    names = [Path(p).name for p in res["artifacts"]]
+    assert {"cut.mp4", "poster.png", "transition.png"} <= set(names)
+
+
 def test_api_health():
     client = TestClient(build_api())
     r = client.get("/api/health")

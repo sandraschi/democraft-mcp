@@ -1,5 +1,19 @@
 # CHANGELOG.md
 
+## Unreleased (2026-10-20, FilmCraft NLE demo)
+
+`film/timeline-cut`: two demo clips imported (`OceanSunset`, `Aurora`), a 24 fps
+1280x720 sequence built from them, a 12-frame cross dissolve on the cut, H.264
+export (816 frames, 640x360) and two rendered frames (poster, transition).
+Verified: 5 CLI steps, 7 artifacts, no failures. The dissolve is applied by a
+real `exec` step with `--save` (not a note claiming success), so `cut.fcproj`
+carries it and both rendered frames show it; regression test
+`test_film_timeline_cut_persists_transition` fails if the transition survives
+only inside the export process. The two film flows now use `timeline-cut`
+instead of `storyboard`; they stay exploratory because the cut builds its own
+footage rather than ingesting the previous step's artifact, and because
+SoundCraft VST3 instruments are silent (BUG-082).
+
 ## Unreleased (2026-10-20, Studio embedding)
 
 `/studio` embeds GridCraft's **web build** in an iframe through the app's

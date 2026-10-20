@@ -601,8 +601,18 @@ APPS: tuple[CraftApp, ...] = (
         "Video: project inspect + scripted runs.",
         (
             Demo(
+                "timeline-cut",
+                "Demo 1: timeline cut (NLE)",
+                "Imports two demo clips, builds a 24 fps sequence, applies a "
+                "12-frame cross dissolve, exports H.264 and renders two frames. "
+                "Real non-linear editing, no AI step.",
+                "",
+                "cli",
+                live=True,
+            ),
+            Demo(
                 "storyboard",
-                "Demo 1: storyboard + AI board (pick a subject)",
+                "Demo 2: storyboard + AI board (pick a subject)",
                 "Real EDL export; local AI boards 3 shots for your subject, "
                 "saved as brief.md. Assembly stays project-gated.",
                 "Board a 3-shot storyboard (pelican, bike, reveal) as JSON "
@@ -1469,6 +1479,105 @@ def run_demo(
                 "- Three sections.\n- One call to action.\n",
                 encoding="utf-8",
             )
+    elif k == "film" and demo.id == "timeline-cut":
+        build = [
+            {"id": "file.newProject", "params": {"name": "Hands-in Cut"}},
+            {"id": "file.importDemoFootage", "params": {"scene": "OceanSunset"}},
+            {"id": "file.importDemoFootage", "params": {"scene": "Aurora"}},
+            {
+                "id": "file.newSequence",
+                "params": {
+                    "name": "Hands-in Cut",
+                    "width": 1280,
+                    "height": 720,
+                    "fps": 24,
+                    "fromItems": [1, 2],
+                },
+            },
+        ]
+        (run_dir / "build.jsonl").write_text(
+            "\n".join(json.dumps(step) for step in build) + "\n", encoding="utf-8"
+        )
+        do(["run", "build.jsonl", "--save-as", "cut.fcproj", "--compact"])
+
+        inspected = cli_run(
+            app.cli_path,
+            ["--project", "cut.fcproj", "inspect", "sequence", "--compact"],
+            run_dir,
+        )
+        clip_id = None
+        text = (inspected.get("stdout") or "").strip()
+        try:
+            sequence = json.loads(text[text.find("{") :])
+            for track in sequence.get("video", []):
+                items = track.get("items") or []
+                if len(items) >= 2:
+                    clip_id = items[1].get("clip")
+                    break
+        except (ValueError, AttributeError):
+            clip_id = None
+
+        if clip_id is not None:
+            # Real exec step (not a note): --save persists the transition into
+            # cut.fcproj so the export below renders the dissolve.
+            do(
+                [
+                    "--project",
+                    "cut.fcproj",
+                    "--save",
+                    "exec",
+                    "sequence.applyVideoTransition",
+                    f"clip={clip_id}",
+                    "effect=cross_dissolve",
+                    "frames=12",
+                    "edge=in",
+                    "--compact",
+                ]
+            )
+        finish = [
+            {
+                "id": "file.exportMedia",
+                "params": {
+                    "path": "cut.mp4",
+                    "format": "h264",
+                    "width": 640,
+                    "height": 360,
+                    "quality": 70,
+                    "range": "entire",
+                    "wait": True,
+                },
+            }
+        ]
+        (run_dir / "finish.jsonl").write_text(
+            "\n".join(json.dumps(step) for step in finish) + "\n", encoding="utf-8"
+        )
+        do(["--project", "cut.fcproj", "run", "finish.jsonl", "--compact"])
+        do(
+            [
+                "--project",
+                "cut.fcproj",
+                "render",
+                "--seconds",
+                "1",
+                "--out",
+                "poster.png",
+                "--scale",
+                "0.5",
+            ]
+        )
+        do(
+            [
+                "--project",
+                "cut.fcproj",
+                "render",
+                "--seconds",
+                "18",
+                "--out",
+                "transition.png",
+                "--scale",
+                "0.5",
+            ]
+        )
     elif k == "film":
         script = run_dir / "storyboard.jsonl"
         script.write_text(

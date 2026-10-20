@@ -146,13 +146,13 @@ SEED_FLOWS: list[dict] = [
         "description": "Title card, motion pass, assembly.",
         "status": "exploratory",
         "blocked_reason": (
-            "FilmCraft has a timeline; our film step is storyboard-only, so this "
-            "ends at the motion still"
+            "FilmCraft timeline exists and the film step is a real cut, but it "
+            "builds its own demo footage instead of ingesting the motion still"
         ),
         "steps": [
             {"app": "design", "demo": "print-spread", "note": "title card"},
             {"app": "effect", "demo": "title-card", "note": "motion still"},
-            {"app": "film", "demo": "storyboard", "note": "assembly (storyboard-only)"},
+            {"app": "film", "demo": "timeline-cut", "note": "NLE cut (own footage)"},
         ],
     },
     {
@@ -161,12 +161,13 @@ SEED_FLOWS: list[dict] = [
         "description": "Music bed, cut to it.",
         "status": "exploratory",
         "blocked_reason": (
-            "FilmCraft timeline exists; our film step is storyboard-only. "
-            "SoundCraft VST3 instruments silent (BUG-082); built-in synth works."
+            "FilmCraft timeline exists; the cut step uses its own demo footage, "
+            "not the music bed. SoundCraft VST3 instruments silent (BUG-082); "
+            "built-in synth works."
         ),
         "steps": [
             {"app": "sound", "demo": "ident-jingle", "note": "music bed"},
-            {"app": "film", "demo": "storyboard", "note": "cut (storyboard-only)"},
+            {"app": "film", "demo": "timeline-cut", "note": "NLE cut (own footage)"},
         ],
     },
 ]
