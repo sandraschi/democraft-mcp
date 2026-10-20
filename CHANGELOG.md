@@ -1,5 +1,15 @@
 # CHANGELOG.md
 
+## 0.2.0b2 - packaging (2026-10-20)
+
+MCPB packaging fixed and shipped. Replaced the vendored pack script with the
+fleet shim (`fleet-mcpb-pack.ps1`), moved the bundle manifest to
+`mcpb/manifest.json`, synced `.mcpbignore`, and added the package `__main__` the
+launch check expects (HTTP on 39812; stdio stays the manifest entry). The bundle
+now passes the import-isolation, AST, pollution and packaged-launch checks, and
+is attached to the release as versioned `.mcpb`, stable `.mcpb` and
+`install.ps1`. No functional changes.
+
 ## 0.2.0b1 - beta 2 (2026-10-20)
 
 Second beta. The hub gained a real job engine, a Depot that keeps every run, and
