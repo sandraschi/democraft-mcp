@@ -23,6 +23,7 @@ from pydantic import BaseModel
 
 from . import __version__
 from .crafts import APPS, BY_KEY, DEFAULT_MODEL, run_demo
+from .flows import FlowError, FlowRunner, FlowStore
 from .jobs import JobEngine
 
 logger = logging.getLogger("democraft_mcp.api")
@@ -58,6 +59,22 @@ class JobRequest(BaseModel):
     demo: str = ""
     topic: str = ""
     model: str = ""
+
+
+class FlowStepIn(BaseModel):
+    app: str
+    demo: str
+    note: str = ""
+    topic: str = ""
+
+
+class FlowIn(BaseModel):
+    id: str
+    name: str
+    description: str = ""
+    status: str = "ready"
+    blocked_reason: str = ""
+    steps: list[FlowStepIn]
 
 
 class ChatRequest(BaseModel):
@@ -202,6 +219,71 @@ def create_app(outbox: Path | None = None) -> FastAPI:
         )
 
     engine = JobEngine(box)
+    flow_store = FlowStore(box.parent / "data" / "flows.json")
+    flow_runner = FlowRunner(box)
+
+    @api.get("/api/flows")
+    def flows_list() -> dict:
+        return {"success": True, "flows": flow_store.list()}
+
+    @api.post("/api/flows")
+    def flows_create(req: FlowIn) -> dict:
+        try:
+            flow = flow_store.create(req.model_dump())
+        except FlowError as exc:
+            return {"success": False, "message": str(exc)}
+        return {"success": True, "flow": flow}
+
+    @api.get("/api/flows/runs/{run_id}")
+    def flow_run_get(run_id: str) -> dict:
+        run = flow_runner.get(run_id)
+        if run is None:
+            return {"success": False, "message": f"unknown flow run '{run_id}'"}
+        return {"success": True, "run": run}
+
+    @api.get("/api/flows/{flow_id}")
+    def flows_get(flow_id: str) -> dict:
+        flow = flow_store.get(flow_id)
+        if flow is None:
+            return {"success": False, "message": f"unknown flow '{flow_id}'"}
+        return {"success": True, "flow": flow}
+
+    @api.put("/api/flows/{flow_id}")
+    def flows_update(flow_id: str, req: FlowIn) -> dict:
+        try:
+            flow = flow_store.update(flow_id, req.model_dump())
+        except FlowError as exc:
+            return {"success": False, "message": str(exc)}
+        return {"success": True, "flow": flow}
+
+    @api.delete("/api/flows/{flow_id}")
+    def flows_delete(flow_id: str) -> dict:
+        return {"success": flow_store.delete(flow_id)}
+
+    @api.post("/api/flows/{flow_id}/run")
+    def flows_run(flow_id: str) -> dict:
+        flow = flow_store.get(flow_id)
+        if flow is None:
+            return {"success": False, "message": f"unknown flow '{flow_id}'"}
+        if flow.get("status") == "blocked":
+            return {
+                "success": False,
+                "message": f"flow is blocked: {flow.get('blocked_reason', 'reason not recorded')}",
+            }
+        run_id = flow_runner.start(flow)
+        return {"success": True, "run": flow_runner.get(run_id)}
+
+    @api.get("/api/flow-artifacts/{path:path}")
+    def flow_artifact(path: str):
+        from fastapi.responses import FileResponse
+
+        root = box.resolve()
+        target = (root / path).resolve()
+        if root != target and root not in target.parents:
+            return {"success": False, "message": "path escapes the outbox"}
+        if not target.is_file():
+            return {"success": False, "message": "artifact not found"}
+        return FileResponse(target)
 
     @api.post("/api/jobs")
     def job_create(req: JobRequest) -> dict:
