@@ -42,6 +42,15 @@ def test_run_demo_unknown_app(tmp_path):
     assert res["error_type"] == "unknown_app"
 
 
+def test_craft_tool_unknown_app_is_structured():
+    """An unknown app key must not raise KeyError out of the MCP tool."""
+    from democraft_mcp.server import craft
+
+    res = craft(operation="run_demo", app="nope")
+    assert res["success"] is False
+    assert res["known_apps"]
+
+
 @_needs("cad")
 def test_cad_demo_runs_headless(tmp_path):
     res = run_demo("cad", "house-plan", tmp_path)

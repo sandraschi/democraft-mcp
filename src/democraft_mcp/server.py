@@ -16,6 +16,8 @@ from fastmcp import FastMCP
 from fastmcp.server.providers import SkillsDirectoryProvider
 from pydantic import Field
 
+from .compat import check as compat_check
+from .compat import probe_version
 from .crafts import APPS, BY_KEY, DEFAULT_MODEL, ai_step, cli_run, run_demo
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -59,6 +61,13 @@ def craft(
     model: Annotated[str, Field(description="Ollama model for the AI step")] = DEFAULT_MODEL,
     prompt: Annotated[str, Field(description="Prompt for ai_flow")] = "",
     confirm: Annotated[bool, Field(description=" confirm=True executes shutdown")] = False,
+    force: Annotated[
+        bool,
+        Field(
+            description="craft_commands: accept the installed build as the new "
+            "baseline after an engine drift report"
+        ),
+    ] = False,
 ) -> dict:
     """Run Craft demos: list apps, check installs, execute headless CLI demos with a local-LLM step.
 
@@ -91,10 +100,19 @@ def craft(
             ],
         }
     if operation == "app_status":
-        rows = [
-            {"key": a.key, "name": a.name, "installed": a.installed(), "cli": str(a.cli_path)}
-            for a in APPS
-        ]
+        rows = []
+        for a in APPS:
+            ver = probe_version(a.cli_path) if a.installed() else {}
+            rows.append(
+                {
+                    "key": a.key,
+                    "name": a.name,
+                    "installed": a.installed(),
+                    "cli": str(a.cli_path),
+                    "version": ver.get("version"),
+                    "modified": ver.get("modified"),
+                }
+            )
         missing = [r["name"] for r in rows if not r["installed"]]
         return {
             "success": True,
@@ -103,7 +121,7 @@ def craft(
             "missing": missing,
         }
     if operation == "run_demo":
-        if not app:
+        if not app or app not in BY_KEY:
             return {"success": False, "message": "app is required", "known_apps": sorted(BY_KEY)}
         a = BY_KEY[app]
         demo_id = demo or (a.demos[0].id if a.demos else "")
@@ -118,14 +136,37 @@ def craft(
                 "message": f"{a.name} not installed",
                 "error_type": "wrappee_missing",
             }
-        res = cli_run(a.cli_path, ["commands", "--json"], OUTBOX)
-        if not res.get("success"):
-            res = cli_run(a.cli_path, ["commands"], OUTBOX)
-            res["flavor"] = "text (this CLI has no --json)"
+        chk = compat_check(a.cli_path, force=force)
+        if chk.get("drift"):
+            return {
+                "success": False,
+                "message": (
+                    f"{a.name} engine drift: {chk['drift']['from_version']} -> "
+                    f"{chk['drift']['to_version']}"
+                ),
+                "error_type": "engine_drift",
+                "app": app,
+                "drift": chk["drift"],
+                "recovery": (
+                    "Re-run the demo suite for this app, then repeat with force=True "
+                    "to accept the installed build as the new baseline."
+                ),
+            }
+        res: dict = {"success": False, "stdout": "", "argv": []}
+        for argv in (["commands", "--json"], ["tools", "--json"], ["commands"]):
+            res = cli_run(a.cli_path, argv, OUTBOX)
+            if res.get("success") and (res.get("stdout") or "").strip():
+                break
         return {
             "success": res.get("success", False),
-            "message": f"commands for {a.name}",
+            "message": f"catalog for {a.name} {chk.get('version') or ''}".strip(),
             "app": app,
+            "version": chk.get("version"),
+            "modified": chk.get("modified"),
+            "schema_hash": chk.get("schema_hash"),
+            "schema_kind": chk.get("schema_kind"),
+            "verbs": chk.get("verbs"),
+            "accepted_drift": chk.get("accepted"),
             "result": res,
         }
     if operation == "ollama_models":

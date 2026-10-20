@@ -22,6 +22,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from . import __version__
+from .compat import probe_version, recorded
 from .crafts import APPS, BY_KEY, DEFAULT_MODEL, run_demo
 from .flows import FlowError, FlowRunner, FlowStore
 from .jobs import JobEngine
@@ -140,9 +141,11 @@ def create_app(outbox: Path | None = None) -> FastAPI:
 
     @api.get("/api/crafts")
     def crafts() -> dict:
-        return {
-            "success": True,
-            "apps": [
+        apps = []
+        for a in APPS:
+            ver = probe_version(a.cli_path) if a.installed() else {}
+            base = recorded(a.cli_path) if a.installed() else None
+            apps.append(
                 {
                     "key": a.key,
                     "name": a.name,
@@ -152,6 +155,15 @@ def create_app(outbox: Path | None = None) -> FastAPI:
                     "clone_of": a.clone_of,
                     "description": a.description,
                     "gaps": list(a.gaps),
+                    "version": ver.get("version"),
+                    "modified": ver.get("modified"),
+                    "baseline_version": (base or {}).get("version"),
+                    "drift": bool(
+                        base
+                        and ver.get("version")
+                        and base.get("version")
+                        and base.get("version") != ver.get("version")
+                    ),
                     "demos": [
                         {
                             "id": d.id,
@@ -164,9 +176,8 @@ def create_app(outbox: Path | None = None) -> FastAPI:
                         for d in a.demos
                     ],
                 }
-                for a in APPS
-            ],
-        }
+            )
+        return {"success": True, "apps": apps}
 
     @api.post("/api/demos/run")
     def demos_run(req: DemoRequest) -> dict:
