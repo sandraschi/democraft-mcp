@@ -119,6 +119,36 @@ SEED_FLOWS: list[dict] = [
         ],
     },
     {
+        "id": "video-delivery",
+        "name": "Video delivery",
+        "description": "Cut, caption, hand off: sequence, SRT round-trip, EDL and XML interchange.",
+        "status": "ready",
+        "steps": [
+            {"app": "film", "demo": "timeline-cut", "note": "real NLE cut + H.264 export"},
+            {
+                "app": "film",
+                "demo": "captions-roundtrip",
+                "note": "SRT in, track read back, SRT out",
+            },
+            {
+                "app": "film",
+                "demo": "interchange-kit",
+                "note": "EDL + FCP7 XML + FCPXML with reports",
+            },
+        ],
+    },
+    {
+        "id": "animatic",
+        "name": "Animatic",
+        "description": "Graded stills and a shot board into a timed cut, plus poster frames.",
+        "status": "ready",
+        "steps": [
+            {"app": "photo", "demo": "plate-grade", "note": "graded stills"},
+            {"app": "film", "demo": "storyboard", "note": "EDL + AI shot board"},
+            {"app": "film", "demo": "poster-strip", "note": "three frames for the depot"},
+        ],
+    },
+    {
         "id": "lyric-sheet",
         "name": "Lyric sheet",
         "description": "Text, layout, PDF.",

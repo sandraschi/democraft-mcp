@@ -1,5 +1,22 @@
 # CHANGELOG.md
 
+## Unreleased (2026-10-20, film demos)
+
+Three new FilmCraft demos, each verified against 0.9.0 on this machine:
+
+- `interchange-kit` builds the two-clip cut, then exports EDL, FCP7 XML and FCPXML and keeps
+  each exporter's own report (EDL: one video track only, Lumetri not representable; FCP7:
+  generators written as FilmCraft effect ids, Lumetri curves unsupported; FCPXML: generators
+  become gaps, transitions on V1 only).
+- `captions-roundtrip` writes a two-cue SRT, imports it onto the built-in demo sequence in
+  one process, exports SRT again and lists the track with style and timing. Text survives;
+  times quantise to the sequence timebase (1,000 ms in, 1,001 ms out at 24 fps).
+- `poster-strip` renders 0 s, 3 s and 6 s at half scale.
+
+Two new flows: `video-delivery` (cut, caption, hand off) and `animatic` (graded stills, shot
+board, poster frames). `tests/test_flows.py` now compares against `len(SEED_FLOWS)` instead
+of a hard-coded 12, which is what broke when the catalog grew.
+
 ## Unreleased (2026-10-20, hands-in window)
 
 Hands-in runs now put the Craft app itself on screen: `run_demo(focus=True)` starts the GUI if

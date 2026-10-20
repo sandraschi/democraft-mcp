@@ -625,6 +625,33 @@ APPS: tuple[CraftApp, ...] = (
                 topic_prompt="Board a 3-shot storyboard about '{topic}' as JSON "
                 "list of {{shot, lens, action}}. No prose.",
             ),
+            Demo(
+                "interchange-kit",
+                "Demo 3: interchange kit (EDL, FCP7 XML, FCPXML)",
+                "Builds a cut, then hands it to other tools: EDL, FCP7 XML and "
+                "FCPXML, each with the exporter's own report of what cannot be "
+                "represented. Real handoff files, honest gaps.",
+                "",
+                "cli",
+                live=True,
+            ),
+            Demo(
+                "captions-roundtrip",
+                "Demo 4: captions round-trip (SRT in and out)",
+                "Imports a two-cue SRT onto the demo sequence, reads the caption "
+                "track back with its style and timing, exports SRT again and "
+                "checks the text survived.",
+                "",
+                "cli",
+            ),
+            Demo(
+                "poster-strip",
+                "Demo 5: poster strip (three frames)",
+                "Renders three stills from the cut at 0s, 3s and 6s - the frames "
+                "a README, depot card or thumbnail rail actually needs.",
+                "",
+                "cli",
+            ),
         ),
     ),
     CraftApp(
@@ -942,6 +969,15 @@ APPS = tuple(
 
 BY_KEY = {a.key: a for a in APPS}
 
+_DEMO_SRT = """1
+00:00:01,000 --> 00:00:03,000
+First caption line.
+
+2
+00:00:04,000 --> 00:00:06,000
+Second caption line.
+"""
+
 _FALLBACK_SVG = (
     '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">'
     '<ellipse cx="200" cy="120" rx="90" ry="60"/>'
@@ -1089,6 +1125,30 @@ def _find_vst3(cli: Path, work: Path, name: str) -> str:
             if plugin.get("name") == name:
                 return str(plugin.get("id"))
     return "subtractive_synth"
+
+
+def _film_build_cut(app, run_dir: Path, do) -> bool:
+    """Build the two-clip cut the handoff/poster demos work from."""
+    build = [
+        {"id": "file.newProject", "params": {"name": "Demo Cut"}},
+        {"id": "file.importDemoFootage", "params": {"scene": "OceanSunset"}},
+        {"id": "file.importDemoFootage", "params": {"scene": "Aurora"}},
+        {
+            "id": "file.newSequence",
+            "params": {
+                "name": "Demo Cut",
+                "width": 1280,
+                "height": 720,
+                "fps": 24,
+                "fromItems": [1, 2],
+            },
+        },
+    ]
+    (run_dir / "build.jsonl").write_text(
+        "\n".join(json.dumps(step) for step in build) + "\n", encoding="utf-8"
+    )
+    do(["run", "build.jsonl", "--save-as", "cut.fcproj", "--compact"])
+    return (run_dir / "cut.fcproj").is_file()
 
 
 def run_demo(
@@ -1617,6 +1677,43 @@ def run_demo(
                 "0.5",
             ]
         )
+    elif k == "film" and demo.id == "interchange-kit":
+        if _film_build_cut(app, run_dir, do):
+            for cmd, out in (
+                ("file.exportEdl", "cut.edl"),
+                ("file.exportFcp7Xml", "cut.xml"),
+                ("file.exportFcpxml", "cut.fcpxml"),
+            ):
+                do(["--project", "cut.fcproj", "exec", cmd, f"path={out}", "--compact"])
+    elif k == "film" and demo.id == "captions-roundtrip":
+        (run_dir / "subs.srt").write_text(_DEMO_SRT, encoding="utf-8")
+        script = [
+            {"id": "captions.import", "params": {"path": "subs.srt"}},
+            {"id": "captions.export", "params": {"path": "subs-out.srt"}},
+            {"id": "captions.list", "params": {}},
+        ]
+        (run_dir / "captions.jsonl").write_text(
+            "\n".join(json.dumps(step) for step in script) + "\n", encoding="utf-8"
+        )
+        # One process: the import has to live long enough for the export to see
+        # the track. Separate exec calls start from the saved project each time.
+        do(["--demo", "run", "captions.jsonl", "--compact"])
+    elif k == "film" and demo.id == "poster-strip":
+        if _film_build_cut(app, run_dir, do):
+            for sec in (0, 3, 6):
+                do(
+                    [
+                        "--project",
+                        "cut.fcproj",
+                        "render",
+                        "--seconds",
+                        str(sec),
+                        "--out",
+                        f"poster-{sec}s.png",
+                        "--scale",
+                        "0.5",
+                    ]
+                )
     elif k == "film":
         script = run_dir / "storyboard.jsonl"
         script.write_text(

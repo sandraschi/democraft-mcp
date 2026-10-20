@@ -8,13 +8,13 @@ import pytest
 from fastapi.testclient import TestClient
 
 from democraft_mcp.api import create_app
-from democraft_mcp.flows import FlowError, FlowStore, validate_flow
+from democraft_mcp.flows import SEED_FLOWS, FlowError, FlowStore, validate_flow
 
 
 def test_seed_catalog_loads(tmp_path: Path) -> None:
     store = FlowStore(tmp_path / "flows.json")
     flows = store.list()
-    assert len(flows) == 12
+    assert len(flows) == len(SEED_FLOWS)
     assert store.get("cover-factory") is not None
     assert store.get("title-sequence")["status"] == "exploratory"
 
@@ -54,7 +54,7 @@ def test_api_crud_and_blocked_run(tmp_path: Path) -> None:
     client = TestClient(create_app(tmp_path / "outbox"))
     listed = client.get("/api/flows").json()
     assert listed["success"] is True
-    assert len(listed["flows"]) == 12
+    assert len(listed["flows"]) == len(SEED_FLOWS)
 
     new = {
         "id": "api-flow",
