@@ -4,9 +4,21 @@ import { MockBadge } from "../components/AppLayout";
 import { api, apiBase } from "../lib/api";
 import { useBackend } from "../store/backend";
 
+interface FocusInfo {
+	ok: boolean;
+	reason?: string | null;
+	exe?: string;
+	window?: string;
+	launched?: boolean;
+	maximized?: boolean;
+	foreground?: boolean;
+	ms?: number;
+}
+
 interface RunResult {
 	success: boolean;
 	message: string;
+	focus?: FocusInfo | null;
 	ai_step?: {
 		success: boolean;
 		model?: string;
@@ -31,6 +43,7 @@ interface RunResult {
 interface LiveEvent {
 	id?: string;
 	kind: string;
+	focus?: FocusInfo;
 	app?: string;
 	demo?: string;
 	status?: string;
@@ -42,6 +55,16 @@ interface LiveEvent {
 	returncode?: number;
 	artifacts?: string[];
 	error?: string;
+}
+
+function focusLabel(focus?: FocusInfo): string {
+	if (!focus) return "app window: unknown";
+	if (!focus.ok)
+		return `app window: unavailable (${focus.reason ?? "unknown"})`;
+	const bits = [focus.window || "app", focus.launched ? "launched" : "raised"];
+	if (focus.maximized) bits.push("maximised");
+	if (!focus.foreground) bits.push("not foreground");
+	return `app window: ${bits.join(", ")}`;
 }
 
 export default function CraftPage() {
@@ -76,9 +99,15 @@ export default function CraftPage() {
 		setJobId("");
 		setLastDemo(demoId);
 		try {
+			const target = craft?.demos.find((d) => d.id === demoId);
 			const r = await api<RunResult>("/api/demos/run", {
 				method: "POST",
-				body: JSON.stringify({ app, demo: demoId, topic }),
+				body: JSON.stringify({
+					app,
+					demo: demoId,
+					topic,
+					focus: Boolean(target?.live),
+				}),
 			});
 			setResult(r);
 			setToast(
@@ -110,7 +139,12 @@ export default function CraftPage() {
 				message?: string;
 			}>("/api/jobs", {
 				method: "POST",
-				body: JSON.stringify({ app, demo: demoId, topic }),
+				body: JSON.stringify({
+					app,
+					demo: demoId,
+					topic,
+					focus: Boolean(craft?.demos.find((d) => d.id === demoId)?.live),
+				}),
 			});
 			if (!created.success || !created.job) {
 				throw new Error(created.message ?? "job rejected");
@@ -454,7 +488,9 @@ export default function CraftPage() {
 										? "queued"
 										: e.kind === "start"
 											? `start ${e.app}/${e.demo}`
-											: `$ ${(e.argv ?? []).join(" ").slice(0, 120)} (rc=${e.returncode}, ${e.ms}ms)`}
+											: e.kind === "focus"
+												? focusLabel(e.focus)
+												: `$ ${(e.argv ?? []).join(" ").slice(0, 120)} (rc=${e.returncode}, ${e.ms}ms)`}
 								{(e.artifacts ?? []).slice(-3).map((a) => (
 									<a
 										key={a}
@@ -486,6 +522,11 @@ export default function CraftPage() {
 					className="mt-4 rounded border border-slate-800 bg-slate-900 p-4 text-sm"
 				>
 					<p>{result.message}</p>
+					{result.focus && (
+						<p data-testid="result-focus" className="text-slate-300">
+							{focusLabel(result.focus)}
+						</p>
+					)}
 					<p className="text-slate-300">
 						AI step:{" "}
 						{result.ai_step?.skipped

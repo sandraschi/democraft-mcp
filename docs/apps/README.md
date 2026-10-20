@@ -36,6 +36,11 @@ Every demo here makes the same four promises:
    recorded as `skipped` with the error.
 4. **Failure is visible.** A non-zero CLI step is reported with its return code and stderr; the
    demo returns `success: false` rather than a green badge over a broken artifact.
+5. **Hands-in puts the app on screen.** A `live` demo starts the Craft app if needed, restores
+   and maximises its main window, and hands it the foreground before the first CLI step. The
+   work still runs through the headless CLI; `run.json` records `focus` (including
+   `foreground: false` when Windows refuses the handoff), so "the app was in front" is checkable
+   rather than assumed.
 
 The `capability-map` demo on every app is the escape hatch: it dumps the installed build's own
 `commands` (or `--help`) to `capabilities.txt`, so you can see what your version supports

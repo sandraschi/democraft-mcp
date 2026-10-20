@@ -90,7 +90,11 @@ Full catalog and the demo contract: [docs/apps/README.md](docs/apps/README.md).
 
 **Hands-in** is the page for demos worth watching. Six runs stream their CLI steps, and the
 craft page replays them with Play / Pause / Stop / Rewind and a 0.25x-4x speed slider while
-artifacts appear as they land.
+artifacts appear as they land. A hands-in run also starts the Craft app if it is not running,
+brings its window to the foreground and maximises it before the first CLI step, so the app is
+on screen while the demo runs. The demo still goes through the headless CLI - the run manifest
+records whether the window actually reached the foreground, so a refusal is visible rather
+than assumed.
 
 Sound makes the point literally: the melody demo writes `melody_dry.wav` and
 `melody_surge.wav`, so you hear the same notes with and without the reverb instead of reading

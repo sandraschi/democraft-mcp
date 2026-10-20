@@ -1,5 +1,23 @@
 # CHANGELOG.md
 
+## Unreleased (2026-10-20, hands-in window)
+
+Hands-in runs now put the Craft app itself on screen: `run_demo(focus=True)` starts the GUI if
+needed (sibling `<app>.exe`, detached), waits for its **titled** main window (an untitled
+startup window is a splash - maximising it leaves the real window normal-sized, which is what
+the first implementation did), then restores, maximises and foregrounds it before the first
+CLI step. The window work uses ctypes only, never raises, and reports `focus` in the result,
+the SSE/job event stream and `run.json`: `ok`, `window`, `launched`, `maximized`, `foreground`
+and `ms`. If Windows refuses the foreground handoff it tries the Alt-key unlock and records
+`foreground: false` instead of pretending.
+
+The webapp sets `focus` only for `live` demos (the hands-in set); MCP calls and multi-app flows
+default to `focus=False`, so an agent never steals the foreground. Verified on 2026-10-20 with
+FilmCraft launched from a cold start: `window: FilmCraft`, `maximized: true`,
+`foreground: true`, 1.46 s, and the window measured at `-7,-7,1288,728` with `IsZoomed` true.
+New `tests/test_windows.py` covers missing GUI, launch-then-find, splash rejection, no-window
+timeout and exception paths without touching a real window.
+
 ## Unreleased (2026-10-20, build probes)
 
 `craft_commands` and `/api/crafts` now read the version and command catalog
