@@ -19,15 +19,15 @@ structure check strict pass.
 ## Last concrete action
 
 2026-10-21:
-1. **ArtCraft October 21 release drift resolved**: 8 installed binaries bumped in
-   `C:\Program Files` (CADCraft 0.10.0, DeckCraft 0.9.0, EffectCraft 0.13.0, FilmCraft 0.10.0,
-   LightCraft 0.10.0, PdfCraft 0.10.1, VectorCraft 0.14.0, WordCraft 0.9.0). Tripwire drift
-   tested, accepted with `force=True`, and baseline state locked in `data/craft_compat.json`.
+1. **ArtCraft October 21 release drift resolved (wave 1 & 2)**: All 13 installed binaries
+   bumped in `C:\Program Files` across two waves (CADCraft 0.10.0, DeckCraft 0.9.0, DesignCraft 0.11.0,
+   EffectCraft 0.14.0, FigCraft 0.9.0, FilmCraft 0.10.0, GridCraft 0.10.0, LightCraft 0.11.0,
+   PdfCraft 0.10.1, PhotoCraft 0.12.0, SoundCraft 0.11.0, VectorCraft 0.14.0, WordCraft 0.9.0).
+   Tripwire drift tested, accepted with `force=True`, and baseline state locked in `data/craft_compat.json`.
 2. **Upstream tracking synchronization**: all 14 clones in `_upstream/` fetched and
    fast-forwarded to `upstream/main`.
-3. **Docs update**: `docs/WRAPPEE.md` and per-app pages (`cad.md`, `film.md`, `pdf.md`,
-   `vector.md`, `word.md`) updated with verified 0.10.0/0.14.0 builds, documented new verbs,
-   and patched gaps.
+3. **Docs update**: `docs/WRAPPEE.md` and all 13 per-app pages in `docs/apps/` updated with verified
+   latest builds, documented new verbs, and patched gaps.
 
 2026-10-20, two pieces of work:
 

@@ -4,7 +4,7 @@
 
 **What it is**: session audio - MIDI, mixing, effects, recording and export. The app's own
 comparison is Ableton Live / Pro Tools. Driven by
-`C:\Program Files\SoundCraft\soundcraft-cli.exe`.
+`C:\Program Files\SoundCraft\soundcraft-cli.exe` (verified against 0.11.0).
 
 This is the app where "hands-in" is literal: the artifacts are audio you can play.
 
@@ -45,3 +45,7 @@ Artifacts: `outbox/sound/melody-vst3/`.
   work, which is why the reverb demo is the one that ships.
 - No cloud collaboration.
 - The free plugin set the demos use is listed in [../FREE_VST3_SET.md](../FREE_VST3_SET.md).
+
+## Release 0.11.0 notes
+
+SoundCraft 0.11.0 includes audio-io empty chunk fixes, marker timing accuracy, and mono device fold-down enhancements. The built-in ident demo renders cleanly to WAV.

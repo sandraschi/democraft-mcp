@@ -4,7 +4,7 @@
 
 **What it is**: scene lighting and rendering from the command surface. The app's own comparison
 is Blender / Cinema 4D lighting. Driven by
-`C:\Program Files\LightCraft\lightcraft-cli.exe`.
+`C:\Program Files\LightCraft\lightcraft-cli.exe` (verified against 0.11.0).
 
 ## Demos
 
@@ -39,3 +39,7 @@ Artifacts: `outbox/light/grade-pelican/`.
 
 - No material or HDRI authoring in the catalog.
 - No bake pipeline.
+
+## Release 0.11.0 notes
+
+LightCraft 0.11.0 introduces background asset reloading, paged catalog reading for large scene collections, and clipping view performance improvements.

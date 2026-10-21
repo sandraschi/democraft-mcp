@@ -1,5 +1,21 @@
 # CHANGELOG.md
 
+## Unreleased (2026-10-21, Craft apps wave 2 releases)
+
+Second evening wave of ArtCraft releases updated in `C:\Program Files`, tripwire drift acknowledged and verified:
+
+- **PhotoCraft** `0.12.0` (924 verbs, was 0.11.1): adds Mixer Brush commands (`brush.mixer.load`,
+  `brush.mixer.clean`), History Brush state management (`history.setSource`, `stepForward`,
+  `stepBackward`, `clear`), and Smart-Filter stack support.
+- **DesignCraft** `0.11.0` (was 0.10.0): refactored placed-PDF rendering (`PDFR`).
+- **FigCraft** `0.9.0` (was 0.8.0): component set and variants discoverability, SVG live text fixes.
+- **GridCraft** `0.10.0` (was 0.9.0): MSI package upgrade, formula and calculation engine stability.
+- **EffectCraft** `0.14.0` (was 0.13.0): color grading panel integration and rendering pipeline updates.
+- **LightCraft** `0.11.0` (was 0.10.0): background asset reloading and paged catalog reading.
+- **SoundCraft** `0.11.0` (was 0.10.0): audio-io and marker timing fixes; verified with `ident-jingle`.
+- All 14 clones in `_upstream/` fast-forwarded to latest release tags.
+- Full CI test suite passing (73 / 73 tests, 61.89% coverage).
+
 ## Unreleased (2026-10-21, Craft apps drift & upstream sync)
 
 Eight ArtCraft apps updated in `C:\Program Files`, tripwire drift acknowledged and verified:
