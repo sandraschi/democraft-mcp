@@ -46,7 +46,7 @@ actually observed.
 - **Headless first.** Demos call `<app>-cli.exe` with `--project` / `run` / `render` style
   commands. The GUI does not need to be open.
 - **Never bundled.** Install the app yourself. Missing apps return `wrappee_missing`.
-- **CLI version matters.** FilmCraft 0.9.0 is what the timeline demo was verified against;
+- **CLI version matters.** FilmCraft 0.10.0 is what the timeline demo was verified against;
   `craft_commands(app=...)` prints the catalog your installed build actually exposes.
 - **Licence and cost are ArtCraft's.** Democraft adds no account, no token and no subscription.
   ArtCraft's own AI generation (where an app offers it) is account-gated. No demo here depends

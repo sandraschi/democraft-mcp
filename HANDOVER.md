@@ -1,6 +1,6 @@
 # HANDOVER — democraft-mcp
 
-**As of:** 2026-10-20. **Version:** 0.2.0b2 (uncommitted work below).
+**As of:** 2026-10-21. **Version:** 0.2.0b2.
 **Assess score:** 91 self-assessed; cold rescore still preferred.
 
 ## What this repo is
@@ -13,12 +13,23 @@ apps, one registry (`src/democraft_mcp/crafts.py`), one portmanteau MCP tool
 
 Ports: **11245** frontend, **11246** backend (registered in `WEBAPP_PORTS.md`).
 Gates: `just ci` (ruff check + format, pytest with coverage,
-tsc, biome, vite build). Last measured: 46 tests, 58.99% coverage, README
+tsc, biome, vite build). Last measured: 73 tests, 61.67% coverage, README
 structure check strict pass.
 
 ## Last concrete action
 
-2026-10-20, two pieces of work, both uncommitted:
+2026-10-21:
+1. **ArtCraft October 21 release drift resolved**: 8 installed binaries bumped in
+   `C:\Program Files` (CADCraft 0.10.0, DeckCraft 0.9.0, EffectCraft 0.13.0, FilmCraft 0.10.0,
+   LightCraft 0.10.0, PdfCraft 0.10.1, VectorCraft 0.14.0, WordCraft 0.9.0). Tripwire drift
+   tested, accepted with `force=True`, and baseline state locked in `data/craft_compat.json`.
+2. **Upstream tracking synchronization**: all 14 clones in `_upstream/` fetched and
+   fast-forwarded to `upstream/main`.
+3. **Docs update**: `docs/WRAPPEE.md` and per-app pages (`cad.md`, `film.md`, `pdf.md`,
+   `vector.md`, `word.md`) updated with verified 0.10.0/0.14.0 builds, documented new verbs,
+   and patched gaps.
+
+2026-10-20, two pieces of work:
 
 1. **FilmCraft NLE demo** (`film/timeline-cut`): real cut, cross dissolve,
    H.264 export, two rendered frames; the two film flows now point at it.

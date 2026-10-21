@@ -1,5 +1,21 @@
 # CHANGELOG.md
 
+## Unreleased (2026-10-21, Craft apps drift & upstream sync)
+
+Eight ArtCraft apps updated in `C:\Program Files`, tripwire drift acknowledged and verified:
+
+- **CADCraft** `0.10.0` (431 verbs, was 0.8.0): adds AutoCAD Express Tools (`breakline`,
+  `burst`, `mocoro`, `txt2mtxt`).
+- **FilmCraft** `0.10.0` (701 verbs, was 0.9.0): verified against `timeline-cut` and interchange flows;
+  introduces animatable graphic properties and track color labels.
+- **VectorCraft** `0.14.0` (792 verbs, was 0.13.1): adds `object.objectsOnPath.attach/expand/options`,
+  `select.color`, and `path.moveAnchor`.
+- **PdfCraft** `0.10.1` (148 verbs, was 0.9.0): adds `page.reverse`, annotation fills/borders, and local model weights.
+- **WordCraft** `0.9.0` (633 verbs, was 0.8.0): adds `list.multilevelPreset` (headings 1.1 / article / outline) and `edit.spike`.
+- **DeckCraft** `0.9.0`, **EffectCraft** `0.13.0`, and **LightCraft** `0.10.0` bumped and baselined.
+- All 14 third-party clones in `_upstream/` synchronized with remote `upstream/main`.
+- CI gate passes cleanly (73 tests, 61.67% coverage, Biome, TypeScript, Vite build).
+
 ## Unreleased (2026-10-20, film demos)
 
 Three new FilmCraft demos, each verified against 0.9.0 on this machine:
