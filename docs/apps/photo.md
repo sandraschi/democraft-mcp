@@ -4,7 +4,7 @@
 
 **What it is**: raster editing with layers, masks, filters, adjustment stacks and batch export.
 The app's own comparison is Adobe Photoshop. Driven by
-`C:\Program Files\PhotoCraft\photocraft-cli.exe`.
+`C:\Program Files\PhotoCraft\photocraft-cli.exe` (verified against 0.12.0).
 
 PhotoCraft carries the most demos because it is the clearest place to show a *non-destructive*
 stack, a batch action, a live drawing, and an honest model benchmark in one app.
@@ -58,3 +58,11 @@ Artifacts: `outbox/photo/<demo>/`.
 
 - No generative fill - PhotoCraft is an editor, not a generator.
 - No cloud asset sync.
+
+## Release 0.12.0 notes
+
+PhotoCraft 0.12.0 added:
+- Mixer Brush commands (`brush.mixer.load`, `brush.mixer.clean`) for painterly color mixing.
+- History Brush state commands (`history.setSource`, `history.stepBackward`, `history.stepForward`, `history.clear`) for selective history restoration across layers.
+- Smart-filter architecture for non-destructive filter stacks.
+- Content-Aware Move live preview.

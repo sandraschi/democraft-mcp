@@ -4,7 +4,7 @@
 
 **What it is**: page layout with threaded stories, facing pages, styles, tables and footnotes,
 exporting PDF and EPUB. The app's own comparison is Adobe InDesign. Driven by
-`C:\Program Files\DesignCraft\designcraft-cli.exe`.
+`C:\Program Files\DesignCraft\designcraft-cli.exe` (verified against 0.11.0).
 
 ## Demos
 
@@ -42,5 +42,6 @@ Artifacts: `outbox/design/<demo>/`.
 - No cloud collaboration or review.
 - Book sync is script-level, not a UI workflow.
 
-The wider book-pipeline plan and its edge cases are tracked in the repo's design notes
-(`docs/PLAN.md`, Phase 4).
+## Release 0.11.0 notes
+
+DesignCraft 0.11.0 refactored placed-PDF rendering (`PDFR`), sharing PDF rendering primitives across engines to improve fidelity when importing complex vector PDFs into multipage layouts.

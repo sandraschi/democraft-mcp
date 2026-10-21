@@ -4,7 +4,7 @@
 
 **What it is**: workbook engine - formulas, charts, pivots, sparklines, import/export. The
 app's own comparison is Microsoft Excel. Driven by
-`C:\Program Files\GridCraft\gridcraft-cli.exe`.
+`C:\Program Files\GridCraft\gridcraft-cli.exe` (verified against 0.10.0).
 
 ## Demos
 
@@ -41,6 +41,10 @@ Artifacts: `outbox/grid/homepage-grid/`.
 
 - No VBA/macro compatibility.
 - No `.xlsx` round-trip verified (export is the verified direction).
+
+## Release 0.10.0 notes
+
+GridCraft 0.10.0 improves calculation stability across dynamic array formulas and chart generation.
 
 The Studio page embeds GridCraft's **web build**; that is separate from these CLI demos - see
 the repo README.

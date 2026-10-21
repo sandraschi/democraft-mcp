@@ -4,7 +4,7 @@
 
 **What it is**: motion-graphics projects - keyframes, expressions, cameras, audio - rendered
 headless. The app's own comparison is Adobe After Effects. Driven by
-`C:\Program Files\EffectCraft\effectcraft-cli.exe`.
+`C:\Program Files\EffectCraft\effectcraft-cli.exe` (verified against 0.14.0).
 
 ## Demos
 
@@ -41,6 +41,10 @@ Artifacts: `outbox/effect/title-card/`.
 
 - No particle system in the command catalog.
 - No third-party plugin ecosystem.
+
+## Release 0.14.0 notes
+
+EffectCraft 0.14.0 introduces the color grading panel, color grading effect parameters, and rendering pipeline updates.
 
 The demo renders a still, not a sequence. That is the scope of this demo - the title spec and
 the still are what it verifies - not a claim that the engine cannot animate.
