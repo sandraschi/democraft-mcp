@@ -3,7 +3,7 @@
 [All apps](README.md) | [Repo README](../../README.md)
 
 **What it is**: document editing with styles, tables and PDF export. The app's own comparison is
-Microsoft Word. Driven by `C:\Program Files\WordCraft\wordcraft-cli.exe`.
+Microsoft Word. Driven by `C:\Program Files\WordCraft\wordcraft-cli.exe` (verified against 0.9.0).
 
 ## Demos
 
@@ -40,3 +40,10 @@ Artifacts: `outbox/word/demo-report/`.
 - No general DOCX import/export verbs in the command catalog - the demo exports through the
   Report template, which is the verified direction.
 - No image-placement verbs.
+
+## Release 0.9.0 notes
+
+WordCraft 0.9.0 added key layout and clipboard verbs:
+- `list.multilevelPreset`: Links styles to multilevel numbering presets (`headings` 1 / 1.1 / 1.1.1, `article`, `outlineHeadings`, or `chapter`), resolving the previous gap in structured outline numbering.
+- `edit.spike` & `edit.insertSpike`: Word's cumulative "Spike" buffer that gathers multiple distinct text selections and pastes them as a compiled block.
+- `view.interfaceTheme`: Theme selection verb.

@@ -3,7 +3,7 @@
 [All apps](README.md) | [Repo README](../../README.md)
 
 **What it is**: vector paths, gradients, text, SVG/PDF export. The app's own comparison is Adobe
-Illustrator. Driven by `C:\Program Files\VectorCraft\vectorcraft-cli.exe`.
+Illustrator. Driven by `C:\Program Files\VectorCraft\vectorcraft-cli.exe` (verified against 0.14.0).
 
 ## Demos
 
@@ -42,3 +42,12 @@ Artifacts: `outbox/vector/pelican-vector/`.
 
 - No boolean path operations in the catalog.
 - No plugin ecosystem.
+
+## Release 0.14.0 notes
+
+VectorCraft 0.14.0 added 7 new verbs:
+- `object.objectsOnPath.attach`: Attaches and distributes objects along arbitrary paths, following curve orientations.
+- `object.objectsOnPath.expand` & `object.objectsOnPath.options`: Configuration and baking of path-attached groups.
+- `select.color`: Global selection by fill and/or stroke hex color (`#rrggbb`).
+- `path.moveAnchor`: Precise programmatic repositioning of path anchor coordinates.
+- `edit.clearHistory` & `library.moveGroup`.

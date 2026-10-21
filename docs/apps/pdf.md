@@ -4,17 +4,16 @@
 
 **What it is**: PDF operations from the CLI - the working set the other crafts hand their
 exports to. The app's own comparison is Adobe Acrobat Pro. Driven by
-`C:\Program Files\PdfCraft\pdfcraft-cli.exe`.
+`C:\Program Files\PdfCraft\pdfcraft-cli.exe` (verified against 0.10.1).
 
 ## Demos
 
 | Demo | What actually runs | Artifacts | AI step |
 |---|---|---|---|
 | `portfolio` | Combines the bundled demo PDFs into one portfolio and renders a thumbnail; the local model names four sections for your subject. | combined PDF, thumbnail PNG, `brief.md` | four section names |
-| `capability-map` | This CLI has no `commands` verb, so the demo falls back to `--help` and records that. | `capabilities.txt` | none |
+| `capability-map` | Discoverable via `tools --json` (or falling back to `--help`). | `capabilities.txt` | none |
 
-The fallback matters: `capabilities.txt` is honest about being `--help` output, not a command
-catalog the app does not publish.
+The discovery ladder walks `tools --json` to inspect the installed tool schemas, falling back to `--help` if needed.
 
 ## Hands-in / Hands-out
 
@@ -38,5 +37,11 @@ Artifacts: `outbox/pdf/portfolio/`.
 
 ## Observed gaps
 
-- No command catalog (the CLI has no `commands` verb).
-- Verbs beyond the shipped set are not discoverable from the app.
+- Shipped CLI exposes operations primarily through MCP `tools --json` rather than a standard `commands` subverb.
+
+## Release 0.10.1 notes
+
+PdfCraft 0.10.1 added:
+- `page.reverse`: Reverses the order of pages across specified ranges or the entire document.
+- Shipped local inference weights in `models/` for offline OCR and layout extraction.
+- Fills and border widths on callouts and annotation text boxes.

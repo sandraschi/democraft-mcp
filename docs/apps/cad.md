@@ -4,7 +4,7 @@
 
 **What it is**: 2D drafting with a scripted command surface - metric plans, elevations, room
 schedules, DXF/PDF/SVG export. The app's own comparison is AutoCAD / BricsCAD. Driven by
-`C:\Program Files\CADCraft\cadcraft-cli.exe`.
+`C:\Program Files\CADCraft\cadcraft-cli.exe` (verified against 0.10.0).
 
 ## Demos
 
@@ -37,6 +37,14 @@ Artifacts: `outbox/cad/house-plan/`.
 
 - No AutoLISP dialect (generic scripting only).
 - 2D engine: no true isometric or 3D solids.
-- No dynamic-block parametrics in the catalog.
+- Dynamic-block parametrics are scriptable via Express Tools (`burst`, `mocoro`, `breakline`), but full UI dynamic grip authoring remains desktop-only.
 
 These are limits of the installed CLI, not a roadmap.
+
+## Release 0.10.0 notes
+
+CADCraft 0.10.0 added AutoCAD Express Tools verbs:
+- `breakline`: Draws standard architectural zigzag break lines with midpoint/size options.
+- `burst`: Explodes block references while preserving attribute text values (unlike standard explode).
+- `mocoro`: Move, copy, rotate, and scale in a single command invocation.
+- `txt2mtxt`: Converts and combines single-line TEXT into multiline MTEXT blocks.

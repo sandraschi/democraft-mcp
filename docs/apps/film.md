@@ -4,7 +4,7 @@
 
 **What it is**: timeline editing - sequences, transitions, keyframes, audio, colour, subtitles
 and proxy workflows. The app's own comparison is Adobe Premiere Pro. Driven by
-`C:\Program Files\FilmCraft\filmcraft-cli.exe` (verified against 0.9.0).
+`C:\Program Files\FilmCraft\filmcraft-cli.exe` (verified against 0.10.0).
 
 ## Demos
 
@@ -22,7 +22,7 @@ return code.
 
 ## What the handoff actually costs
 
-Verified on 0.9.0, from the exporters' own reports rather than from documentation:
+Verified on 0.10.0 (and 0.9.0 baseline), from the exporters' own reports rather than from documentation:
 
 - **EDL**: one video track only, so other video tracks are dropped; synthetic demo media is
   written as reel `AX`; a `Lumetri Color` effect cannot be represented at all. Transitions
