@@ -4,7 +4,7 @@
 
 **What it is**: interface design with frames, auto layout, components, variants, styles and
 prototyping. The app's own comparison is Figma. Driven by
-`C:\Program Files\FigCraft\figcraft-cli.exe` (verified against 0.9.0).
+`C:\Program Files\FigCraft\figcraft-cli.exe` (verified against 0.11.2).
 
 ## Demos
 
@@ -41,9 +41,16 @@ Artifacts: `outbox/fig/landing-page/`.
 - No community/plugin marketplace.
 - No cloud file history.
 
-## Release 0.9.0 notes
+## Release notes watched
 
 FigCraft 0.9.0 added:
 - Component set and variant discoverability improvements.
 - Fixes to SVG export for live text capitalization and subpath reversal.
 - Pages scroll area support.
+
+FigCraft 0.10.0 (2026-10-22): infra only (CI/packaging/Sonar), no CLI surface change.
+FigCraft 0.11.2 (2026-10-25): Dev Mode tail, M12 Boards whiteboard kind, i18n reporting,
+krilla PDF export; still no CLI surface change.
+
+Retested 2026-10-25 on 0.11.2: `file.newFromTemplate` landing-page + `text.set` id 24
+both `ok:true`, render 1930x2980. The demo path is unchanged.
