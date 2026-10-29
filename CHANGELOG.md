@@ -1,4 +1,10 @@
-# CHANGELOG.md
+﻿# CHANGELOG.md
+
+## Unreleased (2026-10-28, ArtCraft 13-app release)
+
+- **Modal handling for hands-in runs.** Probed all GUIs: no Win32 dialogs. The only modal found is SoundCraft's in-window Recover Unsaved Work prompt from a stale autosave; Escape does not dismiss it. windows.quarantine_recovery now moves stale `Autosave`/`Recovery` entries to `%LOCALAPPDATA%\democraft-mcp\recovery_quarantine` before launching a GUI that is not running (moved, never deleted); the result is reported as `recovery_quarantine` in the focus info. FigCraft was not probed (user instance running).
+- **GridCraft demo pivot-report**: PivotTable, calculated field and bound PivotChart (insert.pivotTable, pivot.calculatedField, insert.pivotChart), XLSX + PDF. Verified on GridCraft 0.13.x, PDF values checked.
+- Drift baselines NOT yet acknowledged: the tripwire still reports the new builds (CADCraft 0.14.0 etc.), which is why `test_craft_commands_cad` fails until acknowledged.
 
 ## Unreleased (2026-10-21, Craft apps wave 2 releases)
 
