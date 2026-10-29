@@ -11,10 +11,15 @@ import pytest
 
 from democraft_mcp import windows
 
+_REAL_QUARANTINE = windows.quarantine_recovery
+
 
 @pytest.fixture(autouse=True)
 def on_windows(monkeypatch):
     monkeypatch.setattr(windows, "IS_WINDOWS", True)
+    monkeypatch.setattr(
+        windows, "quarantine_recovery", lambda *a, **k: {"moved": [], "dest": None, "error": None}
+    )
 
 
 def _cli(tmp_path: Path) -> Path:
@@ -143,3 +148,29 @@ def test_window_failure_never_raises(tmp_path, monkeypatch):
     assert res["ok"] is False
     assert res["reason"] == "error"
     assert "EnumWindows exploded" in res["error"]
+
+
+def test_quarantine_moves_stale_autosave_and_recovery(tmp_path):
+    appdata = tmp_path / "AppData"
+    auto = appdata / "SoundCraft" / "Autosave" / "Untitled 1"
+    auto.mkdir(parents=True)
+    (auto / "session.scraft").write_text("x", encoding="utf-8")
+    rec = appdata / "SoundCraft" / "Recovery" / "run-1-0"
+    rec.mkdir(parents=True)
+    (rec / "lock").write_text("", encoding="utf-8")
+    got = _REAL_QUARANTINE("SoundCraft", appdata, tmp_path / "q")
+    assert got["error"] is None
+    assert sorted(got["moved"]) == ["Autosave/Untitled 1", "Recovery/run-1-0"]
+    assert not auto.exists() and not rec.exists()
+    kept = Path(got["dest"]) / "Autosave" / "Untitled 1" / "session.scraft"
+    assert kept.read_text(encoding="utf-8") == "x"
+
+
+def test_quarantine_is_a_noop_without_stale_state(tmp_path):
+    got = _REAL_QUARANTINE("FilmCraft", tmp_path / "AppData", tmp_path / "q")
+    assert got == {"moved": [], "dest": None, "error": None}
+
+
+def test_app_data_name_is_install_folder():
+    cli = Path(r"C:\Program Files\SoundCraft\soundcraft-cli.exe")
+    assert windows.app_data_name(cli) == "SoundCraft"

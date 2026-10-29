@@ -143,3 +143,12 @@ def test_prompts_meet_3_4_100():
     assert len(system.split()) >= 3000, len(system.split())
     assert len(user.split()) >= 4000, len(user.split())
     assert len(examples) >= 100, len(examples)
+
+
+def test_grid_pivot_report_is_registered_and_deterministic():
+    from democraft_mcp import crafts
+
+    grid = next(a for a in crafts.APPS if a.key == "grid")
+    demo = next(d for d in grid.demos if d.id == "pivot-report")
+    assert demo.ai_prompt == ""
+    assert not demo.topics
