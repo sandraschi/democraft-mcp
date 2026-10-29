@@ -20,6 +20,8 @@ No third-party dependencies; ctypes only.
 from __future__ import annotations
 
 import ctypes
+import os
+import shutil
 import subprocess
 import sys
 import time
@@ -172,6 +174,56 @@ def _wait_for_window(
     return found
 
 
+RECOVERY_SUBDIRS = ("Autosave", "Recovery")
+
+
+def app_data_name(cli_path: Path) -> str:
+    """Install folder name doubles as the app's AppData folder (`SoundCraft`)."""
+    return cli_path.parent.name
+
+
+def quarantine_recovery(
+    app_name: str, appdata: Path | None = None, dest_root: Path | None = None
+) -> dict:
+    """Move stale autosave/recovery entries aside before the GUI starts.
+
+    egui apps show an in-window "Recover Unsaved Work" prompt when a previous
+    run left an autosave. It cannot be seen by EnumWindows and Escape does not
+    dismiss it, so it would sit over the demo. Only call this when the GUI is
+    not running. Entries are moved, never deleted, so nothing is lost.
+    """
+    report: dict = {"moved": [], "dest": None, "error": None}
+    try:
+        base = appdata or Path(os.environ.get("APPDATA", ""))
+        root = base / app_name
+        entries = []
+        for sub in RECOVERY_SUBDIRS:
+            d = root / sub
+            if d.is_dir():
+                entries.extend(p for p in d.iterdir())
+        if not entries:
+            return report
+        qroot = dest_root or (
+            Path(os.environ.get("LOCALAPPDATA", str(base)))
+            / "democraft-mcp"
+            / "recovery_quarantine"
+        )
+        dest = qroot / app_name / time.strftime("%Y%m%d-%H%M%S")
+        dest.mkdir(parents=True, exist_ok=True)
+        report["dest"] = str(dest)
+        for p in entries:
+            target = dest / p.parent.name / p.name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                shutil.move(str(p), str(target))
+                report["moved"].append(f"{p.parent.name}/{p.name}")
+            except OSError as exc:
+                report.setdefault("failed", []).append(f"{p.name}: {exc}")
+    except Exception as exc:  # noqa: BLE001 - never block a demo on housekeeping
+        report["error"] = f"{type(exc).__name__}: {exc}"
+    return report
+
+
 def ensure_foreground(cli_path: Path, timeout_s: float = 20.0, poll_s: float = 0.25) -> dict:
     """Start/raise/maximise the app window. Never raises; always reports."""
     started = time.time()
@@ -182,9 +234,11 @@ def ensure_foreground(cli_path: Path, timeout_s: float = 20.0, poll_s: float = 0
         return {"ok": False, "reason": "gui_missing", "exe": str(exe)}
 
     launched = False
+    recovery = None
     try:
         found = _find_window(exe)
         if found is None:
+            recovery = quarantine_recovery(app_data_name(cli_path))
             _launch(exe)
             launched = True
         deadline = started + max(0.0, timeout_s)
@@ -220,6 +274,7 @@ def ensure_foreground(cli_path: Path, timeout_s: float = 20.0, poll_s: float = 0
         "pid": pid,
         "window": title,
         "launched": launched,
+        "recovery_quarantine": recovery,
         "maximized": _is_zoomed(hwnd),
         "foreground": has_foreground and _is_foreground(hwnd),
         "ms": int((time.time() - started) * 1000),

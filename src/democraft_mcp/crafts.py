@@ -674,6 +674,16 @@ APPS: tuple[CraftApp, ...] = (
                 "short plain values, numbers bare]]}}. No prose.",
                 live=True,
             ),
+            Demo(
+                "pivot-report",
+                "Demo 2: pivot report (PivotTable, calculated field, chart)",
+                "A regional sales table becomes a PivotTable (rows Region, columns "
+                "Product, sum of Sales), gains a calculated field (Sales / Units) "
+                "and a PivotChart bound to the report, then exports XLSX and PDF. "
+                "Deterministic, no AI step.",
+                "",
+                "cli",
+            ),
         ),
     ),
     CraftApp(
@@ -1724,6 +1734,62 @@ def run_demo(
         do(["run", str(script)])
         # NOTE: inspect/project probes live in separate processes with no open
         # project, so the exported EDL above is the demo artifact, not the probe.
+    elif k == "grid" and demo.id == "pivot-report":
+        import json as _json
+
+        table = [
+            ["Region", "Product", "Sales", "Units"],
+            ["North", "Alpha", "1200", "10"],
+            ["North", "Beta", "800", "8"],
+            ["South", "Alpha", "950", "9"],
+            ["South", "Beta", "1500", "14"],
+            ["East", "Alpha", "700", "6"],
+            ["East", "Beta", "1100", "11"],
+            ["West", "Alpha", "1300", "12"],
+            ["West", "Beta", "600", "5"],
+        ]
+        seed = ["run"]
+        for r, row in enumerate(table, start=1):
+            for c, value in enumerate(row):
+                cell = _json.dumps({"cell": f"{'ABCD'[c]}{r}", "input": value})
+                seed += ["--cmd", f"cell.set={cell}"]
+        do([*seed, "--out", "data.xlsx"])
+        pivot = {
+            "source": f"Sheet1!$A$1:$D${len(table)}",
+            "rows": ["Region"],
+            "columns": ["Product"],
+            "values": [{"field": "Sales", "func": "sum"}],
+            "name": "SalesPivot",
+        }
+        do(
+            [
+                "run",
+                "--in",
+                "data.xlsx",
+                "--cmd",
+                f"insert.pivotTable={_json.dumps(pivot)}",
+                "--cmd",
+                "pivot.calculatedField="
+                + _json.dumps(
+                    {"pivot": "SalesPivot", "name": "PerUnit", "formula": "=Sales/Units"}
+                ),
+                "--cmd",
+                "insert.pivotChart="
+                + _json.dumps(
+                    {
+                        "pivot": "SalesPivot",
+                        "type": "column",
+                        "title": "Sales by region",
+                        "at": "H2",
+                    }
+                ),
+                "--cmd",
+                f"file.saveAs={_json.dumps({'path': 'pivot-report.pdf'})}",
+                "--out",
+                "pivot-report.xlsx",
+            ]
+        )
+        do(["cat", "pivot-report.xlsx", "--csv"])
     elif k == "grid":
         import json as _json
 
