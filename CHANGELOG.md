@@ -4,7 +4,8 @@
 
 - **Modal handling for hands-in runs.** Probed all GUIs: no Win32 dialogs. The only modal found is SoundCraft's in-window Recover Unsaved Work prompt from a stale autosave; Escape does not dismiss it. windows.quarantine_recovery now moves stale `Autosave`/`Recovery` entries to `%LOCALAPPDATA%\democraft-mcp\recovery_quarantine` before launching a GUI that is not running (moved, never deleted); the result is reported as `recovery_quarantine` in the focus info. FigCraft was not probed (user instance running).
 - **GridCraft demo pivot-report**: PivotTable, calculated field and bound PivotChart (insert.pivotTable, pivot.calculatedField, insert.pivotChart), XLSX + PDF. Verified on GridCraft 0.13.x, PDF values checked.
-- Drift baselines NOT yet acknowledged: the tripwire still reports the new builds (CADCraft 0.14.0 etc.), which is why `test_craft_commands_cad` fails until acknowledged.
+- **FigCraft demo `retro-board`** (`file.newBoard`, `board.template`, `board.sticky`, `board.stamp`, `board.table`; sticky text verified via `node.get`) and **WordCraft demo `scale-fonts`** (`design.scaleFontSizes` +25%, style sizes verified in styles.xml, before/after renders).
+- Drift baselines acknowledged (force) for all 13 apps after every non-live demo passed on the new builds (CAD 0.14.0, Deck 0.12.0, Design 0.14.0, Effect 0.18.0, Fig 0.12.1, Film 0.14.0, Grid 0.13.0, Sound 0.14.0, Word 0.12.0, Pdf 0.15.0, Light 0.15.0, Photo 0.17.0, Vector 0.18.0). Live and AI-driven demos were not re-run.
 
 ## Unreleased (2026-10-21, Craft apps wave 2 releases)
 
