@@ -596,6 +596,15 @@ APPS: tuple[CraftApp, ...] = (
                 "F3 title: ... / F3 text: ... / Quote: ... (illustrative) / CTA title: ... / "
                 "CTA sub: ... Keep every line under 25 words.",
             ),
+            Demo(
+                "retro-board",
+                "Demo 2: retrospective board (stickies, stamp, table)",
+                "A FigCraft board built headless from the Retrospective template: "
+                "three sticky notes, a stamp and a small action table, saved as "
+                ".figcraft and rendered to PNG. Deterministic, no AI step.",
+                "",
+                "cli",
+            ),
         ),
     ),
     CraftApp(
@@ -729,6 +738,16 @@ APPS: tuple[CraftApp, ...] = (
                 topics=WORD_TOPICS,
                 topic_prompt="Write a one-page report on '{topic}' as markdown: a # title "
                 "line, then 4-6 short paragraphs. No preamble.",
+            ),
+            Demo(
+                "scale-fonts",
+                "Demo 2: scale the type (+25% across every style)",
+                "A short brief is converted to DOCX, rendered, then every style's "
+                "font size is scaled by 25% with design.scaleFontSizes, saved and "
+                "rendered again so before and after sit side by side. "
+                "Deterministic, no AI step.",
+                "",
+                "cli",
             ),
         ),
     ),
@@ -1489,6 +1508,48 @@ def run_demo(
         still = do(["render-frame", "--out", "title-card.png"])
         if not still.get("success"):
             steps[-1]["note"] = "render needs an open project - capability map is the demo"
+    elif k == "fig" and demo.id == "retro-board":
+        import json as _json
+
+        board_steps = [
+            {"command": "file.newBoard", "params": {"name": "Retro"}},
+            {"command": "board.template", "params": {"name": "retrospective", "x": 0, "y": 0}},
+            {
+                "command": "board.sticky",
+                "params": {"x": 80, "y": 140, "text": "Headless runs are fast", "color": "green"},
+            },
+            {
+                "command": "board.sticky",
+                "params": {
+                    "x": 420,
+                    "y": 140,
+                    "text": "Modals hide inside egui windows",
+                    "color": "orange",
+                },
+            },
+            {
+                "command": "board.sticky",
+                "params": {"x": 860, "y": 140, "text": "Probe every app", "color": "blue"},
+            },
+            {"command": "board.stamp", "params": {"x": 300, "y": 200, "stamp": "thumbsUp"}},
+            {
+                "command": "board.table",
+                "params": {
+                    "x": 80,
+                    "y": 640,
+                    "cells": [
+                        ["Owner", "Action"],
+                        ["Sandra", "Quarantine autosaves"],
+                        ["Claude", "Probe all GUIs"],
+                    ],
+                },
+            },
+        ]
+        script = run_dir / "board.jsonl"
+        script.write_text("\n".join(_json.dumps(s) for s in board_steps) + "\n", encoding="utf-8")
+        built = do(["run", str(script), "--out", "board.figcraft"])
+        if built.get("success") and (run_dir / "board.figcraft").is_file():
+            do(["render", str(run_dir / "board.figcraft"), "-o", "board.png"])
     elif k == "fig":
         import json as _json
 
@@ -1963,6 +2024,33 @@ def run_demo(
             do(["info", "ident.wav"])
         else:
             steps[-1]["note"] = "bounce produced no file - inspect JSON is the demo"
+    elif k == "word" and demo.id == "scale-fonts":
+        import json as _json
+
+        (run_dir / "brief.md").write_text(
+            "# Field notes\n\n"
+            "## Findings\n\n"
+            "Headless runs are fast, and every verb is reachable from the command line.\n\n"
+            "## Next steps\n\n"
+            "Probe each app for modals before a hands-in run, then scale the type for print.\n",
+            encoding="utf-8",
+        )
+        do(["convert", "brief.md", "brief.docx"])
+        do(["render", "brief.docx", "before.png", "--page", "1"])
+        scaled = do(
+            [
+                "run",
+                "--file",
+                "brief.docx",
+                "--cmd",
+                "design.scaleFontSizes=" + _json.dumps({"percent": 25}),
+                "--save",
+                "scaled.docx",
+            ]
+        )
+        if scaled.get("success") and (run_dir / "scaled.docx").is_file():
+            do(["render", "scaled.docx", "after.png", "--page", "1"])
+            do(["info", "scaled.docx"])
     elif k == "word":
         brief = run_dir / "brief.md"
         if ai.get("success") and ai.get("text"):
