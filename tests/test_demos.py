@@ -152,3 +152,14 @@ def test_grid_pivot_report_is_registered_and_deterministic():
     demo = next(d for d in grid.demos if d.id == "pivot-report")
     assert demo.ai_prompt == ""
     assert not demo.topics
+
+
+def test_new_deterministic_demos_are_registered():
+    from democraft_mcp import crafts
+
+    wanted = {"grid": "pivot-report", "fig": "retro-board", "word": "scale-fonts"}
+    for key, demo_id in wanted.items():
+        app = next(a for a in crafts.APPS if a.key == key)
+        demo = next(d for d in app.demos if d.id == demo_id)
+        assert demo.ai_prompt == ""
+        assert not demo.topics
