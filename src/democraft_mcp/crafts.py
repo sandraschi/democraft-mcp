@@ -712,6 +712,18 @@ APPS: tuple[CraftApp, ...] = (
                 "cli",
                 added="2026-11-01",
             ),
+            Demo(
+                "vba-to-macro",
+                "Demo 4: VBA module to typed macros",
+                "A four-procedure VBA module goes to the local model, which translates "
+                "each procedure into a GridCraft macro. Every macro is saved, dry-run "
+                "with macro.check and only then run. The report says per procedure "
+                "whether it validated, was refused (with the engine's reason) or cannot "
+                "be a macro at all (the one that shells out). VBA is never executed.",
+                "",
+                "cli",
+                added="2026-11-01",
+            ),
         ),
     ),
     CraftApp(
@@ -948,7 +960,7 @@ HERO: dict[str, dict[str, object]] = {
         "description": "2D drafting with a scripted command surface: metric plans, "
         "elevations, room schedules, DXF/PDF/SVG export.",
         "gaps": (
-            "No AutoLISP dialect (generic scripting only)",
+            "AutoLISP: core language, defun c:, command, entmake; no VLAX/ActiveX",
             "2D engine: no true isometric or 3D solids",
             "No dynamic-block parametrics in the catalog",
         ),
@@ -1056,7 +1068,7 @@ HERO: dict[str, dict[str, object]] = {
         "description": "Parametric 3D CAD: constrained sketches, a feature timeline, "
         "parameters, assemblies, sheet metal, STEP/IGES/3MF/STL, GPU renders.",
         "gaps": (
-            "Community member (Tangency Labs), not a Storytold build",
+            "ArtCraft community project (Tangency Labs), not a Storytold build",
             "Self-updates in place: expect the engine version to move between runs",
             "No CAM or simulation workspaces",
         ),
@@ -1110,7 +1122,7 @@ _FALLBACK_SVG = (
 )
 
 
-def ai_step(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 90) -> dict:
+def ai_step(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 90, chars: int = 4000) -> dict:
     """One local-LLM call. Never raises: failure is a declared skip."""
     import httpx
 
@@ -1125,7 +1137,7 @@ def ai_step(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 90) -> dict:
         return {
             "success": True,
             "model": model,
-            "text": r.json().get("response", "")[:4000],
+            "text": r.json().get("response", "")[:chars],
             "ms": int((time.time() - started) * 1000),
             "skipped": False,
         }
@@ -1456,6 +1468,7 @@ def run_demo(
                 do_with=do_with,
                 inputs=inputs,
                 program_files=PROGRAM_FILES,
+                model=model,
             )
         )
         if early is not None:

@@ -148,3 +148,66 @@ def test_gallery_endpoint_shape(tmp_path):
     client = TestClient(create_app(outbox=tmp_path))
     tiles = client.get("/api/gallery").json()["tiles"]
     assert [(t["app"], t["demo"], t["file"]) for t in tiles] == [("cad", "house-plan", "plan.png")]
+
+
+# --------------------------------------------------------------------------- vba to macro
+
+
+def test_vba_module_splits_into_the_four_procedures():
+    from democraft_mcp.vba_demo import PROCEDURES, split_procedures
+
+    parts = split_procedures()
+    assert tuple(parts) == PROCEDURES
+    assert "Shell" in parts["ExportBackup"]
+    assert all(src.rstrip().endswith("End Sub") for src in parts.values())
+
+
+def test_brief_is_per_procedure_and_names_the_table_shape():
+    from democraft_mcp.vba_demo import TABLE_NOTE, brief
+
+    text = brief("AddTotals")
+    assert "Sub AddTotals" in text and "Sub FormatHeader" not in text
+    assert TABLE_NOTE in text
+    assert "not valid JSON" in brief("AddTotals", retry=True)
+
+
+def test_parse_object_tolerates_fences_and_rejects_garbage():
+    assert recipes._parse_object('```json\n{"macro": null, "reason": "x"}\n```') == {
+        "macro": None,
+        "reason": "x",
+    }
+    assert recipes._parse_object("no json here") is None
+    assert recipes._parse_object('{"macro": {') is None
+
+
+def test_engine_reason_strips_the_cli_step_prefix():
+    res = {"stderr": "gridcraft-cli: step 7 (--cmd, macro.save): invalid parameters: bad rows\n"}
+    assert recipes._engine_reason(res) == "invalid parameters: bad rows"
+    assert recipes._engine_reason({}) == "no message"
+
+
+def test_flow_product_sheet_is_valid_and_uses_solidcraft():
+    from democraft_mcp.flows import SEED_FLOWS, validate_flow
+
+    flow = next(f for f in SEED_FLOWS if f["id"] == "product-sheet")
+    assert validate_flow(flow)["steps"][0]["app"] == "solid"
+
+
+@_needs("grid")
+def test_reference_macros_pass_the_real_engine(tmp_path):
+    """The fallback translations must be real: save + check on the live GridCraft."""
+    from democraft_mcp.crafts import PROGRAM_FILES, cli_run
+
+    ctx = recipes.RunCtx(
+        app_key="grid",
+        cli=BY_KEY["grid"].cli_path,
+        run_dir=tmp_path,
+        topic="",
+        ai={},
+        do_with=lambda exe, argv, **kw: cli_run(exe, argv, tmp_path, **kw),
+        inputs=[],
+        program_files=PROGRAM_FILES,
+    )
+    for name, macro in recipes._reference_macros().items():
+        ok, _check, why = recipes._check_macro(ctx, name, {**macro, "name": name}, run=False)
+        assert ok, (name, why)

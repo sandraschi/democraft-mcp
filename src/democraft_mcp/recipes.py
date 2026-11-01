@@ -21,6 +21,9 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
+from . import grid_macros
+from .vba_demo import TABLE_NOTE
+
 ASSETS = Path(__file__).resolve().parents[2] / "assets"
 UPSTREAM = Path(os.getenv("DEMOCRAFT_UPSTREAM", r"D:\Dev\repos\_upstream"))
 BIG = 2_000_000  # stdout kept for parsing; trimmed again before it is stored
@@ -36,6 +39,7 @@ class RunCtx:
     do_with: Callable[..., dict]
     inputs: list[str]
     program_files: Path
+    model: str = ""
 
     def do(self, argv: list[str], **kw) -> dict:
         return self.do_with(self.cli, argv, **kw)
@@ -527,57 +531,7 @@ def pdf_auto_bookmarks(ctx: RunCtx) -> dict | None:
 # --------------------------------------------------------------------------- grid
 
 
-GRID_MACRO = {
-    "name": "Summarise",
-    "description": "Amber header, a SUM total row under the table, bold rows whose "
-    "third column is above 300",
-    "inputs": [
-        {
-            "name": "Table",
-            "kind": "range",
-            "header": True,
-            "rows": [1, 0],
-            "cols": [3, 3],
-            "colTypes": ["text", "number", "number"],
-            "nonEmpty": True,
-        }
-    ],
-    "output": {"anchor": "Table.below(1).cell(1,1)", "onConflict": "fail"},
-    "steps": [
-        {
-            "type": "command",
-            "id": "home.fillColor",
-            "params": {"range": "Table.row(1)", "color": "#F59E0B"},
-        },
-        {"type": "command", "id": "cell.set", "params": {"cell": "Output", "input": "Total"}},
-        {
-            "type": "command",
-            "id": "cell.set",
-            "params": {"cell": "Output.offset(0,1)", "input": "=SUM({{Table.data.col(2)}})"},
-        },
-        {
-            "type": "command",
-            "id": "cell.set",
-            "params": {"cell": "Output.offset(0,2)", "input": "=SUM({{Table.data.col(3)}})"},
-        },
-        {
-            "type": "repeat",
-            "over": "Table.data",
-            "of": "rows",
-            "max": 1000,
-            "body": [
-                {
-                    "type": "if",
-                    "cell": "Row.cell(1,3)",
-                    "op": "gt",
-                    "value": 300,
-                    "then": [{"type": "command", "id": "home.bold", "params": {"range": "Row"}}],
-                },
-            ],
-        },
-    ],
-    "permissions": [],
-}
+GRID_MACRO = grid_macros.GRID_MACRO
 
 GRID_TABLES = {
     "A1": [
@@ -663,6 +617,282 @@ def grid_macro_replay(ctx: RunCtx) -> dict | None:
         "```",
     ]
     ctx.write("macro-report.md", "\n".join(md) + "\n")
+    return None
+
+
+# --------------------------------------------------------------------------- grid: vba -> macro
+
+
+def _reference_macros() -> dict[str, dict]:
+    """Hand-written translations, used only when the local model is unavailable (labelled so)."""
+    table = GRID_MACRO["inputs"]
+    out_anchor = {"anchor": "Table.below(1).cell(1,1)", "onConflict": "fail"}
+    cmd = "command"
+    return {
+        "FormatHeader": {
+            "description": "Amber header, bold",
+            "inputs": table,
+            "steps": [
+                {
+                    "type": cmd,
+                    "id": "home.fillColor",
+                    "params": {"range": "Table.row(1)", "color": "#F59E0B"},
+                },
+                {"type": cmd, "id": "home.bold", "params": {"range": "Table.row(1)"}},
+            ],
+            "permissions": [],
+        },
+        "AddTotals": {
+            "description": "SUM total row under the table",
+            "inputs": table,
+            "output": out_anchor,
+            "steps": [
+                {"type": cmd, "id": "cell.set", "params": {"cell": "Output", "input": "Total"}},
+                {
+                    "type": cmd,
+                    "id": "cell.set",
+                    "params": {
+                        "cell": "Output.offset(0,1)",
+                        "input": "=SUM({{Table.data.col(2)}})",
+                    },
+                },
+                {
+                    "type": cmd,
+                    "id": "cell.set",
+                    "params": {
+                        "cell": "Output.offset(0,2)",
+                        "input": "=SUM({{Table.data.col(3)}})",
+                    },
+                },
+            ],
+            "permissions": [],
+        },
+        "HighlightBigMonths": {
+            "description": "Bold rows whose third column is above 300",
+            "inputs": table,
+            "steps": [
+                {
+                    "type": "repeat",
+                    "over": "Table.data",
+                    "of": "rows",
+                    "max": 1000,
+                    "body": [
+                        {
+                            "type": "if",
+                            "cell": "Row.cell(1,3)",
+                            "op": "gt",
+                            "value": 300,
+                            "then": [{"type": cmd, "id": "home.bold", "params": {"range": "Row"}}],
+                        }
+                    ],
+                }
+            ],
+            "permissions": [],
+        },
+    }
+
+
+def _parse_object(text: str) -> dict | None:
+    start, end = text.find("{"), text.rfind("}")
+    if start < 0 or end <= start:
+        return None
+    try:
+        obj = json.loads(text[start : end + 1])
+    except json.JSONDecodeError:
+        return None
+    return obj if isinstance(obj, dict) else None
+
+
+def _translate(ctx: RunCtx, name: str) -> dict | None:
+    """Ask the local model for one procedure; one retry when the answer is not valid JSON."""
+    from .crafts import DEFAULT_MODEL, ai_step
+    from .vba_demo import brief
+
+    for retry in (False, True, True):
+        ans = ai_step(brief(name, retry), ctx.model or DEFAULT_MODEL, chars=8000)
+        if not ans.get("success"):
+            return None
+        obj = _parse_object(ans.get("text") or "")
+        if obj is not None and "macro" in obj:
+            obj["_retried"] = retry
+            return obj
+    return {
+        "macro": None,
+        "reason": "the model did not return valid JSON in three tries",
+        "_failed": True,
+    }
+
+
+def _seed_cmds() -> list[tuple[str, dict]]:
+    rows = GRID_TABLES["A1"]
+    return [
+        ("cell.set", {"cell": f"{chr(65 + c)}{r}", "input": value})
+        for r, row in enumerate(rows, start=1)
+        for c, value in enumerate(row)
+    ]
+
+
+def _engine_reason(res: dict) -> str:
+    """The engine's own refusal text from stderr, without the CLI's step prefix."""
+    err = str(res.get("stderr") or res.get("error") or "")
+    lines = [ln.strip() for ln in err.splitlines() if "gridcraft-cli:" in ln]
+    line = lines[-1] if lines else err.strip()[-300:]
+    return re.sub(r"^.*?step \d+ \(--cmd, [\w.]+\):\s*", "", line)[:300] or "no message"
+
+
+def _check_macro(ctx: RunCtx, name: str, macro: dict, run: bool) -> tuple[bool, dict, str]:
+    """Save + dry-run (and optionally run) one macro on the demo table. Returns (ok, check, why)."""
+    inputs = {str(i.get("name")): "A1:C4" for i in macro.get("inputs") or [] if isinstance(i, dict)}
+    cmds = [
+        *_seed_cmds(),
+        ("macro.save", {"macro": macro}),
+        ("macro.check", {"name": name, "inputs": inputs}),
+    ]
+    if run:
+        cmds.append(("macro.run", {"name": name, "inputs": inputs}))
+    argv = ["run"]
+    for cid, params in cmds:
+        argv += ["--cmd", f"{cid}={json.dumps(params)}"]
+    res = ctx.do([*argv, "--out", f"{name}.xlsx" if run else f"{name}-check.xlsx"], keep_stdout=BIG)
+    found = _by_command(_json_lines(res.get("stdout", "")))
+    _trim(res)
+    check = (found.get("macro.check") or [None])[0]
+    if isinstance(check, dict) and check.get("ok"):
+        return True, check, ""
+    if isinstance(check, dict):
+        return False, check, "; ".join(check.get("errors") or ["check refused"])
+    return False, {}, _engine_reason(res)
+
+
+def _repair(ctx: RunCtx, name: str, macro: dict, why: str) -> dict | None:
+    """One round trip: hand the engine's refusal back to the model, take the fixed macro."""
+    from .crafts import ai_step
+
+    prompt = (
+        f"The GridCraft engine refused your macro for the VBA procedure {name}.\n"
+        f"Engine message: {why}\n"
+        "Notes: input rows and cols are two-element arrays [first, last-or-0], for example "
+        "rows [1,0] and cols [3,3] for a table with a header row and three columns. "
+        + TABLE_NOTE
+        + "\n"
+        f"Your macro: {json.dumps(macro, separators=(',', ':'))}\n"
+        "Return the corrected macro as one minified JSON object. No code fence, no prose."
+    )
+    ans = ai_step(prompt, str(ctx.ai.get("model") or "gemma4:e4b"), chars=8000)
+    text = ans.get("text") or ""
+    start, end = text.find("{"), text.rfind("}")
+    if not ans.get("success") or start < 0 or end <= start:
+        return None
+    try:
+        fixed = json.loads(text[start : end + 1])
+    except json.JSONDecodeError:
+        return None
+    return fixed if isinstance(fixed, dict) else None
+
+
+def grid_vba_to_macro(ctx: RunCtx) -> dict | None:
+    from .vba_demo import PROCEDURES, VBA_SOURCE
+
+    ctx.write("module.bas", VBA_SOURCE)
+    ctx.inputs.append(str(ctx.run_dir / "module.bas"))
+    by_name: dict[str, dict] = {}
+    for name in PROCEDURES:
+        got = _translate(ctx, name)
+        if got is None:
+            by_name = {}
+            break
+        by_name[name] = got
+    used_ai = bool(by_name)
+    if used_ai:
+        source = f"local AI ({ctx.model or 'default model'}), one call per procedure"
+    else:
+        source = "hand-written reference translation (the local model was unreachable)"
+        by_name = {n: {"name": n, "macro": m, "reason": ""} for n, m in _reference_macros().items()}
+        by_name["ExportBackup"] = {
+            "name": "ExportBackup",
+            "macro": None,
+            "reason": "Shell runs an external program; a macro has no such step",
+        }
+
+    verdicts: list[dict] = []
+    for name in PROCEDURES:
+        entry = by_name.get(name, {})
+        macro = entry.get("macro")
+        v: dict = {"name": name, "reason": str(entry.get("reason") or "")[:240], "attempts": 0}
+        if not isinstance(macro, dict):
+            v["verdict"] = (
+                "model gave no valid JSON" if entry.get("_failed") else "not translatable"
+            )
+            verdicts.append(v)
+            continue
+        if name == "ExportBackup":
+            v["verdict"] = (
+                "discarded: the VBA shells out, a macro that omits the call is not a translation"
+            )
+            ctx.write(f"{name}.macro.json", macro)
+            verdicts.append(v)
+            continue
+        macro = {**macro, "name": name}
+        ctx.write(f"{name}.macro.json", macro)
+        ok, check, why = _check_macro(ctx, name, macro, run=False)
+        v["attempts"] = 1
+        if not ok and used_ai:
+            v["first_refusal"] = why
+            fixed = _repair(ctx, name, macro, why)
+            if fixed is not None:
+                macro = {**fixed, "name": name}
+                ctx.write(f"{name}.macro.json", macro)
+                ok, check, why = _check_macro(ctx, name, macro, run=False)
+                v["attempts"] = 2
+        if not ok:
+            v["verdict"] = "refused by the engine"
+            v["reason"] = why
+            verdicts.append(v)
+            continue
+        _check_macro(ctx, name, macro, run=True)
+        csv_res = ctx.do(["cat", f"{name}.xlsx", "--csv"])
+        csv_text = (csv_res.get("stdout") or "").strip()
+        ctx.write(f"{name}.csv", csv_text)
+        v["verdict"] = "validated and run"
+        v["csv"] = csv_text
+        bounds = [s.get("bounds") for s in (check.get("footprint") or {}).get("sheets", [])]
+        v["footprint"] = ", ".join(map(str, bounds))
+        if name == "AddTotals":
+            v["matches_vba"] = "Total,4160,1002" in csv_text.replace(" ", "")
+        verdicts.append(v)
+
+    ctx.write("verdicts.json", verdicts)
+    count = sum(1 for v in verdicts if v["verdict"] == "validated and run")
+    fixed_n = sum(1 for v in verdicts if v["verdict"] == "validated and run" and v["attempts"] == 2)
+    md = [
+        "# VBA to macro",
+        "",
+        f"Translation by {source}. Source: module.bas ({len(PROCEDURES)} procedures). "
+        "Each macro was saved into a workbook with demo data, dry-run with macro.check, "
+        "and only then run. A macro the engine refused went back to the model once, "
+        "with the engine's message. VBA itself is never executed.",
+        "",
+        f"**{count} of {len(PROCEDURES)} procedures** ended as a macro the engine accepts"
+        + (f" ({fixed_n} of them after one repair round)." if fixed_n else "."),
+        "",
+    ]
+    for v in verdicts:
+        md += [f"## {v['name']}", "", f"- Verdict: {v['verdict']}"]
+        if v.get("first_refusal"):
+            md.append(f"- First attempt refused: {v['first_refusal']}")
+        if v.get("reason"):
+            md.append(f"- Reason: {v['reason']}")
+        if v.get("footprint"):
+            md.append(f"- Would write: {v['footprint']}")
+        if "matches_vba" in v:
+            md.append(
+                "- Total row equals what the VBA computes (Total,4160,1002): "
+                + ("yes" if v["matches_vba"] else "NO")
+            )
+        if v.get("csv"):
+            md += ["", "```", v["csv"], "```"]
+        md.append("")
+    ctx.write("vba-report.md", "\n".join(md))
     return None
 
 
@@ -1031,6 +1261,7 @@ RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("vector", "cleanup-pass"): vector_cleanup_pass,
     ("pdf", "auto-bookmarks"): pdf_auto_bookmarks,
     ("grid", "macro-replay"): grid_macro_replay,
+    ("grid", "vba-to-macro"): grid_vba_to_macro,
     ("solid", "parametric-bracket"): solid_parametric_bracket,
     ("solid", "enclosure-fit"): solid_enclosure_fit,
 }
