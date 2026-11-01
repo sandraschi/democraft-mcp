@@ -19,7 +19,7 @@ export default function HandsIn() {
 	return (
 		<div data-testid="hands-in-page">
 			<h1 className="text-2xl font-bold">Hands-in</h1>
-			<p className="mt-1 max-w-2xl text-sm text-slate-400">
+			<p className="mt-1 max-w-2xl text-sm text-muted">
 				Demos worth watching while they run: each CLI step streams in, and
 				artifacts appear as the engine writes them. No progress theatre - if a
 				step fails, you see the return code and stderr.
@@ -34,23 +34,21 @@ export default function HandsIn() {
 					<article
 						key={`${app.key}/${demo.id}`}
 						data-testid="hands-in-card"
-						className="rounded border border-slate-800 bg-slate-900 p-4"
+						className="rounded-md border border-line bg-surface p-4"
 					>
-						<p className="text-xs uppercase tracking-widest text-amber-400">
-							{app.name}
-						</p>
+						<p className="text-xs text-amber-400">{app.name}</p>
 						<h2 className="mt-1 font-semibold">{demo.title}</h2>
-						<p className="mt-2 text-sm text-slate-300">{demo.blurb}</p>
+						<p className="mt-2 text-sm text-muted">{demo.blurb}</p>
 						<Link
 							to={`/craft/${app.key}?demo=${demo.id}&watch=1`}
-							className="mt-3 inline-block rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950"
+							className="mt-3 inline-block rounded-md bg-accent px-4 py-2 text-sm font-semibold text-zinc-950"
 						>
 							Watch it build
 						</Link>
 					</article>
 				))}
 				{!failed && live.length === 0 && (
-					<p className="text-sm text-slate-300">
+					<p className="text-sm text-muted">
 						No live demos registered yet (a demo opts in with live=True).
 					</p>
 				)}

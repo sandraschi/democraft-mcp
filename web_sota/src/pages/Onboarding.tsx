@@ -24,7 +24,7 @@ export default function Onboarding() {
 					only.
 				</li>
 			</ol>
-			<p className="mt-3 text-sm text-slate-300">
+			<p className="mt-3 text-sm text-muted">
 				Full narrative: docs/ONBOARDING.md.{" "}
 				<Link to="/" className="underline">
 					Back to Dashboard

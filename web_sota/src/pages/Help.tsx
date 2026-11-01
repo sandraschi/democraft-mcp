@@ -33,7 +33,7 @@ export default function Help() {
 		<div data-testid="help-page">
 			<h1 className="text-2xl font-bold">Help</h1>
 			<h2 className="mt-4 font-semibold">First demo in 3 steps</h2>
-			<ol className="mt-1 list-decimal pl-5 text-sm text-slate-300">
+			<ol className="mt-1 list-decimal pl-5 text-sm text-muted">
 				<li>
 					Check the backend line above reads 11246/11245 - if it says
 					unreachable, start the backend.
@@ -48,7 +48,7 @@ export default function Help() {
 			<table className="mt-2 w-full text-sm">
 				<tbody>
 					{apps.map((a) => (
-						<tr key={a.key} className="border-t border-slate-800">
+						<tr key={a.key} className="border-t border-line">
 							<td className="py-1">{a.name}</td>
 							<td>{a.installed ? "installed" : "MISSING - see onboarding"}</td>
 						</tr>
@@ -56,12 +56,12 @@ export default function Help() {
 				</tbody>
 			</table>
 			<h2 className="mt-4 font-semibold">API / ports</h2>
-			<p className="text-sm text-slate-300">
+			<p className="text-sm text-muted">
 				Backend :11246 (/api/*, /mcp), frontend :11245. CORS: localhost only.{" "}
 				{apiPorts}.
 			</p>
 			<h2 className="mt-4 font-semibold">Error fix</h2>
-			<p className="text-sm text-slate-300">
+			<p className="text-sm text-muted">
 				wrappee_missing: install the app. needs_account: configure tokens.
 				needs_input: follow the recovery path. timeout: split ranges. Full
 				catalog: docs/TROUBLESHOOTING.md.
@@ -70,10 +70,10 @@ export default function Help() {
 			{FAQS.map(([q, a]) => (
 				<details
 					key={q}
-					className="mt-2 rounded border border-slate-800 p-2 text-sm"
+					className="mt-2 rounded-md border border-line p-2 text-sm"
 				>
 					<summary className="cursor-pointer">{q}</summary>
-					<p className="mt-1 text-slate-300">{a}</p>
+					<p className="mt-1 text-muted">{a}</p>
 				</details>
 			))}
 		</div>

@@ -5,7 +5,7 @@ import { api, type Flow } from "../lib/api";
 const BADGE: Record<string, string> = {
 	ready: "bg-emerald-500/20 text-emerald-300",
 	exploratory: "bg-amber-500/20 text-amber-300",
-	blocked: "bg-slate-700 text-slate-300",
+	blocked: "bg-raised text-muted",
 };
 
 export default function Flows() {
@@ -23,7 +23,7 @@ export default function Flows() {
 			<div className="flex flex-wrap items-start justify-between gap-3">
 				<div>
 					<h1 className="text-2xl font-bold">Flows</h1>
-					<p className="mt-1 max-w-2xl text-sm text-slate-400">
+					<p className="mt-1 max-w-2xl text-sm text-muted">
 						Readymade multi-app sequences: grade in PhotoCraft, lay out in
 						DesignCraft, assemble in PdfCraft. Each flow is an ordered list of
 						real demos; the runner records every step and bundles the artifacts.
@@ -33,7 +33,7 @@ export default function Flows() {
 				<Link
 					to="/flows/new"
 					data-testid="flow-new"
-					className="rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950"
+					className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-zinc-950"
 				>
 					New flow
 				</Link>
@@ -49,20 +49,20 @@ export default function Flows() {
 					<article
 						key={flow.id}
 						data-testid="flow-card"
-						className="rounded border border-slate-800 bg-slate-900 p-4"
+						className="rounded-md border border-line bg-surface p-4"
 					>
 						<div className="flex items-start justify-between gap-2">
 							<h2 className="font-semibold">{flow.name}</h2>
 							<span
-								className={`rounded px-2 py-0.5 text-xs ${
+								className={`rounded-md px-2 py-0.5 text-xs ${
 									BADGE[flow.status] ?? BADGE.blocked
 								}`}
 							>
 								{flow.status}
 							</span>
 						</div>
-						<p className="mt-2 text-sm text-slate-300">{flow.description}</p>
-						<p className="mt-1 text-xs text-slate-400">
+						<p className="mt-2 text-sm text-muted">{flow.description}</p>
+						<p className="mt-1 text-xs text-muted">
 							{flow.steps.length} steps:{" "}
 							{flow.steps.map((s) => s.app).join(" -> ")}
 						</p>
