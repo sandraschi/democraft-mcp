@@ -24,7 +24,7 @@ def test_status_shape():
     assert r.status_code == 200
     body = r.json()
     assert body["status"] == "ok"
-    assert body["apps"] == 13
+    assert body["apps"] == 14  # 13 Storytold core + SolidCraft (community)
     assert "uptime_seconds" in body
 
 
@@ -33,7 +33,9 @@ def test_capabilities_shape():
     assert r.status_code == 200
     body = r.json()
     assert "run_demo" in body["operations"]
-    assert len(body["apps"]) == 13
+    assert len(body["apps"]) == 14
+    crafts = _client().get("/api/crafts").json()["apps"]
+    assert {a["family"] for a in crafts} == {"core", "community"}
 
 
 def test_chat_alias():
@@ -88,7 +90,7 @@ def test_demo_invalid_app_fast():
 def test_craft_list_apps():
     res = craft(operation="list_apps")
     assert res["success"] is True
-    assert len(res["apps"]) == 13
+    assert len(res["apps"]) == 14
 
 
 def test_craft_app_status():
@@ -140,13 +142,19 @@ def test_each_app_has_a_topic_driven_demo():
     from democraft_mcp.crafts import APPS as _APPS
 
     # Deterministic demos (plate-grade, capability-map) carry no topics by
-    # design; every app must still offer at least one topic-driven demo.
+    # design; every core app must still offer at least one AI topic-driven demo.
+    # Topics without a topic_prompt are input pickers (which file, which board),
+    # not prompts: no AI involved, so the 8-choice rule does not apply to them.
+    # Community apps (SolidCraft) are deterministic CAD: no AI guesses dimensions.
     for a in _APPS:
-        topic_demos = [d for d in a.demos if d.topics]
-        assert topic_demos, a.key
-        for d in topic_demos:
+        ai_topic_demos = [d for d in a.demos if d.topics and d.topic_prompt]
+        if a.family == "core":
+            assert ai_topic_demos, a.key
+        for d in ai_topic_demos:
             assert len(d.topics) >= 8, (a.key, d.id)
-            assert d.topic_prompt, (a.key, d.id)
+        for d in a.demos:
+            if d.topics and not d.topic_prompt:
+                assert len(d.topics) >= 2, (a.key, d.id)
 
 
 @_needs("grid")
