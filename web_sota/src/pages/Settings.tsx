@@ -25,7 +25,7 @@ export default function Settings() {
 			<h1 className="text-2xl font-bold">Settings</h1>
 			<div
 				data-testid="backend-health"
-				className="mt-3 rounded border border-slate-800 bg-slate-900 p-3 text-sm"
+				className="mt-3 rounded-md border border-line bg-surface p-3 text-sm"
 			>
 				<p>
 					Backend:{" "}
@@ -35,28 +35,26 @@ export default function Settings() {
 				</p>
 			</div>
 			<h2 className="mt-4 font-semibold">Local LLM providers</h2>
-			{probing && (
-				<p className="text-sm text-slate-300">Probing providers...</p>
-			)}
+			{probing && <p className="text-sm text-muted">Probing providers...</p>}
 			{!probing && (
 				<div className="mt-2 flex flex-col gap-2">
 					{providers.map((p) => (
 						<div
 							key={p.id}
 							data-testid={`llm-provider-card-${p.id}`}
-							className="flex items-center gap-2 rounded border border-slate-800 bg-slate-900 p-2 text-sm"
+							className="flex items-center gap-2 rounded-md border border-line bg-surface p-2 text-sm"
 						>
 							<span
 								className={`inline-block h-2 w-2 rounded-full ${p.ok ? "bg-emerald-400" : "bg-slate-600"}`}
 							/>
 							<span>{p.id}</span>
-							<span className="text-slate-300">
+							<span className="text-muted">
 								{p.ok ? "detected" : "not found"}
 							</span>
 						</div>
 					))}
 					{gpu && (
-						<p className="text-sm text-slate-300">
+						<p className="text-sm text-muted">
 							GPU present. No local LLM detected - install Ollama to use Chat
 							and AI demo steps.
 						</p>
@@ -76,7 +74,7 @@ export default function Settings() {
 					data-testid="llm-provider-select"
 					value={provider}
 					onChange={(e) => setProvider(e.target.value)}
-					className="rounded bg-slate-800 p-2"
+					className="rounded-md bg-raised p-2"
 				>
 					{providers.map((p) => (
 						<option key={p.id} value={p.id}>
@@ -92,7 +90,7 @@ export default function Settings() {
 					value={model}
 					onChange={(e) => setModel(e.target.value)}
 					disabled={!anyOk}
-					className="rounded bg-slate-800 p-2 disabled:opacity-40"
+					className="rounded-md bg-raised p-2 disabled:opacity-40"
 				>
 					{[model, ...models.filter((m) => m !== model)].map((m) => (
 						<option key={m} value={m}>

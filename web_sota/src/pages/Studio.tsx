@@ -79,7 +79,7 @@ export default function Studio() {
 			<div className="flex flex-wrap items-start justify-between gap-3">
 				<div>
 					<h1 className="text-2xl font-bold">Studio</h1>
-					<p className="mt-1 max-w-3xl text-sm text-slate-400">
+					<p className="mt-1 max-w-3xl text-sm text-muted">
 						GridCraft's web build embedded in this page through the same-origin{" "}
 						<code>?host=parent</code> bridge. The host hands it a CSV and
 						receives whatever it saves. No control channel, no second window, no
@@ -90,7 +90,7 @@ export default function Studio() {
 					<button
 						type="button"
 						onClick={sendSample}
-						className="rounded bg-amber-500 px-4 py-2 font-semibold text-slate-950"
+						className="rounded-md bg-accent px-4 py-2 font-semibold text-zinc-950"
 					>
 						Send sample CSV
 					</button>
@@ -99,23 +99,21 @@ export default function Studio() {
 						onClick={() => {
 							frame.current?.contentWindow?.location.reload();
 						}}
-						className="rounded bg-slate-800 px-4 py-2"
+						className="rounded-md bg-raised px-4 py-2"
 					>
 						Reload sheet
 					</button>
 				</div>
 			</div>
 
-			<div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-300">
+			<div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted">
 				<span>{status}</span>
 				{dirty && (
-					<span className="rounded bg-amber-500/20 px-2 py-0.5 text-amber-300">
+					<span className="rounded-md bg-amber-500/20 px-2 py-0.5 text-amber-300">
 						unsaved changes
 					</span>
 				)}
-				{lastSave && (
-					<span className="text-slate-400">last save: {lastSave}</span>
-				)}
+				{lastSave && <span className="text-muted">last save: {lastSave}</span>}
 			</div>
 
 			<iframe
@@ -123,7 +121,7 @@ export default function Studio() {
 				title="GridCraft embedded"
 				data-testid="studio-frame"
 				src="/gridcraft-web/index.html?host=parent&author=Sandra"
-				className="mt-3 h-[72vh] w-full rounded border border-slate-800 bg-slate-950"
+				className="mt-3 h-[72vh] w-full rounded-md border border-line bg-bench"
 			/>
 
 			<p className="mt-2 text-xs text-slate-500">

@@ -22,15 +22,13 @@ export default function Tools() {
 	return (
 		<div data-testid="tools-page">
 			<h1 className="text-2xl font-bold">Tools</h1>
-			<p className="text-sm text-slate-300">
+			<p className="text-sm text-muted">
 				Discovered live from /api/tools - never hardcoded.
 			</p>
-			<span data-testid="tools-count" className="mt-1 text-sm text-slate-300">
+			<span data-testid="tools-count" className="mt-1 text-sm text-muted">
 				{tools.length} tools
 			</span>
-			{loading && (
-				<p className="mt-2 text-sm text-slate-300">Loading tools...</p>
-			)}
+			{loading && <p className="mt-2 text-sm text-muted">Loading tools...</p>}
 			{failed && (
 				<p className="mt-2 text-sm text-amber-300">
 					Backend unreachable - start it and retry.
@@ -40,18 +38,17 @@ export default function Tools() {
 				{tools.map((t) => (
 					<li
 						key={t.name}
-						className="rounded border border-slate-800 bg-slate-900 p-3"
+						className="rounded-md border border-line bg-surface p-3"
 					>
 						<button
 							type="button"
 							className="font-mono font-semibold"
 							onClick={() => setOpen(open === t.name ? null : t.name)}
 						>
-							{t.name}{" "}
-							<span className="text-sm text-slate-300">({t.pattern})</span>
+							{t.name} <span className="text-sm text-muted">({t.pattern})</span>
 						</button>
 						{open === t.name && t.operations && (
-							<ul className="mt-2 list-disc pl-5 font-mono text-sm text-slate-300">
+							<ul className="mt-2 list-disc pl-5 font-mono text-sm text-muted">
 								{t.operations.map((o) => (
 									<li key={o}>{o}</li>
 								))}
