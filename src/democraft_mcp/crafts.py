@@ -25,7 +25,7 @@ from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from pathlib import Path
 
-from . import __version__, recipes
+from . import __version__, recipes, texture_demo
 from .compat import probe_version
 from .windows import ensure_foreground
 
@@ -727,6 +727,37 @@ APPS: tuple[CraftApp, ...] = (
         ),
     ),
     CraftApp(
+        "texture",
+        "TextureCraft",
+        "texturecraft-cli.exe",
+        "PBR texturing: smart materials, ORM maps, glTF export for game engines.",
+        (
+            Demo(
+                "godot-prop",
+                "Demo 1: textured prop for Godot (pick a prop)",
+                "A built-in mesh gets a smart material, exports Godot 4 (ORM) maps "
+                "plus a glTF mesh, and a local Godot imports it headless. The report "
+                "lists the surfaces and texture slots Godot actually filled. "
+                "Deterministic, no AI step.",
+                "",
+                "cli",
+                topics=texture_demo.PROP_TOPICS,
+                added="2026-11-01",
+            ),
+            Demo(
+                "material-pick",
+                "Demo 2: the model picks mesh and material",
+                "Describe a prop; the local model chooses a built-in mesh and a smart "
+                "material from fixed lists (answers outside the lists are rejected and "
+                "the report says so), then the same export and Godot import runs.",
+                "Pick a mesh and material for a game prop as JSON. No prose.",
+                topics=texture_demo.AI_TOPICS,
+                topic_prompt=texture_demo.AI_PROMPT,
+                added="2026-11-01",
+            ),
+        ),
+    ),
+    CraftApp(
         "sound",
         "SoundCraft",
         "soundcraft-cli.exe",
@@ -844,7 +875,7 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "plate-grade",
-                "Demo 1: plate restoration (Böcklin, 1880)",
+                "Demo 1: plate restoration (BÃ¶cklin, 1880)",
                 "A real public-domain plate through PhotoCraft's non-destructive "
                 "stack: Black & White, Curves and Gradient Map adjustment layers, "
                 "saved as .pcraft with the layer tree intact, then flattened to "
@@ -1019,6 +1050,15 @@ HERO: dict[str, dict[str, object]] = {
         "gaps": (
             "No VBA: an .xlsm keeps its VBA project but never runs it (by design)",
             "No Office Scripts compatibility",
+        ),
+    },
+    "texture": {
+        "clone_of": "Substance 3D Painter",
+        "description": "Layered PBR texturing with smart materials and engine-ready "
+        "exports (Godot, glTF, Unreal, Unity, Blender, OpenPBR).",
+        "gaps": (
+            "Procedural fills outside brick, tile and weave kinds do not tile seamlessly",
+            "No UDIM-free atlas packing across several props",
         ),
     },
     "light": {
@@ -2263,7 +2303,7 @@ def run_demo(
                 "message": f"demo asset missing at {src}",
                 "error_type": "asset_missing",
                 "recovery": (
-                    "Restore assets/photo/isle-of-the-dead.jpg (public domain, Böcklin 1880)."
+                    "Restore assets/photo/isle-of-the-dead.jpg (public domain, BÃ¶cklin 1880)."
                 ),
             }
         if ai.get("success") and ai.get("text"):

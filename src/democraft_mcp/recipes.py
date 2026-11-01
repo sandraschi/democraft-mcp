@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from . import grid_macros
+from .texture_demo import godot_prop, godot_prop_ai
 from .vba_demo import TABLE_NOTE
 
 ASSETS = Path(__file__).resolve().parents[2] / "assets"
@@ -1264,4 +1265,6 @@ RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("grid", "vba-to-macro"): grid_vba_to_macro,
     ("solid", "parametric-bracket"): solid_parametric_bracket,
     ("solid", "enclosure-fit"): solid_enclosure_fit,
+    ("texture", "godot-prop"): godot_prop,
+    ("texture", "material-pick"): godot_prop_ai,
 }
