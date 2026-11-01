@@ -62,7 +62,7 @@ export default function Depot() {
 	return (
 		<div data-testid="depot-page">
 			<h1 className="text-2xl font-bold">Depot - every demo run</h1>
-			<p className="mt-1 text-sm text-slate-400">
+			<p className="mt-1 text-sm text-muted">
 				Each run keeps its artifacts and provenance; the newest stays live,
 				older runs move to history.
 			</p>
@@ -74,9 +74,9 @@ export default function Depot() {
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
 					placeholder="filter app/demo/topic..."
-					className="rounded bg-slate-800 p-1"
+					className="rounded-md bg-raised p-1"
 				/>
-				<span data-testid="depot-count" className="text-slate-300">
+				<span data-testid="depot-count" className="text-muted">
 					{shown.length} of {runs.length} runs
 				</span>
 				<div className="ml-auto flex gap-1">
@@ -84,10 +84,10 @@ export default function Depot() {
 						type="button"
 						data-testid="depot-view-cards"
 						onClick={() => pick("cards")}
-						className={`rounded px-3 py-1 ${
+						className={`rounded-md px-3 py-1 ${
 							view === "cards"
-								? "bg-amber-500 font-semibold text-slate-950"
-								: "bg-slate-800 text-slate-300"
+								? "bg-accent font-semibold text-zinc-950"
+								: "bg-raised text-muted"
 						}`}
 					>
 						Cards
@@ -96,10 +96,10 @@ export default function Depot() {
 						type="button"
 						data-testid="depot-view-list"
 						onClick={() => pick("list")}
-						className={`rounded px-3 py-1 ${
+						className={`rounded-md px-3 py-1 ${
 							view === "list"
-								? "bg-amber-500 font-semibold text-slate-950"
-								: "bg-slate-800 text-slate-300"
+								? "bg-accent font-semibold text-zinc-950"
+								: "bg-raised text-muted"
 						}`}
 					>
 						List
@@ -107,16 +107,14 @@ export default function Depot() {
 				</div>
 			</div>
 
-			{loading && (
-				<p className="mt-3 text-sm text-slate-300">Loading runs...</p>
-			)}
+			{loading && <p className="mt-3 text-sm text-muted">Loading runs...</p>}
 			{failed && (
 				<p className="mt-3 text-sm text-amber-300">
 					Backend unreachable - start it and retry.
 				</p>
 			)}
 			{!loading && !failed && !runs.length && (
-				<p className="mt-3 text-sm text-slate-300">
+				<p className="mt-3 text-sm text-muted">
 					No demo runs yet. Run one from any Craft page - every attempt lands
 					here, including failures.
 				</p>
@@ -128,33 +126,29 @@ export default function Depot() {
 						<article
 							key={`${r.app}/${r.demo}/${r.run_id}`}
 							data-testid="depot-card"
-							className="rounded border border-slate-800 bg-slate-900 p-4 text-sm"
+							className="rounded-md border border-line bg-surface p-4 text-sm"
 						>
 							<div className="flex items-start justify-between gap-2">
 								<div>
 									<p className="font-semibold">
 										{r.app}/{r.demo}
 									</p>
-									<p className="text-xs text-slate-400">{when(r.started)}</p>
+									<p className="text-xs text-muted">{when(r.started)}</p>
 								</div>
 								<span
-									className={`rounded px-2 py-0.5 text-xs ${
+									className={`rounded-md px-2 py-0.5 text-xs ${
 										r.latest
 											? "bg-emerald-500/20 text-emerald-300"
-											: "bg-slate-800 text-slate-400"
+											: "bg-raised text-muted"
 									}`}
 								>
 									{r.latest ? "latest" : r.run_id}
 								</span>
 							</div>
-							{r.topic && (
-								<p className="mt-2 text-slate-300">Topic: {r.topic}</p>
-							)}
-							<p className="mt-1 text-xs text-slate-400">
-								{r.artifacts} artifacts
-							</p>
+							{r.topic && <p className="mt-2 text-muted">Topic: {r.topic}</p>}
+							<p className="mt-1 text-xs text-muted">{r.artifacts} artifacts</p>
 							{r.inputs.length > 0 && (
-								<p className="mt-2 text-xs text-slate-400">
+								<p className="mt-2 text-xs text-muted">
 									source:{" "}
 									{r.inputs.map((f) => (
 										<a
@@ -177,7 +171,7 @@ export default function Depot() {
 										href={artifactUrl(r, f)}
 										target="_blank"
 										rel="noreferrer"
-										className="rounded bg-slate-800 px-2 py-1 underline"
+										className="rounded-md bg-raised px-2 py-1 underline"
 									>
 										{f.split("/").pop()}
 									</a>
@@ -200,7 +194,7 @@ export default function Depot() {
 			) : (
 				<div className="mt-4 overflow-x-auto">
 					<table className="w-full text-left text-sm">
-						<thead className="text-xs uppercase tracking-wide text-slate-400">
+						<thead className="text-xs uppercase tracking-wide text-muted">
 							<tr>
 								<th className="py-2 pr-4">Run</th>
 								<th className="py-2 pr-4">When</th>
@@ -214,20 +208,18 @@ export default function Depot() {
 								<tr
 									key={`${r.app}/${r.demo}/${r.run_id}`}
 									data-testid="depot-row"
-									className="border-t border-slate-800"
+									className="border-t border-line"
 								>
 									<td className="py-2 pr-4 font-semibold">
 										{r.app}/{r.demo}
 										{r.latest && (
-											<span className="ml-2 rounded bg-emerald-500/20 px-1 text-xs text-emerald-300">
+											<span className="ml-2 rounded-md bg-emerald-500/20 px-1 text-xs text-emerald-300">
 												latest
 											</span>
 										)}
 									</td>
-									<td className="py-2 pr-4 text-slate-400">
-										{when(r.started)}
-									</td>
-									<td className="py-2 pr-4 text-slate-300">{r.topic || "-"}</td>
+									<td className="py-2 pr-4 text-muted">{when(r.started)}</td>
+									<td className="py-2 pr-4 text-muted">{r.topic || "-"}</td>
 									<td className="py-2 pr-4">{r.artifacts}</td>
 									<td className="py-2">
 										<Link to={`/craft/${r.app}`} className="mr-3 underline">

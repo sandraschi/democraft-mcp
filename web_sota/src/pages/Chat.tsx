@@ -144,7 +144,7 @@ export default function Chat() {
 					data-testid="personality-select"
 					value={personality}
 					onChange={(e) => setPersonality(e.target.value)}
-					className="rounded bg-slate-800 p-1"
+					className="rounded-md bg-raised p-1"
 				>
 					{PERSONALITIES.map((p) => (
 						<option key={p.id} value={p.id}>
@@ -157,7 +157,7 @@ export default function Chat() {
 						value={customSystem}
 						onChange={(e) => setCustomSystem(e.target.value)}
 						placeholder="Custom style..."
-						className="rounded bg-slate-800 p-1"
+						className="rounded-md bg-raised p-1"
 					/>
 				)}
 				<label htmlFor="chat-model">Model</label>
@@ -166,7 +166,7 @@ export default function Chat() {
 					data-testid="chat-model"
 					value={model}
 					onChange={(e) => setModel(e.target.value)}
-					className="rounded bg-slate-800 p-1"
+					className="rounded-md bg-raised p-1"
 				>
 					{[model, ...models.filter((m) => m !== model)].map((m) => (
 						<option key={m} value={m}>
@@ -180,7 +180,7 @@ export default function Chat() {
 					data-testid="chat-skill"
 					value={skill}
 					onChange={(e) => setSkill(e.target.value)}
-					className="rounded bg-slate-800 p-1"
+					className="rounded-md bg-raised p-1"
 				>
 					<option value="">none</option>
 					{skills.map((s) => (
@@ -194,7 +194,7 @@ export default function Chat() {
 					data-testid="chat-export"
 					onClick={exportTxt}
 					disabled={!hist.length}
-					className="rounded border border-slate-700 px-2 py-1 disabled:opacity-40"
+					className="rounded-md border border-line px-2 py-1 disabled:opacity-40"
 				>
 					Export
 				</button>
@@ -203,7 +203,7 @@ export default function Chat() {
 					data-testid="chat-clear"
 					onClick={clear}
 					disabled={!hist.length}
-					className="rounded border border-slate-700 px-2 py-1 disabled:opacity-40"
+					className="rounded-md border border-line px-2 py-1 disabled:opacity-40"
 				>
 					Clear
 				</button>
@@ -221,7 +221,7 @@ export default function Chat() {
 						type="button"
 						onClick={() => sendText(p)}
 						disabled={busy || !llmOk}
-						className="rounded border border-slate-700 px-2 py-1 text-sm disabled:opacity-40"
+						className="rounded-md border border-line px-2 py-1 text-sm disabled:opacity-40"
 					>
 						{p}
 					</button>
@@ -232,7 +232,7 @@ export default function Chat() {
 				className="mt-3 flex max-h-[50vh] flex-col gap-2 overflow-auto"
 			>
 				{!hist.length && (
-					<p className="text-sm text-slate-300">
+					<p className="text-sm text-muted">
 						Ask about any demo - e.g. which wrappees are installed, or what the
 						film EDL contains.
 					</p>
@@ -240,7 +240,7 @@ export default function Chat() {
 				{hist.map((m) => (
 					<p
 						key={`${m.role}-${m.text.slice(0, 32)}`}
-						className={`rounded p-2 text-sm ${m.role === "you" ? "bg-slate-800" : "bg-slate-900"}`}
+						className={`rounded-md p-2 text-sm ${m.role === "you" ? "bg-raised" : "bg-surface"}`}
 					>
 						<b>{m.role}:</b> {m.text}
 					</p>
@@ -254,14 +254,14 @@ export default function Chat() {
 					onKeyDown={(e) => e.key === "Enter" && send()}
 					placeholder="Ask about a demo..."
 					disabled={!llmOk}
-					className="flex-1 rounded bg-slate-800 p-2 disabled:opacity-40"
+					className="flex-1 rounded-md bg-raised p-2 disabled:opacity-40"
 				/>
 				<button
 					type="button"
 					data-testid="chat-send"
 					onClick={send}
 					disabled={busy || !llmOk}
-					className="rounded bg-amber-500 px-4 py-2 font-semibold text-slate-950 disabled:opacity-40"
+					className="rounded-md bg-accent px-4 py-2 font-semibold text-zinc-950 disabled:opacity-40"
 				>
 					Send
 				</button>

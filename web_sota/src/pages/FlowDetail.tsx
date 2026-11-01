@@ -94,9 +94,7 @@ export default function FlowDetail() {
 	}
 
 	if (!flow) {
-		return (
-			<p className="text-sm text-slate-300">{toast || "Loading flow..."}</p>
-		);
+		return <p className="text-sm text-muted">{toast || "Loading flow..."}</p>;
 	}
 
 	const blocked = flow.status === "blocked";
@@ -105,11 +103,11 @@ export default function FlowDetail() {
 		<div data-testid="flow-detail">
 			<div className="flex flex-wrap items-start justify-between gap-3">
 				<div>
-					<Link to="/flows" className="text-xs underline text-slate-400">
+					<Link to="/flows" className="text-xs underline text-muted">
 						Flows
 					</Link>
 					<h1 className="mt-1 text-2xl font-bold">{flow.name}</h1>
-					<p className="mt-1 max-w-2xl text-sm text-slate-300">
+					<p className="mt-1 max-w-2xl text-sm text-muted">
 						{flow.description}
 					</p>
 					{blocked && (
@@ -124,20 +122,20 @@ export default function FlowDetail() {
 						data-testid="flow-run"
 						onClick={runFlow}
 						disabled={busy || blocked}
-						className="rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 disabled:opacity-40"
+						className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-zinc-950 disabled:opacity-40"
 					>
 						{busy ? "Starting..." : "Run flow"}
 					</button>
 					<Link
 						to={`/flows/${flow.id}/edit`}
-						className="rounded bg-slate-800 px-4 py-2 text-sm"
+						className="rounded-md bg-raised px-4 py-2 text-sm"
 					>
 						Edit
 					</Link>
 					<button
 						type="button"
 						onClick={removeFlow}
-						className="rounded bg-slate-800 px-4 py-2 text-sm text-red-300"
+						className="rounded-md bg-raised px-4 py-2 text-sm text-red-300"
 					>
 						Delete
 					</button>
@@ -145,7 +143,7 @@ export default function FlowDetail() {
 			</div>
 
 			<table className="mt-5 w-full text-left text-sm">
-				<thead className="text-xs uppercase tracking-wide text-slate-400">
+				<thead className="text-xs uppercase tracking-wide text-muted">
 					<tr>
 						<th className="py-2 pr-3">#</th>
 						<th className="py-2 pr-3">App</th>
@@ -160,12 +158,12 @@ export default function FlowDetail() {
 						return (
 							<tr
 								key={`${step.app}-${step.demo}-${step.note ?? ""}`}
-								className="border-t border-slate-800"
+								className="border-t border-line"
 							>
-								<td className="py-2 pr-3 text-slate-400">{index + 1}</td>
+								<td className="py-2 pr-3 text-muted">{index + 1}</td>
 								<td className="py-2 pr-3 font-semibold">{step.app}</td>
 								<td className="py-2 pr-3">{step.demo}</td>
-								<td className="py-2 pr-3 text-slate-400">{step.note}</td>
+								<td className="py-2 pr-3 text-muted">{step.note}</td>
 								<td className="py-2">
 									<span className="flex items-center gap-2 text-xs">
 										<span
@@ -182,15 +180,15 @@ export default function FlowDetail() {
 				</tbody>
 			</table>
 
-			{toast && <p className="mt-3 text-sm text-slate-300">{toast}</p>}
+			{toast && <p className="mt-3 text-sm text-muted">{toast}</p>}
 
 			{run && run.artifacts.length > 0 && (
 				<div
 					data-testid="flow-artifacts"
-					className="mt-4 rounded border border-slate-800 bg-slate-900 p-4"
+					className="mt-4 rounded-md border border-line bg-surface p-4"
 				>
 					<p className="font-semibold">Artifacts ({run.artifacts.length})</p>
-					<ul className="mt-2 list-disc pl-5 text-sm text-slate-300">
+					<ul className="mt-2 list-disc pl-5 text-sm text-muted">
 						{run.artifacts.map((artifact) => (
 							<li key={artifact} className="break-all">
 								<a

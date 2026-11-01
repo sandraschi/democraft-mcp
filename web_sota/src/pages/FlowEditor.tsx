@@ -129,7 +129,7 @@ export default function FlowEditor() {
 		<div data-testid="flow-editor">
 			<Link
 				to={editing ? `/flows/${flow.id}` : "/flows"}
-				className="text-xs underline text-slate-400"
+				className="text-xs underline text-muted"
 			>
 				{editing ? "Back to flow" : "Flows"}
 			</Link>
@@ -145,7 +145,7 @@ export default function FlowEditor() {
 						disabled={editing}
 						onChange={(e) => setFlow({ ...flow, id: e.target.value })}
 						placeholder="cover-factory"
-						className="mt-1 w-full rounded bg-slate-800 p-2 disabled:opacity-50"
+						className="mt-1 w-full rounded-md bg-raised p-2 disabled:opacity-50"
 					/>
 				</label>
 				<label className="text-sm">
@@ -153,7 +153,7 @@ export default function FlowEditor() {
 					<input
 						value={flow.name}
 						onChange={(e) => setFlow({ ...flow, name: e.target.value })}
-						className="mt-1 w-full rounded bg-slate-800 p-2"
+						className="mt-1 w-full rounded-md bg-raised p-2"
 					/>
 				</label>
 				<label className="text-sm md:col-span-2">
@@ -161,7 +161,7 @@ export default function FlowEditor() {
 					<input
 						value={flow.description}
 						onChange={(e) => setFlow({ ...flow, description: e.target.value })}
-						className="mt-1 w-full rounded bg-slate-800 p-2"
+						className="mt-1 w-full rounded-md bg-raised p-2"
 					/>
 				</label>
 				<label className="text-sm">
@@ -169,7 +169,7 @@ export default function FlowEditor() {
 					<select
 						value={flow.status}
 						onChange={(e) => setFlow({ ...flow, status: e.target.value })}
-						className="mt-1 w-full rounded bg-slate-800 p-2"
+						className="mt-1 w-full rounded-md bg-raised p-2"
 					>
 						<option value="ready">ready</option>
 						<option value="exploratory">exploratory</option>
@@ -184,7 +184,7 @@ export default function FlowEditor() {
 							onChange={(e) =>
 								setFlow({ ...flow, blocked_reason: e.target.value })
 							}
-							className="mt-1 w-full rounded bg-slate-800 p-2"
+							className="mt-1 w-full rounded-md bg-raised p-2"
 						/>
 					</label>
 				)}
@@ -195,7 +195,7 @@ export default function FlowEditor() {
 				<button
 					type="button"
 					onClick={addStep}
-					className="rounded bg-slate-800 px-3 py-1 text-sm"
+					className="rounded-md bg-raised px-3 py-1 text-sm"
 				>
 					Add step
 				</button>
@@ -205,13 +205,13 @@ export default function FlowEditor() {
 				{flow.steps.map((step, index) => (
 					<div
 						key={step._key ?? `${step.app}-${step.demo}`}
-						className="grid gap-2 rounded border border-slate-800 bg-slate-900 p-3 md:grid-cols-[2rem_1fr_1fr_2fr_auto]"
+						className="grid gap-2 rounded-md border border-line bg-surface p-3 md:grid-cols-[2rem_1fr_1fr_2fr_auto]"
 					>
-						<span className="text-slate-400">{index + 1}</span>
+						<span className="text-muted">{index + 1}</span>
 						<select
 							value={step.app}
 							onChange={(e) => changeApp(index, e.target.value)}
-							className="rounded bg-slate-800 p-2 text-sm"
+							className="rounded-md bg-raised p-2 text-sm"
 						>
 							{apps.map((a) => (
 								<option key={a.key} value={a.key}>
@@ -222,7 +222,7 @@ export default function FlowEditor() {
 						<select
 							value={step.demo}
 							onChange={(e) => updateStep(index, { demo: e.target.value })}
-							className="rounded bg-slate-800 p-2 text-sm"
+							className="rounded-md bg-raised p-2 text-sm"
 						>
 							{demosFor(step.app).map((d) => (
 								<option key={d.id} value={d.id}>
@@ -234,20 +234,20 @@ export default function FlowEditor() {
 							value={step.note ?? ""}
 							placeholder="note"
 							onChange={(e) => updateStep(index, { note: e.target.value })}
-							className="rounded bg-slate-800 p-2 text-sm"
+							className="rounded-md bg-raised p-2 text-sm"
 						/>
 						<div className="flex gap-1 text-xs">
 							<button
 								type="button"
 								onClick={() => move(index, -1)}
-								className="rounded bg-slate-800 px-2"
+								className="rounded-md bg-raised px-2"
 							>
 								Up
 							</button>
 							<button
 								type="button"
 								onClick={() => move(index, 1)}
-								className="rounded bg-slate-800 px-2"
+								className="rounded-md bg-raised px-2"
 							>
 								Down
 							</button>
@@ -259,7 +259,7 @@ export default function FlowEditor() {
 										steps: f.steps.filter((_, i) => i !== index),
 									}))
 								}
-								className="rounded bg-slate-800 px-2 text-red-300"
+								className="rounded-md bg-raised px-2 text-red-300"
 							>
 								Remove
 							</button>
@@ -275,7 +275,7 @@ export default function FlowEditor() {
 					type="button"
 					onClick={save}
 					disabled={busy}
-					className="rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 disabled:opacity-40"
+					className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-zinc-950 disabled:opacity-40"
 				>
 					{busy ? "Saving..." : "Save"}
 				</button>
@@ -283,7 +283,7 @@ export default function FlowEditor() {
 					<button
 						type="button"
 						onClick={remove}
-						className="rounded bg-slate-800 px-4 py-2 text-sm text-red-300"
+						className="rounded-md bg-raised px-4 py-2 text-sm text-red-300"
 					>
 						Delete
 					</button>
