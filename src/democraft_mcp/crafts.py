@@ -8,6 +8,10 @@ Every demo = optional AI step (Ollama, declared) + real CLI subprocess.
 Structured errors beat fake artifacts: engine failures return the real
 stderr; `needs_account` exists for the day an engine gates a feature.
 Verified 2026-10-15: no generative verbs in any of the 13 CLIs.
+
+Family tiers (2026-11-01): `core` apps are Storytold's ArtCraft suite; `community`
+apps are third-party members of the family (SolidCraft by Tangency Labs first).
+Demos added since then live in `recipes.py`, dispatched before the legacy chain.
 """
 
 from __future__ import annotations
@@ -21,7 +25,7 @@ from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from pathlib import Path
 
-from . import __version__
+from . import __version__, recipes
 from .compat import probe_version
 from .windows import ensure_foreground
 
@@ -41,6 +45,7 @@ class Demo:
     topics: tuple[str, ...] = ()  # combobox choices; empty = free text only
     topic_prompt: str = ""  # {topic} template used when a topic is picked; else ai_prompt
     live: bool = False  # worth watching step by step ("hands-in")
+    added: str = ""  # ISO date the demo shipped, for the webapp's "new" markers
 
 
 def _grid_data(ai: dict, topic: str) -> dict:
@@ -476,6 +481,8 @@ class CraftApp:
     clone_of: str = ""
     description: str = ""
     gaps: tuple[str, ...] = ()
+    family: str = "core"  # core (Storytold ArtCraft) | community (third-party members)
+    maker: str = "Storytold"
 
     @property
     def cli_path(self) -> Path:
@@ -693,6 +700,18 @@ APPS: tuple[CraftApp, ...] = (
                 "",
                 "cli",
             ),
+            Demo(
+                "macro-replay",
+                "Demo 3: Macro replay with dry runs",
+                "One typed macro (amber header, SUM total row, conditional bold) is "
+                "saved into the workbook, dry-run with macro.check (footprint, no "
+                "writes), run on one table, refused on a second that holds text in a "
+                "number column (the refusal names the cell), then run again after the "
+                "fix. XLSX, PDF, CSV and the macro JSON. Deterministic, no AI step.",
+                "",
+                "cli",
+                added="2026-11-01",
+            ),
         ),
     ),
     CraftApp(
@@ -766,6 +785,22 @@ APPS: tuple[CraftApp, ...] = (
                 topics=PDF_TOPICS,
                 topic_prompt="Name 4 portfolio sections for '{topic}' documents "
                 "as JSON list. No prose.",
+            ),
+            Demo(
+                "auto-bookmarks",
+                "Demo 2: Rebuild a lost outline",
+                "WordCraft writes a sectioned report to PDF with an outline; the "
+                "outline is deleted, then PdfCraft reads the text styles and rebuilds "
+                "bookmarks from the heading styles alone. The original outline is the "
+                "answer key: the report scores titles and nesting recovered. Pick a "
+                "subject and local AI writes the report; without AI the built-in one runs.",
+                "",
+                "cli",
+                topics=recipes.PDF_TOPICS,
+                topic_prompt="Write a short markdown report about '{topic}': one '# ' "
+                "title, three '## ' sections, each with two '### ' subsections, and one "
+                "plain sentence under every heading. Markdown only, no code fences.",
+                added="2026-11-01",
             ),
         ),
     ),
@@ -856,7 +891,54 @@ APPS: tuple[CraftApp, ...] = (
                 topics=VECTOR_TOPICS,
                 topic_prompt="Draw an SVG of {topic}. Raw SVG only.",
             ),
+            Demo(
+                "cleanup-pass",
+                "Demo 2: Artwork cleanup pass",
+                "Artwork Cleanup's health check, fix-all and keep-shape simplify on a "
+                "traced drawing (dense polylines plus six planted defects), the "
+                "VectorCraft icon from upstream, or any SVG path you type. Reports "
+                "issues and anchors before and after, file size, and a pixel diff of the "
+                "two renders so 'looks the same' is a number. No AI step.",
+                "",
+                "cli",
+                topics=recipes.VECTOR_TOPICS,
+                added="2026-11-01",
+            ),
         ),
+    ),
+    CraftApp(
+        "solid",
+        "SolidCraft",
+        "solidcraft-cli.exe",
+        "Parametric 3D CAD: sketches, features, STEP/STL/3MF, renders.",
+        (
+            Demo(
+                "parametric-bracket",
+                "Demo 1: Parametric bracket, three variants",
+                "One script defines an L-bracket from five user parameters; three "
+                "variants change only the parameters and SolidCraft rebuilds the "
+                "timeline. STEP + STL + iso render per variant, mass and size from "
+                "solidcraft-cli eval, a variants table and a contact strip. No AI step.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-01",
+            ),
+            Demo(
+                "enclosure-fit",
+                "Demo 2: Enclosure fitted to a board",
+                "SolidCraft's own sensor-enclosure acceptance project (case + lid, "
+                "standoffs, USB cut-out, snap fit), refitted to a board by changing its "
+                "parameters. STEP + 3MF, iso, section and x-ray renders, mass per body. "
+                "Type 'W x D inset N' in mm for your own board. No AI step.",
+                "",
+                "cli",
+                topics=recipes.SOLID_BOARD_TOPICS,
+                added="2026-11-01",
+            ),
+        ),
+        family="community",
+        maker="Tangency Labs",
     ),
 )
 
@@ -920,10 +1002,11 @@ HERO: dict[str, dict[str, object]] = {
     },
     "grid": {
         "clone_of": "Microsoft Excel",
-        "description": "Workbook engine: formulas, charts, pivots, macros, import and export.",
+        "description": "Workbook engine: formulas, charts, pivots, typed macros with dry "
+        "runs and input checks, import and export.",
         "gaps": (
-            "No VBA/macro compatibility",
-            "No xlsx round-trip verified",
+            "No VBA: an .xlsm keeps its VBA project but never runs it (by design)",
+            "No Office Scripts compatibility",
         ),
     },
     "light": {
@@ -939,8 +1022,8 @@ HERO: dict[str, dict[str, object]] = {
         "description": "PDF operations from the CLI: the working set the other "
         "crafts hand their exports to.",
         "gaps": (
-            "No command catalog (the CLI has no `commands` verb)",
-            "Verbs beyond the shipped set are not discoverable from the app",
+            "Catalog is `tools` (JSON Schemas), not a `commands` verb like the others",
+            "Bookmarks from text styles go under a new 'Untitled' root",
         ),
     },
     "photo": {
@@ -961,10 +1044,21 @@ HERO: dict[str, dict[str, object]] = {
     },
     "vector": {
         "clone_of": "Adobe Illustrator",
-        "description": "Vector paths, gradients, text and SVG/PDF export.",
+        "description": "Vector paths, compound shapes, gradient presets, text, artwork "
+        "cleanup and SVG/PDF export.",
         "gaps": (
-            "No boolean path operations in the catalog",
-            "No plugin ecosystem",
+            "Bundled add-ons only (Artwork Cleanup, Path Tools); no third-party plugins",
+            "No cloud libraries",
+        ),
+    },
+    "solid": {
+        "clone_of": "Autodesk Fusion",
+        "description": "Parametric 3D CAD: constrained sketches, a feature timeline, "
+        "parameters, assemblies, sheet metal, STEP/IGES/3MF/STL, GPU renders.",
+        "gaps": (
+            "Community member (Tangency Labs), not a Storytold build",
+            "Self-updates in place: expect the engine version to move between runs",
+            "No CAM or simulation workspaces",
         ),
     },
     "word": {
@@ -1045,8 +1139,18 @@ def ai_step(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 90) -> dict:
         }
 
 
-def cli_run(exe: Path, argv: list[str], cwd: Path, timeout_s: int = CLI_TIMEOUT_S) -> dict:
-    """Run one CLI argv. Returns the real result, including real failures."""
+def cli_run(
+    exe: Path,
+    argv: list[str],
+    cwd: Path,
+    timeout_s: int = CLI_TIMEOUT_S,
+    keep_stdout: int = 6000,
+) -> dict:
+    """Run one CLI argv. Returns the real result, including real failures.
+
+    ``keep_stdout`` lets a recipe parse a long JSON report; it trims the stored
+    copy back afterwards (recipes._trim).
+    """
     started = time.time()
     try:
         p = subprocess.run(
@@ -1062,7 +1166,7 @@ def cli_run(exe: Path, argv: list[str], cwd: Path, timeout_s: int = CLI_TIMEOUT_
             "success": p.returncode == 0,
             "argv": argv,
             "returncode": p.returncode,
-            "stdout": p.stdout[-6000:],
+            "stdout": p.stdout[-keep_stdout:],
             "stderr": p.stderr[-2000:],
             "ms": int((time.time() - started) * 1000),
         }
@@ -1308,10 +1412,15 @@ def run_demo(
     ):
         (run_dir / "brief.md").write_text(ai["text"][:4000], encoding="utf-8")
 
-    def do(argv: list[str]) -> dict:
+    def do_with(
+        exe: Path, argv: list[str], timeout_s: int = CLI_TIMEOUT_S, keep_stdout: int = 6000
+    ) -> dict:
+        """One reported CLI step for any app's binary (recipes chain apps)."""
         if should_cancel and should_cancel():
             raise DemoCancelled()
-        res = cli_run(app.cli_path, argv, run_dir)
+        res = cli_run(exe, argv, run_dir, timeout_s=timeout_s, keep_stdout=keep_stdout)
+        if exe != app.cli_path:
+            res["app"] = exe.stem.replace("-cli", "")
         steps.append(res)
         for f in sorted(run_dir.rglob("*")):
             if f.is_file() and str(f) not in artifacts:
@@ -1331,8 +1440,27 @@ def run_demo(
             )
         return res
 
+    def do(argv: list[str]) -> dict:
+        return do_with(app.cli_path, argv)
+
     k = app_key
-    if k == "cad":
+    recipe = recipes.RECIPES.get((k, demo.id))
+    if recipe is not None:
+        early = recipe(
+            recipes.RunCtx(
+                app_key=k,
+                cli=app.cli_path,
+                run_dir=run_dir,
+                topic=topic,
+                ai=ai,
+                do_with=do_with,
+                inputs=inputs,
+                program_files=PROGRAM_FILES,
+            )
+        )
+        if early is not None:
+            return early
+    elif k == "cad":
         plan = [
             ["style", '{"name": "ArialTT", "font": "Arial"}'],
             [
