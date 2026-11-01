@@ -1,4 +1,4 @@
-# democraft-mcp
+﻿# democraft-mcp
 
 <p align="center">
   <a href="https://github.com/casey/just"><img src="https://img.shields.io/badge/just-ready_to_go-7c5cfc?style=flat-square&logo=just&logoColor=white" alt="Just"></a>
@@ -11,7 +11,7 @@
   <a href="https://getartcraft.com"><img src="https://img.shields.io/badge/Craft_apps-13_%2B_1_community-f59e0b?style=flat-square" alt="13 Craft apps plus 1 community member"></a>
 </p>
 
-**Watch the Craft family build: 13 ArtCraft apps plus SolidCraft, 31 demos, real CLI output you
+**Watch the Craft family build: 14 ArtCraft apps plus SolidCraft, 33 demos, real CLI output you
 can see, hear and measure.**
 
 Every demo drives an installed `<App>\<app>-cli.exe`, streams its steps while it runs, and
@@ -20,7 +20,7 @@ no progress theatre.
 
 ## What this wraps
 
-The **ArtCraft** family: thirteen local creative apps, each a desktop alternative to an
+The **ArtCraft** family: fourteen local creative apps, each a desktop alternative to an
 industry standard - CADCraft (AutoCAD), DeckCraft (PowerPoint), DesignCraft (InDesign),
 EffectCraft (After Effects), FigCraft (Figma), FilmCraft (Premiere Pro), GridCraft (Excel),
 SoundCraft (Ableton Live), WordCraft (Word), PdfCraft (Acrobat Pro), LightCraft (studio
@@ -90,6 +90,7 @@ Demo counts exclude the capability map every app also has.
 | FigCraft | Figma | 2 | - | [fig](docs/apps/fig.md) |
 | FilmCraft | Premiere Pro | 5 | timeline cut, interchange kit | [film](docs/apps/film.md) |
 | GridCraft | Excel | 4 | topic report | [grid](docs/apps/grid.md) |
+| TextureCraft | Substance 3D Painter | 2 | textured prop for Godot | [texture](docs/apps/texture.md) |
 | SoundCraft | Ableton Live / Pro Tools | 2 | dry vs VST3 | [sound](docs/apps/sound.md) |
 | WordCraft | Microsoft Word | 2 | - | [word](docs/apps/word.md) |
 | PdfCraft | Acrobat Pro | 2 | - | [pdf](docs/apps/pdf.md) |

@@ -6,10 +6,10 @@
 ## What this repo is
 
 The demo bench for the Craft family: one page per app, every demo a real headless
-`<app>-cli.exe` run plus an optional local-LLM step. 14 apps: 13 Storytold ArtCraft (`core`)
+`<app>-cli.exe` run plus an optional local-LLM step. 15 apps: 14 Storytold ArtCraft (`core`)
 plus SolidCraft by Tangency Labs (`community`, first of more to come). One registry
 (`src/democraft_mcp/crafts.py`), demos since 2026-11-01 in `recipes.py`, one portmanteau MCP
-tool (`craft`), one webapp. 31 demos (8 streamable) plus a capability map per app, 15 flows.
+tool (`craft`), one webapp. 33 demos (8 streamable) plus a capability map per app, 15 flows.
 
 Ports: **11245** frontend, **11246** backend. Gates: `just ci`.
 

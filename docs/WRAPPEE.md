@@ -1,6 +1,6 @@
 # What ArtCraft is
 
-**ArtCraft** is a family of thirteen local creative applications for Windows. Each one is a
+**ArtCraft** is a family of fourteen local creative applications for Windows. Each one is a
 desktop alternative to an established industry tool (AutoCAD, InDesign, Premiere Pro, and so
 on) and ships a headless command-line binary next to the GUI. The apps run on your machine;
 there is no cloud requirement to open a file or render a demo.
@@ -19,7 +19,7 @@ ecosystems for other editors.
 
 There is also no single "ArtCraft CLI": each app ships its own binary, listed below.
 
-## The thirteen apps
+## The fourteen apps
 
 | App | Does | Local alternative to | CLI (under `C:\Program Files\<App>\`) |
 |---|---|---|---|
@@ -30,6 +30,7 @@ There is also no single "ArtCraft CLI": each app ships its own binary, listed be
 | FigCraft | Interface design: frames, auto layout, components | Figma | `figcraft-cli.exe` |
 | FilmCraft | Timeline editing: sequences, transitions, colour, export | Adobe Premiere Pro | `filmcraft-cli.exe` |
 | GridCraft | Workbooks: formulas, charts, pivots, XLSX/PDF | Microsoft Excel | `gridcraft-cli.exe` |
+| TextureCraft | PBR texturing: smart materials, ORM maps, glTF and engine exports | Substance 3D Painter | `texturecraft-cli.exe` |
 | SoundCraft | Session audio: MIDI, mixing, effects, bounce | Ableton Live / Pro Tools | `soundcraft-cli.exe` |
 | WordCraft | Documents: styles, tables, DOCX/PDF | Microsoft Word | `wordcraft-cli.exe` |
 | PdfCraft | PDF combine, render, anatomy | Adobe Acrobat Pro | `pdfcraft-cli.exe` |
