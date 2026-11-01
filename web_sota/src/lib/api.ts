@@ -49,6 +49,8 @@ export interface CraftDemo {
 	requires: string;
 	topics?: string[];
 	live?: boolean;
+	/** ISO date the demo shipped; empty for the original set. */
+	added?: string;
 }
 
 export interface FlowStep {
@@ -67,6 +69,16 @@ export interface Flow {
 	blocked_reason?: string;
 	steps: FlowStep[];
 }
+export interface GalleryTile {
+	app: string;
+	demo: string;
+	title: string;
+	file: string;
+	url: string;
+	images: number;
+	mtime: number;
+}
+
 export interface CraftApp {
 	key: string;
 	name: string;
@@ -76,6 +88,9 @@ export interface CraftApp {
 	clone_of: string;
 	description: string;
 	gaps: string[];
+	/** core = Storytold ArtCraft; community = third-party family member. */
+	family?: "core" | "community";
+	maker?: string;
 	demos: CraftDemo[];
 	/** Installed CLI version, read from the binary on this machine. */
 	version?: string | null;

@@ -1,17 +1,64 @@
 @import "tailwindcss";
 
+/* Bench tokens. Dark is permanent (fleet standard); text is warm "paper" so
+   real renders read as prints on a proof sheet. Per-app hues live in
+   lib/appMeta.ts and only ever mark edges. */
+@theme {
+	--color-bench: #09090b;
+	--color-surface: #131316;
+	--color-raised: #1b1b1f;
+	--color-line: #27272a;
+	--color-paper: #e7e5e4;
+	--color-muted: #a1a1aa;
+	--color-accent: #f59e0b;
+	--font-sans: "Geist", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+	--font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+}
+
 :root {
 	color-scheme: dark;
 }
 
 body {
-	font-family:
-		ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-		sans-serif;
+	background: var(--color-bench);
+	color: var(--color-paper);
+	font-family: var(--font-sans);
+	font-feature-settings: "ss01", "cv11";
+	-webkit-font-smoothing: antialiased;
 }
 
 ::selection {
 	background: rgb(245 158 11 / 0.35);
+}
+
+:focus-visible {
+	outline: 2px solid var(--color-accent);
+	outline-offset: 2px;
+}
+
+/* A print on the proof sheet: no radius, hairline frame, caption below. */
+.print {
+	border: 1px solid var(--color-line);
+	background: #050506;
+}
+
+.print img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	background: #050506;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		/* biome-ignore lint/complexity/noImportantStyles: reduced motion must beat utility classes */
+		animation-duration: 0.01ms !important;
+		/* biome-ignore lint/complexity/noImportantStyles: reduced motion must beat utility classes */
+		transition-duration: 0.01ms !important;
+	}
 }
 
 *::-webkit-scrollbar {
@@ -19,7 +66,7 @@ body {
 	height: 10px;
 }
 *::-webkit-scrollbar-thumb {
-	background: rgb(51 65 85);
+	background: #3f3f46;
 	border-radius: 8px;
 }
 *::-webkit-scrollbar-track {
