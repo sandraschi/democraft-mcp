@@ -11,7 +11,7 @@
   <a href="https://getartcraft.com"><img src="https://img.shields.io/badge/Craft_apps-13_%2B_1_community-f59e0b?style=flat-square" alt="13 Craft apps plus 1 community member"></a>
 </p>
 
-**Watch the Craft family build: 13 ArtCraft apps plus SolidCraft, 30 demos, real CLI output you
+**Watch the Craft family build: 13 ArtCraft apps plus SolidCraft, 31 demos, real CLI output you
 can see, hear and measure.**
 
 Every demo drives an installed `<App>\<app>-cli.exe`, streams its steps while it runs, and
@@ -26,7 +26,7 @@ EffectCraft (After Effects), FigCraft (Figma), FilmCraft (Premiere Pro), GridCra
 SoundCraft (Ableton Live), WordCraft (Word), PdfCraft (Acrobat Pro), LightCraft (studio
 lighting), PhotoCraft (Photoshop), VectorCraft (Illustrator).
 
-Plus **community members** of the family, built by other makers to the same conventions
+Plus **ArtCraft community projects**, built by other makers to the same conventions
 (headless CLI, JSON command catalog, MCP server). The first is **SolidCraft** by Tangency Labs,
 parametric 3D CAD in the spirit of Autodesk Fusion. More will follow; the registry models them
 as `family = "community"`.
@@ -72,8 +72,8 @@ Craft documents.
   GridCraft macro is dry-run before it writes and refuses bad input by naming the cell.
 - **Keep every run**: each run gets a folder and a manifest; older runs move to `_history`
   instead of being overwritten.
-- **Chain apps**: twelve readymade multi-app flows (cover factory, photo book, data deck,
-  audiobook art, score-driven cut) that you can run, edit or reorder.
+- **Chain apps**: fifteen readymade multi-app flows (cover factory, photo book, data deck,
+  product sheet, audiobook art, score-driven cut) that you can run, edit or reorder.
 - **Local first**: AI steps use Ollama; if it is down the CLI half still runs and the AI step is
   marked skipped, never faked.
 
@@ -89,7 +89,7 @@ Demo counts exclude the capability map every app also has.
 | EffectCraft | After Effects | 1 | - | [effect](docs/apps/effect.md) |
 | FigCraft | Figma | 2 | - | [fig](docs/apps/fig.md) |
 | FilmCraft | Premiere Pro | 5 | timeline cut, interchange kit | [film](docs/apps/film.md) |
-| GridCraft | Excel | 3 | topic report | [grid](docs/apps/grid.md) |
+| GridCraft | Excel | 4 | topic report | [grid](docs/apps/grid.md) |
 | SoundCraft | Ableton Live / Pro Tools | 2 | dry vs VST3 | [sound](docs/apps/sound.md) |
 | WordCraft | Microsoft Word | 2 | - | [word](docs/apps/word.md) |
 | PdfCraft | Acrobat Pro | 2 | - | [pdf](docs/apps/pdf.md) |

@@ -5,9 +5,10 @@
 - **SolidCraft** (Tangency Labs) joins as the first community member; registry `family`/`maker`.
 - Oct 31 builds: 104 verbs added, none removed; all 25 existing demos + 13 capability maps
   green; baselines accepted.
+- CADCraft 0.15 AutoLISP verified (`lisp`, `appload`, `script`; no VLAX/ActiveX); the stale "No AutoLISP" gap is corrected. SolidCraft is described as an ArtCraft community project.
 - `_upstream/` Craft clones fast-forwarded to 2026-11-01 (local edits stashed, not discarded).
 - New demos in `recipes.py`: `grid/macro-replay`, `pdf/auto-bookmarks`, `vector/cleanup-pass`,
-  `solid/parametric-bracket`, `solid/enclosure-fit`. EffectCraft camera-to-Blender tried and not
+  `solid/parametric-bracket`, `solid/enclosure-fit`, and `grid/vba-to-macro` (local model translates VBA to typed macros, engine validates, one repair round). New flow `product-sheet` (SolidCraft, DesignCraft, PdfCraft). EffectCraft camera-to-Blender tried and not
   shipped (unreliable solve; see `docs/apps/effect.md`).
 - Webapp: contact-sheet dashboard (`/api/gallery`), family-grouped apps, inline last-run outputs,
   Ctrl+K palette, bench design tokens; dead Companion button removed.

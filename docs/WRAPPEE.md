@@ -37,9 +37,9 @@ There is also no single "ArtCraft CLI": each app ships its own binary, listed be
 | PhotoCraft | Raster editing: layers, masks, adjustment stacks, batch | Adobe Photoshop | `photocraft-cli.exe` |
 | VectorCraft | Vector paths, gradients, text, SVG/PDF | Adobe Illustrator | `vectorcraft-cli.exe` |
 
-## Community members
+## Community projects
 
-Apps by other makers that follow the Craft conventions (headless CLI next to the GUI, a JSON
+ArtCraft community projects: apps by other makers that follow the Craft conventions (headless CLI next to the GUI, a JSON
 command catalog, an MCP server). democraft treats them exactly like the core apps and marks them
 `family = "community"`.
 

@@ -1,6 +1,6 @@
 # democraft-mcp 0.3.0b1 (2026-11-01)
 
-Oct 31 ArtCraft builds, SolidCraft as the first community member, five new demos, and a
+Oct 31 ArtCraft builds, SolidCraft as the first community member, six new demos, and a
 redesigned webapp.
 
 ## Craft family
@@ -26,11 +26,18 @@ redesigned webapp.
 - `vector/cleanup-pass`: Artwork Cleanup check/fix/simplify with anchor counts and a pixel diff
   (traced sample: 1,030 to 493 anchors, 0.34% pixels changed; app icon: -41% anchors).
 - `solid/parametric-bracket`: five-parameter L-bracket, three rebuilt variants, STEP/STL, mass.
+- `grid/vba-to-macro`: a VBA module translated to typed macros by the local model, one call per
+  procedure; each macro is saved, dry-run and run by the engine, refusals go back to the model
+  once with the engine's message. Typical result: 3 of 4 valid, the Shell procedure refused.
 - `solid/enclosure-fit`: SolidCraft's acceptance enclosure refitted to a board (presets or
   `W x D inset N`), STEP/3MF, iso/section/x-ray renders.
 - Tried and not shipped: EffectCraft 3D camera track to Blender. The solve on synthetic CAD
   footage is unreliable (16-21 of 36 frames, 61-102 deg vs 66 deg true); measurements in
   `docs/apps/effect.md`.
+
+## Flows
+
+- `product-sheet`: SolidCraft enclosure, DesignCraft spec sheet, PdfCraft assembly.
 
 ## Webapp
 
@@ -45,6 +52,9 @@ redesigned webapp.
 
 ## Fixes
 
+- CADCraft gap corrected: AutoLISP is supported (`lisp`, `appload`, `script`; core language,
+  `defun c:`, `command`, `entmake`), VLAX/ActiveX is not. SolidCraft is labelled an ArtCraft
+  community project in the registry, dashboard and docs.
 - HERO gaps corrected where the Oct 31 builds made them false (VectorCraft booleans, GridCraft
   macros, PdfCraft catalog).
 - README counts regenerated from the registry (they were stale before this release).
