@@ -37,6 +37,18 @@ There is also no single "ArtCraft CLI": each app ships its own binary, listed be
 | PhotoCraft | Raster editing: layers, masks, adjustment stacks, batch | Adobe Photoshop | `photocraft-cli.exe` |
 | VectorCraft | Vector paths, gradients, text, SVG/PDF | Adobe Illustrator | `vectorcraft-cli.exe` |
 
+## Community members
+
+Apps by other makers that follow the Craft conventions (headless CLI next to the GUI, a JSON
+command catalog, an MCP server). democraft treats them exactly like the core apps and marks them
+`family = "community"`.
+
+| App | Does | Local alternative to | Maker | CLI |
+|---|---|---|---|---|
+| SolidCraft | Parametric 3D CAD: sketches, feature timeline, parameters, assemblies, STEP/3MF/STL, renders | Autodesk Fusion | Tangency Labs ([source](https://github.com/tangency-labs/solidcraft), MIT OR Apache-2.0) | `C:\Program Files\SolidCraft\solidcraft-cli.exe` |
+
+SolidCraft updates itself in place; expect its version to move between runs.
+
 The "alternative to" column is the app's own comparison, repeated here so a reader can place
 each tool. It is not a feature-parity claim; [each app page](apps/README.md) lists the gaps we
 actually observed.
@@ -46,7 +58,9 @@ actually observed.
 - **Headless first.** Demos call `<app>-cli.exe` with `--project` / `run` / `render` style
   commands. The GUI does not need to be open.
 - **Never bundled.** Install the app yourself. Missing apps return `wrappee_missing`.
-- **CLI version matters.** FilmCraft 0.10.0 is what the timeline demo was verified against;
+- **CLI version matters.** All builds were re-verified on 2026-11-01 after the Oct 31 releases
+  (every existing demo green, catalogs additive only, baselines accepted). FilmCraft 0.10.0 is
+  what the timeline demo was first verified against;
   `craft_commands(app=...)` prints the catalog your installed build actually exposes.
 - **Licence and cost are ArtCraft's.** Democraft adds no account, no token and no subscription.
   ArtCraft's own AI generation (where an app offers it) is account-gated. No demo here depends

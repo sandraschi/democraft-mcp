@@ -1,5 +1,18 @@
 ﻿# CHANGELOG.md
 
+## 0.3.0b1 (2026-11-01, Oct 31 builds, SolidCraft, webapp redesign)
+
+- **SolidCraft** (Tangency Labs) joins as the first community member; registry `family`/`maker`.
+- Oct 31 builds: 104 verbs added, none removed; all 25 existing demos + 13 capability maps
+  green; baselines accepted.
+- `_upstream/` Craft clones fast-forwarded to 2026-11-01 (local edits stashed, not discarded).
+- New demos in `recipes.py`: `grid/macro-replay`, `pdf/auto-bookmarks`, `vector/cleanup-pass`,
+  `solid/parametric-bracket`, `solid/enclosure-fit`. EffectCraft camera-to-Blender tried and not
+  shipped (unreliable solve; see `docs/apps/effect.md`).
+- Webapp: contact-sheet dashboard (`/api/gallery`), family-grouped apps, inline last-run outputs,
+  Ctrl+K palette, bench design tokens; dead Companion button removed.
+- Details: `CHANGELOG_LATEST.md`.
+
 ## Unreleased (2026-10-28, ArtCraft 13-app release)
 
 - **Modal handling for hands-in runs.** Probed all GUIs: no Win32 dialogs. The only modal found is SoundCraft's in-window Recover Unsaved Work prompt from a stale autosave; Escape does not dismiss it. windows.quarantine_recovery now moves stale `Autosave`/`Recovery` entries to `%LOCALAPPDATA%\democraft-mcp\recovery_quarantine` before launching a GUI that is not running (moved, never deleted); the result is reported as `recovery_quarantine` in the focus info. FigCraft was not probed (user instance running).
@@ -268,8 +281,8 @@ per-file warnings surfaced. Inputs and provenance in `assets/ai-art/CREDITS.md`
 ## Unreleased (2026-10-19, PhotoCraft flagship demo)
 
 `photo/plate-grade`: a real public-domain plate (Böcklin, *Isle of the Dead*,
-1880) through PhotoCraft's non-destructive stack — Black & White, Curves and
-Gradient Map adjustment layers — saved as `.pcraft` with the layer tree intact,
+1880) through PhotoCraft's non-destructive stack - Black & White, Curves and
+Gradient Map adjustment layers - saved as `.pcraft` with the layer tree intact,
 then flattened to PNG and JPG. Deterministic recipe; the AI step only writes the
 restoration note. Asset bundled at `assets/photo/isle-of-the-dead.jpg` (247 KB,
 PD). Verified end to end: 4 CLI steps, 4 artifacts, four layers in the `.pcraft`.

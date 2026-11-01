@@ -1,6 +1,7 @@
-# The thirteen apps
+# The apps
 
-One page per ArtCraft app: what it is, what each demo actually executes, what lands on disk,
+Thirteen Storytold ArtCraft apps plus community members of the family (SolidCraft by
+Tangency Labs, since 2026-11-01). One page per app: what it is, what each demo actually executes, what lands on disk,
 and the gaps we observed in the installed CLI. The registry that generates these pages and the
 webapp is `src/democraft_mcp/crafts.py` - if a page and the registry disagree, the registry is
 right and the page is a bug.
@@ -13,13 +14,17 @@ right and the page is a bug.
 | EffectCraft | 2 | - | [effect.md](effect.md) |
 | FigCraft | 2 | - | [fig.md](fig.md) |
 | FilmCraft | 3 | timeline cut | [film.md](film.md) |
-| GridCraft | 2 | topic report | [grid.md](grid.md) |
+| GridCraft | 3 | topic report | [grid.md](grid.md) |
 | SoundCraft | 3 | melody dry vs VST3 | [sound.md](sound.md) |
 | WordCraft | 2 | - | [word.md](word.md) |
-| PdfCraft | 2 | - | [pdf.md](pdf.md) |
+| PdfCraft | 3 | - | [pdf.md](pdf.md) |
 | LightCraft | 2 | - | [light.md](light.md) |
 | PhotoCraft | 5 | plate grade, lighthouse | [photo.md](photo.md) |
-| VectorCraft | 2 | - | [vector.md](vector.md) |
+| VectorCraft | 3 | - | [vector.md](vector.md) |
+| SolidCraft (community) | 3 | parametric bracket | [solid.md](solid.md) |
+
+Demo counts include `capability-map`. Demos added 2026-11-01 for the Oct 31 builds live in
+`src/democraft_mcp/recipes.py`.
 
 ## The demo contract
 

@@ -8,10 +8,11 @@
   <a href="https://github.com/PrefectHQ/fastmcp"><img src="https://img.shields.io/badge/FastMCP-3.4.4%2B-7c5cfc?style=flat-square" alt="FastMCP"></a>
   <a href="https://github.com/sandraschi/democraft-mcp/releases"><img src="https://img.shields.io/github/v/release/sandraschi/democraft-mcp?include_prereleases&style=flat-square&logo=github" alt="Release"></a>
   <a href="https://github.com/sandraschi/democraft-mcp/releases"><img src="https://img.shields.io/badge/packaging-.mcpb-2ea44f?style=flat-square" alt="MCPB"></a>
-  <a href="https://getartcraft.com"><img src="https://img.shields.io/badge/Craft_apps-13-f59e0b?style=flat-square" alt="13 Craft apps"></a>
+  <a href="https://getartcraft.com"><img src="https://img.shields.io/badge/Craft_apps-13_%2B_1_community-f59e0b?style=flat-square" alt="13 Craft apps plus 1 community member"></a>
 </p>
 
-**Watch the ArtCraft family build: 13 creative apps, 32 demos, real CLI output you can see and hear.**
+**Watch the Craft family build: 13 ArtCraft apps plus SolidCraft, 30 demos, real CLI output you
+can see, hear and measure.**
 
 Every demo drives an installed `<App>\<app>-cli.exe`, streams its steps while it runs, and
 leaves the artifacts on disk with a manifest and the engine log beside them. No mock pixels,
@@ -25,18 +26,23 @@ EffectCraft (After Effects), FigCraft (Figma), FilmCraft (Premiere Pro), GridCra
 SoundCraft (Ableton Live), WordCraft (Word), PdfCraft (Acrobat Pro), LightCraft (studio
 lighting), PhotoCraft (Photoshop), VectorCraft (Illustrator).
 
+Plus **community members** of the family, built by other makers to the same conventions
+(headless CLI, JSON command catalog, MCP server). The first is **SolidCraft** by Tangency Labs,
+parametric 3D CAD in the spirit of Autodesk Fusion. More will follow; the registry models them
+as `family = "community"`.
+
 Nothing is bundled. Install the apps you care about from <https://getartcraft.com>; this repo
 is the control surface and the demo bench. What each app is, and where it lives:
 [docs/WRAPPEE.md](docs/WRAPPEE.md).
 
 ## Preview
 
-| Dashboard | Hands-in: watch it build | Depot: every run kept |
+| Dashboard: the latest real renders | SolidCraft: enclosure fitted to a board | VectorCraft: cleanup pass |
 |---|---|---|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Hands-in](docs/screenshots/hands-in.png) | ![Depot](docs/screenshots/depot.png) |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![SolidCraft](docs/screenshots/craft-solid.png) | ![VectorCraft](docs/screenshots/craft-vector.png) |
 
-*Our webapp (:11245), not the Craft apps' native UIs: one page per engine, live steps, and the
-run history the engines do not keep for you.*
+*Our webapp (:11245), not the Craft apps' native UIs. The dashboard opens on a contact sheet of
+the newest renders on this machine; each craft page shows its last run inline.*
 
 ## What You Can Do
 
@@ -59,6 +65,11 @@ Craft documents.
   the drawing itself.
 - **Compare models honestly**: the pelican-on-a-bicycle benchmark, same prompt through
   PhotoCraft and VectorCraft. The ugliness is the measurement.
+- **Change a dimension, watch it rebuild**: SolidCraft rebuilds a parametric bracket in three
+  variants and refits its enclosure to a board you name, with STEP/STL/3MF and mass per body.
+- **Measure, don't assert**: the VectorCraft cleanup pass reports anchors before and after and a
+  pixel diff; the PdfCraft outline rebuild scores itself against the outline it deleted; the
+  GridCraft macro is dry-run before it writes and refuses bad input by naming the cell.
 - **Keep every run**: each run gets a folder and a manifest; older runs move to `_history`
   instead of being overwritten.
 - **Chain apps**: twelve readymade multi-app flows (cover factory, photo book, data deck,
@@ -66,29 +77,32 @@ Craft documents.
 - **Local first**: AI steps use Ollama; if it is down the CLI half still runs and the AI step is
   marked skipped, never faked.
 
-## The thirteen apps
+## The apps
+
+Demo counts exclude the capability map every app also has.
 
 | App | Local alternative to | Demos | Watch / listen | Details |
 |---|---|---|---|---|
-| CADCraft | AutoCAD / BricsCAD | 2 | - | [cad](docs/apps/cad.md) |
-| DeckCraft | PowerPoint / Keynote | 3 | transition reel | [deck](docs/apps/deck.md) |
-| DesignCraft | Adobe InDesign | 2 | - | [design](docs/apps/design.md) |
-| EffectCraft | After Effects | 2 | - | [effect](docs/apps/effect.md) |
+| CADCraft | AutoCAD / BricsCAD | 1 | - | [cad](docs/apps/cad.md) |
+| DeckCraft | PowerPoint / Keynote | 2 | transition reel | [deck](docs/apps/deck.md) |
+| DesignCraft | Adobe InDesign | 1 | - | [design](docs/apps/design.md) |
+| EffectCraft | After Effects | 1 | - | [effect](docs/apps/effect.md) |
 | FigCraft | Figma | 2 | - | [fig](docs/apps/fig.md) |
-| FilmCraft | Premiere Pro | 3 | timeline cut | [film](docs/apps/film.md) |
-| GridCraft | Excel | 2 | topic report | [grid](docs/apps/grid.md) |
-| SoundCraft | Ableton Live / Pro Tools | 3 | dry vs VST3 | [sound](docs/apps/sound.md) |
+| FilmCraft | Premiere Pro | 5 | timeline cut, interchange kit | [film](docs/apps/film.md) |
+| GridCraft | Excel | 3 | topic report | [grid](docs/apps/grid.md) |
+| SoundCraft | Ableton Live / Pro Tools | 2 | dry vs VST3 | [sound](docs/apps/sound.md) |
 | WordCraft | Microsoft Word | 2 | - | [word](docs/apps/word.md) |
 | PdfCraft | Acrobat Pro | 2 | - | [pdf](docs/apps/pdf.md) |
-| LightCraft | studio lighting | 2 | - | [light](docs/apps/light.md) |
-| PhotoCraft | Photoshop | 5 | plate grade, lighthouse | [photo](docs/apps/photo.md) |
+| LightCraft | studio lighting | 1 | - | [light](docs/apps/light.md) |
+| PhotoCraft | Photoshop | 4 | plate grade, lighthouse | [photo](docs/apps/photo.md) |
 | VectorCraft | Illustrator | 2 | - | [vector](docs/apps/vector.md) |
+| SolidCraft (community) | Autodesk Fusion | 2 | parametric bracket | [solid](docs/apps/solid.md) |
 
 Full catalog and the demo contract: [docs/apps/README.md](docs/apps/README.md).
 
 ## Hands-in: see it, hear it
 
-**Hands-in** is the page for demos worth watching. Six runs stream their CLI steps, and the
+**Hands-in** is the page for demos worth watching. Eight runs stream their CLI steps, and the
 craft page replays them with Play / Pause / Stop / Rewind and a 0.25x-4x speed slider while
 artifacts appear as they land. A hands-in run also starts the Craft app if it is not running,
 brings its window to the foreground and maximises it before the first CLI step, so the app is
