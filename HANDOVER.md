@@ -18,11 +18,13 @@ Ports: **11245** frontend, **11246** backend. Gates: `just ci`.
 1. **Oct 31 builds.** All 13 core CLIs bumped; drift additive only (104 verbs). Every existing
    demo re-run green on the new builds, baselines accepted for all 14 apps
    (`data/craft_compat.json`, gitignored).
-2. **`_upstream/` refreshed** to 2026-11-01 for the 15 Craft clones. Most trees had local
-   modifications (EffectCraft 30 files, LightCraft 42); each was stashed as
-   `democraft-refresh-2026-11-01 local changes before ff` before fast-forwarding. Inspect with
-   `git -C D:\Dev\repos\_upstream\<app> stash show -p stash@{0}`. Non-Craft clones (buzz, immich,
-   gods-eye-view, photoprism, Strata, VoiceStudio, token-factory-cookbook) were fetched only.
+2. **`_upstream/` refreshed** to 2026-11-01 for the 15 Craft clones. The local changes found
+   there were formatter output (Biome style) and CRLF churn, no real work; stashed, inspected,
+   dropped. Mirrors now pin `core.autocrlf false`, `_upstream\AGENTS.md` + `CLAUDE.md` tell
+   agents the folder is read-only, and refreshes go through
+   `mcp-central-docs\scripts\refresh-upstream-mirrors.ps1` (hard reset to remote, logged).
+   Non-Craft clones (buzz, immich, gods-eye-view, photoprism, Strata, VoiceStudio,
+   token-factory-cookbook) were fetched only; run the script with `-All` to clean them too.
 3. **SolidCraft** registered (`family="community"`, `maker`); `/api/crafts` carries both.
 4. **Recipes** (`recipes.py`, dispatched in `run_demo` before the legacy chain via
    `RECIPES[(app, demo)]` and a `RunCtx` with `do_with(exe, argv)` for cross-app steps):
