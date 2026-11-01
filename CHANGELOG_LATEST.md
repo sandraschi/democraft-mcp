@@ -5,6 +5,9 @@ redesigned webapp.
 
 ## Craft family
 
+- **TextureCraft joins the core family** (14th Storytold app, Substance 3D Painter alternative) with
+  `texturecraft/godot-prop`: built-in mesh + smart material, Godot 4 (ORM) maps + GLB, then a real
+  headless Godot import whose surfaces and texture slots are reported. 33 demos, 15 apps.
 - **SolidCraft joins as a community member** (Tangency Labs, parametric 3D CAD, Autodesk Fusion
   alternative). The registry gains `family` (`core` | `community`) and `maker`; the API, sidebar
   and dashboard group apps by family. 14 apps: 13 Storytold core + 1 community.

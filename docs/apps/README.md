@@ -1,6 +1,6 @@
-# The apps
+﻿# The apps
 
-Thirteen Storytold ArtCraft apps plus ArtCraft community projects (SolidCraft by
+Fourteen Storytold ArtCraft apps plus ArtCraft community projects (SolidCraft by
 Tangency Labs, since 2026-11-01). One page per app: what it is, what each demo actually executes, what lands on disk,
 and the gaps we observed in the installed CLI. The registry that generates these pages and the
 webapp is `src/democraft_mcp/crafts.py` - if a page and the registry disagree, the registry is
@@ -15,6 +15,7 @@ right and the page is a bug.
 | FigCraft | 2 | - | [fig.md](fig.md) |
 | FilmCraft | 3 | timeline cut | [film.md](film.md) |
 | GridCraft | 4 | topic report | [grid.md](grid.md) |
+| TextureCraft | 2 | textured prop for Godot | [texture.md](texture.md) |
 | SoundCraft | 3 | melody dry vs VST3 | [sound.md](sound.md) |
 | WordCraft | 2 | - | [word.md](word.md) |
 | PdfCraft | 3 | - | [pdf.md](pdf.md) |
