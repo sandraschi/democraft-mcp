@@ -24,7 +24,7 @@ def test_status_shape():
     assert r.status_code == 200
     body = r.json()
     assert body["status"] == "ok"
-    assert body["apps"] == 14  # 13 Storytold core + SolidCraft (community)
+    assert body["apps"] == 15  # 14 Storytold core + SolidCraft (community)
     assert "uptime_seconds" in body
 
 
@@ -33,7 +33,7 @@ def test_capabilities_shape():
     assert r.status_code == 200
     body = r.json()
     assert "run_demo" in body["operations"]
-    assert len(body["apps"]) == 14
+    assert len(body["apps"]) == 15
     crafts = _client().get("/api/crafts").json()["apps"]
     assert {a["family"] for a in crafts} == {"core", "community"}
 
@@ -90,7 +90,7 @@ def test_demo_invalid_app_fast():
 def test_craft_list_apps():
     res = craft(operation="list_apps")
     assert res["success"] is True
-    assert len(res["apps"]) == 14
+    assert len(res["apps"]) == 15
 
 
 def test_craft_app_status():

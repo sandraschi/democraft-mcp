@@ -18,12 +18,12 @@ def _needs(app_key: str):
     )
 
 
-def test_registry_has_13_core_apps_and_community_members():
+def test_registry_has_14_core_apps_and_community_members():
     core = [a for a in APPS if a.family == "core"]
     community = [a for a in APPS if a.family == "community"]
-    assert len(core) == 13
+    assert len(core) == 14
     assert [a.key for a in community] == ["solid"]
-    assert len(BY_KEY) == len(APPS) == 14
+    assert len(BY_KEY) == len(APPS) == 15
     for a in APPS:
         assert a.demos, f"{a.key} has no demo"
         assert a.family in ("core", "community")
@@ -130,11 +130,11 @@ def test_api_health():
     assert r.json()["status"] == "ok"
 
 
-def test_api_crafts_lists_13():
+def test_api_crafts_lists_15():
     client = TestClient(build_api())
     r = client.get("/api/crafts")
     assert r.status_code == 200
-    assert len(r.json()["apps"]) == 14
+    assert len(r.json()["apps"]) == 15
 
 
 def test_prompts_meet_3_4_100():
