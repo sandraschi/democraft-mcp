@@ -4,7 +4,7 @@
 
 **What it is**: motion-graphics projects - keyframes, expressions, cameras, audio - rendered
 headless. The app's own comparison is Adobe After Effects. Driven by
-`C:\Program Files\EffectCraft\effectcraft-cli.exe` (verified against 0.14.0).
+`C:\Program Files\EffectCraft\effectcraft-cli.exe` (verified against 0.19.0, 2026-11-01).
 
 ## Demos
 
@@ -41,6 +41,32 @@ Artifacts: `outbox/effect/title-card/`.
 
 - No particle system in the command catalog.
 - No third-party plugin ecosystem.
+- 3D Camera Tracker on synthetic CAD footage is not reliable enough for a demo yet (see below).
+
+## Tried and not shipped: camera track to Blender (2026-11-01)
+
+0.19.0 adds `camera.exportBlender`, which writes a Blender script from a 3D Camera Tracker
+solve. The chain works mechanically: SolidCraft renders an orbit of the enclosure, EffectCraft
+encodes it to H.264 (`render --project`), `track.camera` solves, `camera.exportBlender` writes a
+225 KB script for Blender 4.x. It is not shipped as a demo because the solve does not hold up:
+
+| Footage | Solver setting | Frames solved | Recovered horizontal AOV | True AOV |
+|---|---|---|---|---|
+| orthographic orbit (SolidCraft default), 48 frames | fixed / auto | 48 of 48 | 4.1 deg (500 mm lens) | none (orthographic) |
+| perspective orbit, fov 40 deg vertical, 36 frames | fixed / auto, detailed | 17 of 36 ("tripod pan") | 68.6 deg | 65.8 deg |
+| same | fixed / typical, detailed | 21 of 36 | 102.1 deg | 65.8 deg |
+| same | variable / typical, detailed | 16 of 36 | 60.9 deg | 65.8 deg |
+| same | specify aov 65.8 / typical | not solved | - | 65.8 deg |
+
+The exporter correctly refuses partial solves ("unsolved frames or invalid focal lengths"), and
+the orthographic case "solves" by inventing a telephoto lens. Flat-shaded CAD renders are
+probably poor tracking material; real footage may do better. Revisit with filmed footage or a
+textured render.
+
+## Release 0.19.0 notes (Oct 31 build)
+
+New verbs: `camera.exportBlender`, `comp.scale`, `keys.setMuted`, `file.checkOutput`,
+`file.runStartupScripts`/`runShutdownScripts`, `scriptui.resize`.
 
 ## Release 0.14.0 notes
 

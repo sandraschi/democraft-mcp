@@ -4,13 +4,14 @@
 
 **What it is**: workbook engine - formulas, charts, pivots, sparklines, import/export. The
 app's own comparison is Microsoft Excel. Driven by
-`C:\Program Files\GridCraft\gridcraft-cli.exe` (verified against 0.10.0).
+`C:\Program Files\GridCraft\gridcraft-cli.exe` (verified against 0.14.2, 2026-11-01).
 
 ## Demos
 
 | Demo | What actually runs | Artifacts | AI step |
 |---|---|---|---|
 | `homepage-grid` | The local model fills a table for your topic; the engine formats it, adds charts and sparklines, and exports XLSX + PDF. | `.xlsx`, `.pdf` | table JSON (`title`, `headers`, rows) |
+| `macro-replay` | One typed macro (amber header, SUM total row, bold rows above 300) saved into the workbook; `macro.check` dry-runs it on two tables (footprint only, nothing written), refuses the second because a number column holds text and names the cell (G3), then the cell is fixed and the macro runs on both. | `macro-replay.xlsx`, `.pdf`, `result.csv`, `macro.json`, `macro-report.md` | none |
 | `capability-map` | The installed CLI's `commands` output (or `--help`). | `capabilities.txt` | none |
 
 Topic presets: Sales report 2025, Pelican census, Bike shop inventory, Household energy 2025.
@@ -39,8 +40,15 @@ Artifacts: `outbox/grid/homepage-grid/`.
 
 ## Observed gaps
 
-- No VBA/macro compatibility.
-- No `.xlsx` round-trip verified (export is the verified direction).
+- No VBA: an `.xlsm` keeps its VBA project on save and never runs it (an owner decision).
+  Typed macros (`macro.*`, 0.14) are the automation path instead.
+- No Office Scripts compatibility.
+
+## Release 0.14.2 notes (Oct 31 build)
+
+New `macro.*` verbs: record, save, check (dry run with footprint), run (one undo step, rolls
+back on error), debug, list, get, rename, delete. The engine's input validation names the
+offending cell, which is what `macro-replay` shows.
 
 ## Release 0.10.0 notes
 
