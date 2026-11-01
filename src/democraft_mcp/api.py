@@ -157,6 +157,8 @@ def create_app(outbox: Path | None = None) -> FastAPI:
                     "clone_of": a.clone_of,
                     "description": a.description,
                     "gaps": list(a.gaps),
+                    "family": a.family,
+                    "maker": a.maker,
                     "version": ver.get("version"),
                     "modified": ver.get("modified"),
                     "baseline_version": (base or {}).get("version"),
@@ -174,6 +176,7 @@ def create_app(outbox: Path | None = None) -> FastAPI:
                             "requires": d.requires,
                             "topics": list(d.topics),
                             "live": d.live,
+                            "added": d.added,
                         }
                         for d in a.demos
                     ],
@@ -439,6 +442,53 @@ def create_app(outbox: Path | None = None) -> FastAPI:
                                 )
         items.sort(key=lambda x: (x.get("started") or "", x["app"], x["demo"]), reverse=True)
         return {"success": True, "runs": items}
+
+    @api.get("/api/gallery")
+    def gallery(limit: int = 24, app: str = "") -> dict:
+        """The newest real render of each latest run, for the dashboard mosaic.
+
+        One image per run dir (outbox/<app>/<demo>/), picked as the largest PNG/JPG/GIF
+        that is not a diff or an intermediate frame. Nothing is generated here: a run
+        without an image simply has no tile.
+        """
+        tiles: list[dict] = []
+        if not box.is_dir():
+            return {"success": True, "tiles": []}
+        skip = ("diff", "tr1-t", "tr2-t", "f0", "frame")
+        for app_dir in sorted(box.iterdir()):
+            if not app_dir.is_dir() or app_dir.name.startswith("_") or app_dir.name not in BY_KEY:
+                continue
+            if app and app_dir.name != app:
+                continue
+            for run_dir in sorted(app_dir.iterdir()):
+                if not run_dir.is_dir():
+                    continue
+                images = [
+                    f
+                    for f in run_dir.rglob("*")
+                    if f.is_file()
+                    and f.suffix.lower() in (".png", ".jpg", ".jpeg", ".gif")
+                    and not any(f.name.lower().startswith(s) for s in skip)
+                    and 6_000 < f.stat().st_size < 12_000_000  # skip placeholders
+                ]
+                if not images:
+                    continue
+                best = max(images, key=lambda f: f.stat().st_size)
+                rel = str(best.relative_to(run_dir)).replace("\\", "/")
+                demo = next((d for d in BY_KEY[app_dir.name].demos if d.id == run_dir.name), None)
+                tiles.append(
+                    {
+                        "app": app_dir.name,
+                        "demo": run_dir.name,
+                        "title": demo.title if demo else run_dir.name,
+                        "file": rel,
+                        "url": f"/api/artifacts/{app_dir.name}/{run_dir.name}/{rel}",
+                        "images": len(images),
+                        "mtime": best.stat().st_mtime,
+                    }
+                )
+        tiles.sort(key=lambda t: t["mtime"], reverse=True)
+        return {"success": True, "tiles": tiles[: max(1, min(limit, 100))]}
 
     @api.get("/api/history/{app}/{demo}/{run_id}/{path:path}")
     def history_artifact(app: str, demo: str, run_id: str, path: str):

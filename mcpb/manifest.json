@@ -1,7 +1,7 @@
 {
   "manifest_version": "0.2",
   "name": "democraft-mcp",
-  "version": "0.2.0b2",
+  "version": "0.3.0b1",
   "description": "Demo fleet for the ArtCraft family (13 apps): real headless CLI runs, a job engine with provenance, a Depot of every run, and hands-in playback. Ships no engines - install the apps from getartcraft.com first.",
   "author": { "name": "Sandra Schipal" },
   "repository": {
