@@ -1,8 +1,46 @@
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { api, todayLocal } from "../lib/api";
+import ContactSheet from "../components/ContactSheet";
+import { api, type CraftApp, type GalleryTile } from "../lib/api";
+import { appMeta, isNew } from "../lib/appMeta";
 import { useBackend } from "../store/backend";
 import { useLlm } from "../store/llm";
+
+function AppRow({ a }: { a: CraftApp }) {
+	const meta = appMeta(a.key);
+	return (
+		<Link
+			to={`/craft/${a.key}`}
+			data-testid={`dash-app-${a.key}`}
+			className="group flex items-center gap-3 border-b border-line py-2.5 pl-3 transition-colors hover:bg-surface"
+			style={{ borderLeft: `2px solid ${meta.hue}` }}
+		>
+			<meta.icon size={17} style={{ color: meta.hue }} className="shrink-0" />
+			<span className="min-w-0 flex-1">
+				<span className="block truncate text-sm font-medium text-paper">
+					{a.name}
+				</span>
+				<span className="block truncate text-xs text-muted">
+					for {a.clone_of}
+				</span>
+			</span>
+			<span className="hidden text-xs text-muted sm:block">
+				{a.demos.length - 1} demos
+			</span>
+			<span className="w-24 shrink-0 pr-3 text-right font-mono text-xs">
+				{a.installed ? (
+					<span className={a.drift ? "text-amber-300" : "text-muted"}>
+						{a.version ?? "?"}
+						{a.drift && " new"}
+					</span>
+				) : (
+					<span className="text-red-300">missing</span>
+				)}
+			</span>
+		</Link>
+	);
+}
 
 export default function Dashboard() {
 	const { apps, missing, health, refresh } = useBackend();
@@ -10,227 +48,202 @@ export default function Dashboard() {
 	const [kpis, setKpis] = useState<{ label: string; value: number | string }[]>(
 		[],
 	);
-	const [flowsPreview, setFlowsPreview] = useState<
-		{ id: string; name: string; status: string }[]
-	>([]);
+	const [tiles, setTiles] = useState<GalleryTile[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [failed, setFailed] = useState(false);
+
 	useEffect(() => {
 		refresh();
 		refreshLlm();
-		api<{
-			kpis: { label: string; value: number | string }[];
-			flows_preview?: { id: string; name: string; status: string }[];
-		}>("/api/dashboard")
-			.then((j) => {
-				setKpis(j.kpis ?? []);
-				setFlowsPreview(j.flows_preview ?? []);
-				setLoading(false);
+		Promise.all([
+			api<{ kpis: { label: string; value: number | string }[] }>(
+				"/api/dashboard",
+			),
+			api<{ tiles: GalleryTile[] }>("/api/gallery?limit=8"),
+		])
+			.then(([d, g]) => {
+				setKpis(d.kpis ?? []);
+				setTiles(g.tiles ?? []);
 			})
-			.catch(() => {
-				setFailed(true);
-				setLoading(false);
-			});
+			.catch(() => setFailed(true))
+			.finally(() => setLoading(false));
 	}, [refresh, refreshLlm]);
-	const llmOk = providers.some((p) => p.ok);
-	const kpiValue = (label: string) =>
-		kpis.find((k) => k.label === label)?.value ?? "-";
-	return (
-		<div>
-			<h1 className="text-3xl font-bold">Demo the whole Craft family.</h1>
-			<p className="mt-2 text-slate-300">
-				One page per Craft app, real headless demos, a job engine with
-				provenance, and twelve readymade multi-app flows you can run or edit.
-				Every demo shells to the installed CLI - no mock pixels.
-			</p>
-			<div
-				data-testid="dashboard"
-				className="mt-4 flex flex-wrap items-center gap-3 text-sm"
-			>
-				<span className="flex items-center gap-1">
-					<span
-						className={`inline-block h-2 w-2 rounded-full ${health ? "bg-emerald-400" : "bg-red-400"}`}
-					/>
-					Backend{" "}
-					{health ? `ok (${health.installed}/${health.apps} apps)` : "down"}
-				</span>
-				<span className="flex items-center gap-1">
-					<span
-						className={`inline-block h-2 w-2 rounded-full ${llmOk ? "bg-emerald-400" : "bg-slate-600"}`}
-					/>
-					LLM {llmOk ? "available" : "not detected"}
-				</span>
-			</div>
-			{loading && (
-				<p className="mt-4 text-sm text-slate-300">Loading dashboard...</p>
-			)}
-			{failed && (
-				<p className="mt-4 text-sm text-amber-300">
-					Backend unreachable. Start it, then{" "}
-					<button
-						type="button"
-						className="underline"
-						onClick={() => window.location.reload()}
-					>
-						retry
-					</button>
-					.
-				</p>
-			)}
-			<div className="mt-4 flex gap-3">
-				<Link
-					to="/craft/cad"
-					data-testid="hero-cta"
-					className="rounded bg-amber-500 px-5 py-2 font-semibold text-slate-950"
-				>
-					Run the CAD house plan
-				</Link>
-				<Link
-					to="/flows"
-					data-testid="flows-cta"
-					className="rounded bg-slate-800 px-5 py-2"
-				>
-					Browse flows
-				</Link>
-				<Link to="/help" className="rounded border border-slate-700 px-5 py-2">
-					How it works
-				</Link>
-			</div>
-			{missing.length > 0 && (
-				<Link
-					to="/onboarding"
-					data-testid="onboarding-cta"
-					className="mt-4 block rounded border-2 border-red-500 bg-red-950 p-4 font-semibold text-red-200"
-				>
-					{missing.length} Craft app(s) missing (
-					{missing.slice(0, 4).join(", ")}
-					{missing.length > 4 ? "..." : ""}) - install them to clear MOCK badges
-				</Link>
-			)}
-			<div className="mt-6 grid gap-3 md:grid-cols-3">
-				<Link
-					to="/flows"
-					className="rounded border border-slate-800 bg-slate-900 p-4 hover:border-amber-500/50"
-				>
-					<p className="text-xs uppercase tracking-widest text-amber-400">
-						Multi-app
-					</p>
-					<p className="mt-1 text-lg font-semibold">Flows</p>
-					<p className="text-sm text-slate-300">
-						{kpiValue("Flows")} readymade chains - grade, lay out, assemble -
-						with a CRUD step editor.
-					</p>
-				</Link>
-				<Link
-					to="/hands-in"
-					className="rounded border border-slate-800 bg-slate-900 p-4 hover:border-amber-500/50"
-				>
-					<p className="text-xs uppercase tracking-widest text-amber-400">
-						Watch it build
-					</p>
-					<p className="mt-1 text-lg font-semibold">Hands-in</p>
-					<p className="text-sm text-slate-300">
-						{kpiValue("Live demos")} demos stream each CLI step, with playback
-						controls.
-					</p>
-				</Link>
-				<Link
-					to="/depot"
-					className="rounded border border-slate-800 bg-slate-900 p-4 hover:border-amber-500/50"
-				>
-					<p className="text-xs uppercase tracking-widest text-amber-400">
-						Every run
-					</p>
-					<p className="mt-1 text-lg font-semibold">Depot</p>
-					<p className="text-sm text-slate-300">
-						{kpiValue("Demo runs")} demo runs kept with artifacts and source
-						links.
-					</p>
-				</Link>
-			</div>
 
-			{apps.length > 0 && (
-				<div
-					data-testid="dashboard-builds"
-					className="mt-4 rounded border border-slate-800 bg-slate-900 p-4"
-				>
-					<div className="flex items-center justify-between gap-2">
-						<p className="text-xs uppercase tracking-widest text-slate-400">
-							Installed builds
-						</p>
-						<Link to="/apps" className="text-xs text-amber-400 hover:underline">
-							versions table
+	const llmOk = providers.some((p) => p.ok);
+	const core = apps.filter((a) => a.family !== "community");
+	const community = apps.filter((a) => a.family === "community");
+	const fresh = apps.flatMap((a) =>
+		a.demos.filter((d) => isNew(d.added)).map((d) => ({ app: a, demo: d })),
+	);
+
+	return (
+		<div data-testid="dashboard">
+			<motion.section
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				transition={{ duration: 0.5 }}
+				aria-label="Latest renders"
+			>
+				{tiles.length > 0 ? (
+					<ContactSheet tiles={tiles} apps={apps} />
+				) : (
+					!loading && (
+						<div className="print flex aspect-[16/5] items-center justify-center text-sm text-muted">
+							No renders yet. Run any demo and its output lands here.
+						</div>
+					)
+				)}
+			</motion.section>
+
+			<section className="mt-10 grid gap-8 lg:grid-cols-[1fr_20rem]">
+				<div>
+					<h1 className="max-w-[18ch] text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
+						Every Craft app, run for real.
+					</h1>
+					<p className="mt-4 max-w-[62ch] text-[15px] leading-relaxed text-muted">
+						Each picture above came out of an installed Craft CLI on this
+						machine, with the engine version and every step recorded. Pick an
+						app, run a demo, keep the files.
+					</p>
+					<div className="mt-6 flex flex-wrap gap-3">
+						<Link
+							to={
+								tiles[0]
+									? `/craft/${tiles[0].app}?demo=${tiles[0].demo}`
+									: "/craft/solid"
+							}
+							data-testid="hero-cta"
+							className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-amber-400"
+						>
+							Open the latest run
+						</Link>
+						<Link
+							to="/flows"
+							data-testid="flows-cta"
+							className="rounded-md border border-line px-4 py-2 text-sm hover:border-zinc-500"
+						>
+							Chain apps in a flow
 						</Link>
 					</div>
-					<div className="mt-2 flex flex-wrap gap-2">
-						{apps.map((a) => (
-							<Link
-								key={a.key}
-								to={`/craft/${a.key}`}
-								data-testid={`dash-app-${a.key}`}
-								className={`rounded px-2 py-1 text-xs ${
-									a.installed
-										? "bg-slate-800 text-slate-200 hover:bg-slate-700"
-										: "border border-slate-700 text-slate-400"
-								}`}
-							>
-								{a.name}{" "}
-								<span className="font-mono text-slate-400">
-									{a.version ?? (a.installed ? "?" : "missing")}
-								</span>
-								{a.drift && <span className="ml-1 text-amber-300">drift</span>}
-							</Link>
-						))}
-					</div>
-					<p className="mt-2 text-xs text-slate-400">
-						{apps.filter((a) => a.installed).length}/{apps.length} installed,{" "}
-						{
-							apps.filter((a) => (a.modified ?? "").startsWith(todayLocal()))
-								.length
-						}{" "}
-						built today, {apps.filter((a) => a.drift).length} drifting from the
-						accepted baseline.
+					<p className="mt-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">
+						<span className="flex items-center gap-1.5">
+							<span
+								className={`h-1.5 w-1.5 rounded-full ${health ? "bg-emerald-400" : "bg-red-400"}`}
+							/>
+							{health
+								? `${health.installed} of ${health.apps} apps installed`
+								: "backend down"}
+						</span>
+						<span className="flex items-center gap-1.5">
+							<span
+								className={`h-1.5 w-1.5 rounded-full ${llmOk ? "bg-emerald-400" : "bg-zinc-600"}`}
+							/>
+							{llmOk
+								? "local model available for AI steps"
+								: "no local model: AI steps skip"}
+						</span>
 					</p>
-				</div>
-			)}
-
-			{flowsPreview.length > 0 && (
-				<div className="mt-4">
-					<p className="text-xs uppercase tracking-widest text-slate-400">
-						Readymade
-					</p>
-					<div className="mt-2 flex flex-wrap gap-2">
-						{flowsPreview.map((flow) => (
-							<Link
-								key={flow.id}
-								to={`/flows/${flow.id}`}
-								className="rounded bg-slate-800 px-2 py-1 text-xs text-slate-200 hover:bg-slate-700"
+					{failed && (
+						<p className="mt-4 text-sm text-amber-300">
+							The backend did not answer. Start it with start.bat, then{" "}
+							<button
+								type="button"
+								className="underline"
+								onClick={() => window.location.reload()}
 							>
-								{flow.name}
-								{flow.status === "blocked" && (
-									<span className="ml-1 text-amber-300">blocked</span>
-								)}
-							</Link>
-						))}
-					</div>
+								reload
+							</button>
+							.
+						</p>
+					)}
+					{missing.length > 0 && (
+						<Link
+							to="/onboarding"
+							data-testid="onboarding-cta"
+							className="mt-5 block rounded-md border border-red-500/70 bg-red-950/60 p-3 text-sm font-medium text-red-200"
+						>
+							{missing.length} Craft app(s) not installed (
+							{missing.slice(0, 4).join(", ")}
+							{missing.length > 4 ? "..." : ""}). Install them to clear the MOCK
+							badges.
+						</Link>
+					)}
 				</div>
-			)}
 
-			<div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-				{kpis.map((k) => (
-					<div
-						key={k.label}
-						data-testid={`kpi-${k.label.toLowerCase().replace(/\s+/g, "-")}`}
-						className="rounded border border-slate-800 bg-slate-900 p-4"
+				{fresh.length > 0 && (
+					<aside
+						data-testid="whats-new"
+						className="lg:border-l lg:border-line lg:pl-6"
 					>
-						<p className="text-2xl font-bold">{k.value}</p>
-						<p className="text-sm text-slate-300">{k.label}</p>
+						<h2 className="text-sm font-medium">New with the Oct 31 builds</h2>
+						<ul className="mt-3 space-y-3">
+							{fresh.map(({ app, demo }) => {
+								const meta = appMeta(app.key);
+								return (
+									<li key={`${app.key}/${demo.id}`}>
+										<Link
+											to={`/craft/${app.key}?demo=${demo.id}`}
+											className="group block text-sm"
+										>
+											<span className="flex items-center gap-1.5 text-xs text-muted">
+												<meta.icon size={13} style={{ color: meta.hue }} />
+												{app.name}
+											</span>
+											<span className="text-paper group-hover:text-accent">
+												{demo.title.replace(/^Demo \d+: /, "")}
+											</span>
+										</Link>
+									</li>
+								);
+							})}
+						</ul>
+					</aside>
+				)}
+			</section>
+
+			<section className="mt-12 grid gap-x-10 gap-y-8 md:grid-cols-2">
+				<div data-testid="dashboard-builds">
+					<h2 className="mb-2 text-sm font-medium">
+						Storytold ArtCraft{" "}
+						<span className="text-muted">({core.length})</span>
+					</h2>
+					<div className="border-t border-line">
+						{core.map((a) => (
+							<AppRow key={a.key} a={a} />
+						))}
 					</div>
-				))}
-			</div>
-			<p className="mt-4 text-sm text-slate-300">
-				Numbers update live from the backend on this machine.
-			</p>
+				</div>
+				<div>
+					<h2 className="mb-2 text-sm font-medium">
+						Community members{" "}
+						<span className="text-muted">({community.length})</span>
+					</h2>
+					<div className="border-t border-line">
+						{community.map((a) => (
+							<AppRow key={a.key} a={a} />
+						))}
+					</div>
+					<p className="mt-3 max-w-[48ch] text-xs leading-relaxed text-muted">
+						Third-party apps built to the Craft conventions. SolidCraft is by
+						Tangency Labs and updates itself in place, so its version can move
+						between runs.
+					</p>
+					<dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4 md:grid-cols-2">
+						{kpis.map((k) => (
+							<div
+								key={k.label}
+								data-testid={`kpi-${k.label.toLowerCase().replace(/\s+/g, "-")}`}
+								className="flex flex-col-reverse"
+							>
+								<dt className="text-xs text-muted">{k.label}</dt>
+								<dd className="text-xl font-semibold tabular-nums">
+									{k.value}
+								</dd>
+							</div>
+						))}
+					</dl>
+				</div>
+			</section>
 		</div>
 	);
 }
