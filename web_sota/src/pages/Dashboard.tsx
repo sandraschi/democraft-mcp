@@ -215,7 +215,7 @@ export default function Dashboard() {
 				</div>
 				<div>
 					<h2 className="mb-2 text-sm font-medium">
-						Community members{" "}
+						Community projects{" "}
 						<span className="text-muted">({community.length})</span>
 					</h2>
 					<div className="border-t border-line">
@@ -224,9 +224,9 @@ export default function Dashboard() {
 						))}
 					</div>
 					<p className="mt-3 max-w-[48ch] text-xs leading-relaxed text-muted">
-						Third-party apps built to the Craft conventions. SolidCraft is by
-						Tangency Labs and updates itself in place, so its version can move
-						between runs.
+						ArtCraft community projects, built by third parties to the Craft
+						conventions. SolidCraft is by Tangency Labs and updates itself in
+						place, so its version can move between runs.
 					</p>
 					<dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4 md:grid-cols-2">
 						{kpis.map((k) => (
