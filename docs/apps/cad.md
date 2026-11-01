@@ -35,7 +35,7 @@ Artifacts: `outbox/cad/house-plan/`.
 
 ## Observed gaps
 
-- No AutoLISP dialect (generic scripting only).
+- AutoLISP is supported since 0.15: `lisp` (inline code, optional `inputs` feeding getpoint/getint), `appload` (a path, or `name` plus base64 `data`) and `script` for .scr files. The core language, `defun c:` commands, `command`, `polar`, `entmake` and `mapcar`/`lambda` work; VLAX/ActiveX does not (`vlax-get-acad-object` is undefined).
 - 2D engine: no true isometric or 3D solids.
 - Dynamic-block parametrics are scriptable via Express Tools (`burst`, `mocoro`, `breakline`), but full UI dynamic grip authoring remains desktop-only.
 

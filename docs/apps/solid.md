@@ -61,7 +61,7 @@ Artifacts: `outbox/solid/<demo>/`. The enclosure script is vendored with attribu
 
 ## Observed gaps
 
-- Community member, not a Storytold build: release cadence and conventions may diverge.
+- ArtCraft community project by Tangency Labs, not a Storytold build: release cadence and conventions may diverge.
 - Self-updates in place: the engine version can move between two runs.
 - `snapshot` renders orthographic by default; pass a `fov` in `--camera` for perspective.
 - No CAM or simulation workspaces.

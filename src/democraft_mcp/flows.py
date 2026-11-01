@@ -75,6 +75,21 @@ SEED_FLOWS: list[dict] = [
         ],
     },
     {
+        "id": "product-sheet",
+        "name": "Product sheet",
+        "description": "Enclosure in SolidCraft, a spec sheet in DesignCraft, an assembled PDF.",
+        "status": "ready",
+        "steps": [
+            {
+                "app": "solid",
+                "demo": "enclosure-fit",
+                "note": "constrained 3D part, STEP + renders",
+            },
+            {"app": "design", "demo": "print-spread", "note": "spec sheet layout"},
+            {"app": "pdf", "demo": "portfolio", "note": "assemble and export"},
+        ],
+    },
+    {
         "id": "poster-lab",
         "name": "Poster lab",
         "description": "Vector source, texture pass, poster layout.",
