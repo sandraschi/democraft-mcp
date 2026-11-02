@@ -1,19 +1,25 @@
 # HANDOVER - democraft-mcp
 
-**As of:** 2026-11-01. **Version:** 0.3.0b1.
+**As of:** 2026-11-02. **Version:** 0.3.0.
 **Assess score:** not re-scored this session; the 91 from 2026-10-21 was self-assessed.
 
 ## What this repo is
 
 The demo bench for the Craft family: one page per app, every demo a real headless
-`<app>-cli.exe` run plus an optional local-LLM step. 15 apps: 14 Storytold ArtCraft (`core`)
-plus SolidCraft by Tangency Labs (`community`, first of more to come). One registry
+`<app>-cli.exe` run plus an optional local-LLM step. 15 apps: 13 Storytold ArtCraft (`core`)
+plus 2 community members (SolidCraft by Tangency Labs, Craft Anything by Storytold). One registry
 (`src/democraft_mcp/crafts.py`), demos since 2026-11-01 in `recipes.py`, one portmanteau MCP
-tool (`craft`), one webapp. 33 demos (8 streamable) plus a capability map per app, 15 flows.
+tool (`craft`), one webapp. 35 demos plus capability maps.
 
 Ports: **11245** frontend, **11246** backend. Gates: `just ci`.
 
-## Last concrete action (2026-11-01)
+## Last concrete action (2026-11-02)
+
+1. **Craft Anything integrated** as 15th craft app: added `anything/study-and-spec` and
+   `anything/oracle-check` clean-room recipes to `recipes.py`.
+2. **SolidCraft & TextureCraft verified**: parametric bracket & enclosure fitting, ORM maps
+   export and headless Godot import.
+3. **Release v0.3.0 tagged and pushed.**
 
 1. **Oct 31 builds.** All 13 core CLIs bumped; drift additive only (104 verbs). Every existing
    demo re-run green on the new builds, baselines accepted for all 14 apps

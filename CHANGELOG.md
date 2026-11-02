@@ -1,4 +1,12 @@
-﻿# CHANGELOG.md
+# CHANGELOG.md
+
+## 0.3.0 (2026-11-02, Craft Anything, SolidCraft, TextureCraft)
+
+- Craft Anything joins as the 15th Craft App (`storytold/craft-anything`), clean-room reverse-engineering & autonomous software reconstruction engine.
+- New recipes in `src/democraft_mcp/recipes.py`: `anything/study-and-spec` (design tokens, layout, routes, and `SPEC.md`) and `anything/oracle-check` (3-viewport responsive perceptual pixel diff and Level 3 equivalence verdict).
+- Verified SolidCraft parametric bracket & sensor enclosure fitting workflows.
+- Verified TextureCraft PBR smart material export and Godot 4 headless import.
+- Full test suite passing across all 15 craft applications.
 
 ## 0.3.0b1 (2026-11-01, Oct 31 builds, SolidCraft, webapp redesign)
 
