@@ -211,3 +211,35 @@ def test_reference_macros_pass_the_real_engine(tmp_path):
     for name, macro in recipes._reference_macros().items():
         ok, _check, why = recipes._check_macro(ctx, name, {**macro, "name": name}, run=False)
         assert ok, (name, why)
+
+
+def test_craft_anything_recipes(tmp_path):
+    """Craft Anything recipes emit structured SPEC.md and oracle verification verdict."""
+    ctx = recipes.RunCtx(
+        app_key="anything",
+        cli=tmp_path / "mock-cli.exe",
+        run_dir=tmp_path,
+        topic="SOTA Web Console",
+        ai={},
+        do_with=lambda *a, **k: {},
+        inputs=[],
+        program_files=tmp_path,
+    )
+    # Test Study & Spec
+    res1 = recipes.anything_study_and_spec(ctx)
+    assert res1 is None
+    assert (tmp_path / "SPEC.md").is_file()
+    assert (tmp_path / "study.json").is_file()
+    assert (tmp_path / "study-report.md").is_file()
+    spec_txt = (tmp_path / "SPEC.md").read_text(encoding="utf-8")
+    assert "SOTA Web Console" in spec_txt
+    assert "Clean-Room Specification" in spec_txt
+
+    # Test Oracle Check
+    res2 = recipes.anything_oracle_check(ctx)
+    assert res2 is None
+    assert (tmp_path / "oracle-verdict.json").is_file()
+    assert (tmp_path / "oracle-report.md").is_file()
+    verdict = json.loads((tmp_path / "oracle-verdict.json").read_text(encoding="utf-8"))
+    assert verdict["verdict"] == "Level 3 Equivalent"
+    assert len(verdict["viewports_checked"]) == 3

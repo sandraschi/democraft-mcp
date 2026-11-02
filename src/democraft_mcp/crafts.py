@@ -983,9 +983,49 @@ APPS: tuple[CraftApp, ...] = (
         family="community",
         maker="Tangency Labs",
     ),
+    CraftApp(
+        "anything",
+        "CraftAnything",
+        "craft-anything-cli.exe",
+        "Autonomous clean-room software reconstruction: Study -> Build -> Check -> Ready.",
+        (
+            Demo(
+                "study-and-spec",
+                "Demo 1: Clean-room study and specification",
+                "Observes an app, website or file without inspecting proprietary code; "
+                "extracts visual tokens, typography, routes, and layout, then emits "
+                "a formal clean-room engineering specification (SPEC.md).",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-01",
+            ),
+            Demo(
+                "oracle-check",
+                "Demo 2: Oracle verification and perceptual diff",
+                "Runs loopback headless verification comparing the target against "
+                "the reconstructed clone across 3 responsive viewports, computing "
+                "perceptual pixel diffs and route parity verdict.",
+                "",
+                "cli",
+                added="2026-11-01",
+            ),
+        ),
+        family="community",
+        maker="Storytold",
+    ),
 )
 
 HERO: dict[str, dict[str, object]] = {
+    "anything": {
+        "clone_of": "REA (morluto/rea, rea.tools)",
+        "description": "Autonomous clean-room software reconstruction in pure Rust: "
+        "observes running targets, orchestrates coding agents, and verifies perceptual parity.",
+        "gaps": (
+            "Deep Mode requires authorized private access token",
+            "Local unattended agent loop requires Claude Code CLI or Ollama",
+        ),
+    },
     "cad": {
         "clone_of": "AutoCAD / BricsCAD",
         "description": "2D drafting with a scripted command surface: metric plans, "
