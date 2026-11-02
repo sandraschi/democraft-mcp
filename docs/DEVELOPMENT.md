@@ -9,7 +9,7 @@ N/A rationale applies.
 C:\Users\sandr\.local\bin\uv.exe sync --extra dev
 C:\Users\sandr\.local\bin\uv.exe run pytest -q
 C:\Users\sandr\.local\bin\uv.exe run ruff check .; C:\Users\sandr\.local\bin\uv.exe run ruff format --check .
-cd web_sota; C:\Users\sandr\.bun\bin\bun.exe install; C:\Users\sandr\.bun\bin\bun.exe run check; C:\Users\sandr\.bun\bin\bun.exe run build
+cd webapp; C:\Users\sandr\.bun\bin\bun.exe install; C:\Users\sandr\.bun\bin\bun.exe run check; C:\Users\sandr\.bun\bin\bun.exe run build
 ```
 
 Or `just ci` (lint + test + web-check + web-build).

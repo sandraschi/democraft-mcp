@@ -42,13 +42,14 @@ Ports: **11245** frontend, **11246** backend. Gates: `just ci`.
 2. Phase 1 of `docs/PLAN.md` continues: port legacy branches of `run_demo` into `recipes.py`
    one app at a time; the recipe pattern is the typed-adapter seam.
 3. Regenerate README screenshots after UI changes: start the app, then
-   `node web_sota/scripts/shots.mjs docs/screenshots` (Node, not Bun: Playwright hangs under
+   `node webapp/scripts/shots.mjs docs/screenshots` (Node, not Bun: Playwright hangs under
    Bun on Windows).
 
 ## Blockers / open items
 
-- **Directory standard**: frontend dir is `web_sota/`, fleet standard says `webapp/`. Not
-  renamed this session (touches start scripts, justfile, CI).
+- **Directory standard**: the frontend dir was `web_sota/` and is now `webapp/` (fleet standard).
+  Start script config, justfile, CI, ignore files and docs follow it; old reports and the
+  0.3.0b1 changelog keep the old name as history. Restart the dev server from `webapp/`.
 - **Goliath has hundreds of stale `python.exe` processes** dating from Oct 30-31 (likely leaked
   MCP server instances). Not touched; worth a look outside this repo.
 - **Streaming chat endpoint** and **vendored MCPB pack script** - still open from 2026-10-21.
@@ -64,5 +65,5 @@ Ports: **11245** frontend, **11246** backend. Gates: `just ci`.
 
 1. `just ci`.
 2. `src/democraft_mcp/recipes.py` for the new demo pattern; `crafts.py` for the registry.
-3. `web_sota/src/lib/appMeta.ts` when adding an app (hue + icon), `HERO` in `crafts.py` for facts.
+3. `webapp/src/lib/appMeta.ts` when adding an app (hue + icon), `HERO` in `crafts.py` for facts.
 4. `outbox/<app>/<demo>/` - every artifact with `run.json` and the report.

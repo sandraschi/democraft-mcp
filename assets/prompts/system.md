@@ -236,11 +236,11 @@ DEV/TOOLS/TROUBLESHOOTING). README/INSTALL/CHANGELOG/AGENTS/CLAUDE/
 cursorrules/llms.txt/llms-full.txt/glama.json/manifest.json/.env.example/
 .gitignore/.mcpbignore. fleet-start.config.ps1 (11246/11245, uvicorn
 democraft_mcp.server:app, vite-npm). start.ps1 (fleet engine byte-copy) +
-start.bat + web_sota/start.ps1 (byte-copy) + mcd starts bat. scripts/
+start.bat + webapp/start.ps1 (byte-copy) + mcd starts bat. scripts/
 mcpb-pack.ps1 (wipe+recopy+verify+pack) + seed_examples.py (104-example
 generator, committed). .github/workflows/ci.yml (Windows: uv sync, ruff x2,
 pytest, bun install/check/build). assets/prompts/ (this pack) + icon.png.
-web_sota/ (below). outbox/ (gitignored artifacts).
+webapp/ (below). outbox/ (gitignored artifacts).
 
 Verification order: pytest (real CLIs) -> ruff check + format --check ->
 bun check (astro-less vite: tsc + biome) -> bun build -> just ci alias ->

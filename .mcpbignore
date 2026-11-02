@@ -1,6 +1,6 @@
 .venv/
 node_modules/
-web_sota/
+webapp/
 tests/
 data/
 outbox/

@@ -3,7 +3,7 @@
     BackendPort  = 11246
     FrontendPort = 11245
     HealthPath   = '/api/health'
-    WebRoot      = 'web_sota'
+    WebRoot      = 'webapp'
 
     Backend = @{
         Kind          = 'uvicorn'

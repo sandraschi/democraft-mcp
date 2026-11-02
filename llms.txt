@@ -24,6 +24,6 @@ per app, every demo a real headless CLI run plus an optional local Ollama step.
   `INSTALL.md` (all install paths)
 - Server: `src/democraft_mcp/server.py` (MCP), `api.py` (REST), `crafts.py`
   (registry + runners), `jobs.py` (job engine), `flows.py` (multi-app flows)
-- Webapp: `web_sota/` (React + Vite + Tailwind; 13 craft pages, `/hands-in`,
+- Webapp: `webapp/` (React + Vite + Tailwind; 13 craft pages, `/hands-in`,
   `/depot`, `/flows`, `/studio`)
 - Full text: `llms-full.txt`

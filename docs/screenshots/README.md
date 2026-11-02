@@ -35,7 +35,7 @@ Start the app first (`start.bat`, or backend on `:11246` and Vite on `:11245`), 
 
 ```powershell
 $env:PATH = "C:\Users\sandr\.bun\bin;$env:PATH"
-cd web_sota
+cd webapp
 bunx playwright screenshot --viewport-size="1280,720" --wait-for-timeout=3500 `
   "http://127.0.0.1:11245/" ..\docs\screenshots\dashboard.png
 bunx playwright screenshot --viewport-size="1280,720" --wait-for-timeout=3000 `

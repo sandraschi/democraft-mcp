@@ -2,4 +2,4 @@
 
 Demo fleet for the 13 ArtCraft apps + IncaCraft (proposed). See `AGENTS.md` (fleet chain) +
 `docs/ONBOARDING.md` (wrappees). Key files: `src/democraft_mcp/crafts.py`
-(registry + runners), `server.py` (MCP), `api.py` (REST), `web_sota/`.
+(registry + runners), `server.py` (MCP), `api.py` (REST), `webapp/`.

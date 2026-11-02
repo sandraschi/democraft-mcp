@@ -29,7 +29,7 @@ POST /api/shutdown (confirm). MCP at /mcp (path=/ mount + lifespan).
 CORS localhost + LAN/Tauri regex. Backend :11246, frontend :11245.
 
 ## Webapp
-web_sota/: AppLayout sidebar+topbar, Dashboard/Inbox/Tools/Skills/Chat/
+webapp/: AppLayout sidebar+topbar, Dashboard/Inbox/Tools/Skills/Chat/
 Settings/Help/Logs + Craft/:app dynamic domain pages fed by /api/crafts.
 Zustand stores (llm, backend), data-testid on controls, MOCK badges until
 wrappee installed. Onboarding CTA under hero per ONBOARDING_STANDARD.

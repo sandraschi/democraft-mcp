@@ -13,10 +13,10 @@ jobs:
       - run: uv run pyright src/
       - uses: oven-sh/setup-bun@v2
       - run: bun install
-        working-directory: web_sota
+        working-directory: webapp
       - run: bun run biome:ci
-        working-directory: web_sota
+        working-directory: webapp
       - run: bun run check
-        working-directory: web_sota
+        working-directory: webapp
       - run: bun run build
-        working-directory: web_sota
+        working-directory: webapp

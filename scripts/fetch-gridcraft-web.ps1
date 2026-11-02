@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $temp = Join-Path $env:TEMP "gridcraft-web-$Version"
 $zip = Join-Path $temp "gridcraft-web-$Version.zip"
-$dest = Join-Path $root "web_sota\public\gridcraft-web"
+$dest = Join-Path $root "webapp\public\gridcraft-web"
 
 New-Item -ItemType Directory -Force -Path $temp | Out-Null
 gh release download "v$Version" -R storytold/gridcraft -p "gridcraft-web-$Version.zip" -D $temp --clobber

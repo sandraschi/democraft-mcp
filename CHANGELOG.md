@@ -2,6 +2,8 @@
 
 ## 0.3.0b1 (2026-11-01, Oct 31 builds, SolidCraft, webapp redesign)
 
+- Frontend directory renamed `web_sota/` to `webapp/` (fleet standard); `fleet-start.config.ps1`, `justfile`, CI and docs updated.
+
 - TextureCraft is the 14th core app; demo `texturecraft/godot-prop` (mesh + smart material, Godot 4 ORM maps + GLB, headless Godot import report). 33 demos, 15 apps.
 
 - **SolidCraft** (Tangency Labs) joins as the first community member; registry `family`/`maker`.

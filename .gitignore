@@ -4,8 +4,8 @@ node_modules/
 .venv/
 target/
 **/target/
-web_sota/dist/
-web_sota/public/gridcraft-web/
+webapp/dist/
+webapp/public/gridcraft-web/
 src-tauri/target/
 src-tauri/binaries/
 mcpb/src/

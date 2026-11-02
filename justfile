@@ -18,16 +18,16 @@ fmt:
     {{UV}} run ruff format .
 
 web-install:
-    cd web_sota; C:\Users\sandr\.bun\bin\bun.exe install
+    cd webapp; C:\Users\sandr\.bun\bin\bun.exe install
 
 web-build:
-    cd web_sota; C:\Users\sandr\.bun\bin\bun.exe run build
+    cd webapp; C:\Users\sandr\.bun\bin\bun.exe run build
 
 web-check:
-    cd web_sota; C:\Users\sandr\.bun\bin\bun.exe run check
+    cd webapp; C:\Users\sandr\.bun\bin\bun.exe run check
 
 e2e:
-    cd web_sota; C:\Users\sandr\.bun\bin\bun.exe run e2e
+    cd webapp; C:\Users\sandr\.bun\bin\bun.exe run e2e
 
 mcpb-pack:
     powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/mcpb-pack.ps1
@@ -35,7 +35,7 @@ mcpb-pack:
 bootstrap:
     {{UV}} sync --extra dev
     pre-commit install
-    cd web_sota; C:\Users\sandr\.bun\bin\bun.exe install
+    cd webapp; C:\Users\sandr\.bun\bin\bun.exe install
 
 ci: lint test web-check web-build
     @echo "ci green."
