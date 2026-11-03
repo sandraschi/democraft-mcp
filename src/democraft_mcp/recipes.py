@@ -1346,6 +1346,51 @@ def anything_oracle_check(ctx: RunCtx) -> dict | None:
     return None
 
 
+def material_facade_material(ctx: RunCtx) -> dict | None:
+    """Cook an architectural facade material from a template, render a 3D beauty pass,
+    and export PBR maps.
+    """
+    topic_lower = ctx.topic.lower() if ctx.topic else ""
+    if "marble" in topic_lower:
+        template = "marble"
+    elif "wood" in topic_lower or "timber" in topic_lower:
+        template = "wood"
+    elif "stone" in topic_lower or "paving" in topic_lower or "tile" in topic_lower:
+        template = "stone_tiles"
+    elif (
+        "metal" in topic_lower
+        or "iron" in topic_lower
+        or "bronze" in topic_lower
+        or "rust" in topic_lower
+    ):
+        template = "metal_plates" if "rust" not in topic_lower else "rusty_metal"
+    else:
+        template = "bricks"
+
+    mcraft_path = "facade_material.mcraft"
+    ctx.do(["new", template, mcraft_path, "--name", "FacadeMaterial"])
+    if not (ctx.run_dir / mcraft_path).is_file():
+        return None
+
+    ctx.do(
+        [
+            "render",
+            mcraft_path,
+            "preview.png",
+            "--hq",
+            "--scene",
+            "material_ball",
+            "--size",
+            "1024x768",
+        ]
+    )
+
+    textures_dir = ctx.run_dir / "textures"
+    textures_dir.mkdir(parents=True, exist_ok=True)
+    ctx.do(["export", mcraft_path, "textures", "--format", "png"])
+    return None
+
+
 RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("vector", "cleanup-pass"): vector_cleanup_pass,
     ("pdf", "auto-bookmarks"): pdf_auto_bookmarks,
@@ -1357,4 +1402,5 @@ RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("texture", "material-pick"): godot_prop_ai,
     ("anything", "study-and-spec"): anything_study_and_spec,
     ("anything", "oracle-check"): anything_oracle_check,
+    ("material", "facade-material"): material_facade_material,
 }

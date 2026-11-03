@@ -66,10 +66,21 @@ SEED_FLOWS: list[dict] = [
     {
         "id": "cad-board",
         "name": "CAD board",
-        "description": "Plan, presentation board, PDF.",
+        "description": "Plan, facade material, textured element, presentation board, PDF.",
         "status": "ready",
         "steps": [
             {"app": "cad", "demo": "house-plan", "note": "2D plan set"},
+            {
+                "app": "material",
+                "demo": "facade-material",
+                "note": "procedural facade PBR material",
+            },
+            {
+                "app": "texture",
+                "demo": "godot-prop",
+                "note": "3D textured architectural element",
+                "topic": "Red brick block",
+            },
             {"app": "design", "demo": "print-spread", "note": "board layout"},
             {"app": "pdf", "demo": "portfolio", "note": "export"},
         ],

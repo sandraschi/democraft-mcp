@@ -1,5 +1,12 @@
 # CHANGELOG.md
 
+## 0.4.0 (2026-11-03, MaterialCraft, 5-stage CAD Board flow)
+
+- **MaterialCraft joins the fleet**: Registered `material` (`storytold/materialcraft`), a pure-Rust, node-based procedural material authoring tool (clone of Autodesk Material Editor and Substance 3D Designer).
+- **New demo recipe**: `material/facade-material` compiles `.mcraft` packages from templates (brick, stone, marble, wood, metal), cooks 6-channel PBR textures (albedo, normal, roughness, metallic, height, AO), and generates `--hq` beauty renders with displacement and ambient occlusion.
+- **5-Stage Architecture Flow**: Flow 4 (`cad-board`) updated to a complete architectural pipeline: `cad:house-plan` (2D plan set) -> `material:facade-material` (procedural facade PBR finish) -> `texture:godot-prop` (3D textured element) -> `design:print-spread` (board layout) -> `pdf:portfolio` (client presentation document).
+- **Engine baseline & tests**: Acknowledged CADCraft 0.17.0 baseline drift; updated test assertions across `test_api.py`, `test_demos.py`, and `test_flows.py` (47/47 tests passing).
+
 ## 0.3.0 (2026-11-02, Craft Anything, SolidCraft, TextureCraft)
 
 - Craft Anything joins as the 15th Craft App (`storytold/craft-anything`), clean-room reverse-engineering & autonomous software reconstruction engine.

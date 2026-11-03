@@ -470,6 +470,21 @@ PHOTO_TOPICS: tuple[str, ...] = (
 
 VECTOR_TOPICS: tuple[str, ...] = PHOTO_TOPICS
 
+MATERIAL_TOPICS: tuple[str, ...] = (
+    "Red brick wall with aged mortar",
+    "Polished Carrara marble tiles",
+    "Weathered board-formed concrete",
+    "Exterior timber cladding slats",
+    "Corrugated rusted iron plates",
+    "Hexagonal paving stone tiles",
+    "Brushed bronze architectural panel",
+    "Terracotta roof tiles with moss",
+)
+MATERIAL_PROMPT = (
+    "Describe procedural material parameters for '{topic}' as JSON: "
+    '{"template": str, "roughness": float, "tint": str}. No prose.'
+)
+
 
 @dataclass(frozen=True)
 class CraftApp:
@@ -754,6 +769,27 @@ APPS: tuple[CraftApp, ...] = (
                 topics=texture_demo.AI_TOPICS,
                 topic_prompt=texture_demo.AI_PROMPT,
                 added="2026-11-01",
+            ),
+        ),
+    ),
+    CraftApp(
+        "material",
+        "MaterialCraft",
+        "materialcraft-cli.exe",
+        "Procedural PBR materials: node graphs, multi-channel PBR, beauty renders.",
+        (
+            Demo(
+                "facade-material",
+                "Demo 1: Architectural facade material",
+                "Synthesizes a procedural architectural material package (.mcraft) "
+                "from a template (brick wall, marble, stone tiles, or metal), cooks "
+                "the PBR channels (albedo, normal, roughness, metallic, height, AO), "
+                "and renders a 3D beauty pass (--hq) on a material ball primitive.",
+                "Describe architectural material parameters as JSON. No prose.",
+                "cli",
+                topics=MATERIAL_TOPICS,
+                topic_prompt=MATERIAL_PROMPT,
+                added="2026-11-03",
             ),
         ),
     ),
@@ -1099,6 +1135,15 @@ HERO: dict[str, dict[str, object]] = {
         "gaps": (
             "Procedural fills outside brick, tile and weave kinds do not tile seamlessly",
             "No UDIM-free atlas packing across several props",
+        ),
+    },
+    "material": {
+        "clone_of": "Autodesk Material Editor / Substance 3D Designer",
+        "description": "Procedural node-based PBR material synthesis, real-time 3D preview, "
+        "and beauty rendering (--hq) with height displacement and AO.",
+        "gaps": (
+            "No direct BIM thermal / structural parameter simulation",
+            "No proprietary .adsklib binary container export",
         ),
     },
     "light": {
