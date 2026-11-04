@@ -1749,6 +1749,94 @@ def rev_dki_decode(ctx: RunCtx) -> dict | None:
     return None
 
 
+def doc_convert_roundtrip(ctx: RunCtx) -> dict | None:
+    """DocCraft Demo 1: Headless document format conversion."""
+    md_file = ctx.run_dir / "brief.md"
+    content = "# Enterprise Architecture Brief\n\nAutomated document compilation."
+    md_file.write_text(content, encoding="utf-8")
+
+    res_conv = ctx.do(["convert", "--in", str(md_file), "--out", "html", "--json"])
+
+    report = [
+        "# DocCraft Conversion Roundtrip Report",
+        "",
+        f"- Source Document: `{md_file.name}` ({md_file.stat().st_size} bytes)",
+        "- Target Format: `html`",
+        f"- Conversion Success: `{res_conv.get('success', False)}`",
+        f"- Execution latency: {res_conv.get('ms', 0)} ms",
+    ]
+    (ctx.run_dir / "convert-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def doc_text_extract(ctx: RunCtx) -> dict | None:
+    """DocCraft Demo 2: Document text and word count extraction."""
+    doc_file = ctx.run_dir / "specification.txt"
+    text_sample = (
+        "DocCraft provides headless Office document automation, converting Word, "
+        "Excel, PowerPoint, and ODF formats to production-ready deliverables."
+    )
+    doc_file.write_text(text_sample, encoding="utf-8")
+
+    res_txt = ctx.do(["text", "--in", str(doc_file), "--json"])
+
+    words = 0
+    chars = 0
+    try:
+        data = json.loads(res_txt.get("stdout", "{}"))
+        words = data.get("word_count", 0)
+        chars = data.get("char_count", 0)
+    except Exception:
+        pass
+
+    report = [
+        "# DocCraft Text Extraction Report",
+        "",
+        f"- Input file: `{doc_file.name}`",
+        f"- Extraction status: `{res_txt.get('success', False)}`",
+        f"- Extracted word count: {words}",
+        f"- Extracted character count: {chars}",
+    ]
+    (ctx.run_dir / "text-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def doc_combine_split(ctx: RunCtx) -> dict | None:
+    """DocCraft Demo 3: Multi-document PDF merging and consolidation."""
+    min_pdf = (
+        b"%PDF-1.4\n"
+        b"1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
+        b"2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n"
+        b"3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>endobj\n"
+        b"xref\n0 4\n"
+        b"0000000000 65535 f \n"
+        b"0000000009 00000 n \n"
+        b"0000000052 00000 n \n"
+        b"0000000108 00000 n \n"
+        b"trailer<</Size 4/Root 1 0 R>>\n"
+        b"startxref\n185\n%%EOF\n"
+    )
+
+    pdf_a = ctx.run_dir / "doc_a.pdf"
+    pdf_b = ctx.run_dir / "doc_b.pdf"
+    pdf_a.write_bytes(min_pdf)
+    pdf_b.write_bytes(min_pdf)
+    merged_pdf = ctx.run_dir / "combined_bundle.pdf"
+
+    res_merge = ctx.do(["combine", str(pdf_a), str(pdf_b), "--out", str(merged_pdf), "--json"])
+
+    report = [
+        "# DocCraft Document Bundle Consolidation Report",
+        "",
+        "- Source documents: `doc_a.pdf`, `doc_b.pdf`",
+        f"- Target consolidated output: `{merged_pdf.name}`",
+        f"- Consolidation status: `{res_merge.get('success', False)}`",
+        f"- Output exists: {merged_pdf.is_file()}",
+    ]
+    (ctx.run_dir / "combine-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
 RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("design", "print-spread"): design_print_spread,
     ("design", "fleet-poster-a2"): design_fleet_poster_a2,
@@ -1777,4 +1865,7 @@ RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("rev", "strings-entropy"): rev_strings_entropy,
     ("rev", "die-capa-smoke"): rev_die_capa_smoke,
     ("rev", "dki-decode"): rev_dki_decode,
+    ("doc", "convert-roundtrip"): doc_convert_roundtrip,
+    ("doc", "text-extract"): doc_text_extract,
+    ("doc", "combine-split"): doc_combine_split,
 }

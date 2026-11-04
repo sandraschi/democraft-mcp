@@ -1213,6 +1213,43 @@ APPS: tuple[CraftApp, ...] = (
         maker="Storytold",
     ),
     CraftApp(
+        "doc",
+        "DocCraft",
+        "doccraft-cli.exe",
+        "Office document workstation: Word, Excel, PowerPoint, ODF, and PDF automation.",
+        (
+            Demo(
+                "convert-roundtrip",
+                "Demo 1: Headless document format conversion",
+                "Converts source documents across Office, HTML, Markdown, and PDF formats.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+            Demo(
+                "text-extract",
+                "Demo 2: Document text and word count extraction",
+                "Extracts structured readable text, page counts, and vocabulary statistics.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+            Demo(
+                "combine-split",
+                "Demo 3: Multi-document PDF merging and consolidation",
+                "Merges multiple distinct documents into a unified output PDF artifact.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
         "app",
         "AppCraft",
         "appcraft-cli.exe",
@@ -1643,6 +1680,14 @@ HERO: dict[str, dict[str, object]] = {
         "gaps": (
             "Interactive Ghidra GUI integration requires running headless or local bridge",
             "Dynamic emulation requires Unicorn/Frida runtime enablement",
+        ),
+    },
+    "doc": {
+        "clone_of": "Microsoft 365 / LibreOffice / Adobe Acrobat",
+        "description": "Office document conversion, text extraction, and PDF manipulation.",
+        "gaps": (
+            "Real-time collaborative editing requires live UNO extension bridge",
+            "VBA macro execution sandboxed in headless mode",
         ),
     },
     "app": {

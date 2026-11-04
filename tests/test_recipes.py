@@ -324,3 +324,18 @@ def test_rev_recipes(tmp_path):
     res3 = run_demo("rev", "dki-decode", tmp_path, model="none")
     assert res3["success"] and res3["all_cli_ok"]
     assert (tmp_path / "rev" / "dki-decode" / "dki-report.md").is_file()
+
+
+@_needs("doc")
+def test_doc_recipes(tmp_path):
+    res1 = run_demo("doc", "convert-roundtrip", tmp_path, model="none")
+    assert res1["success"] and res1["all_cli_ok"]
+    assert (tmp_path / "doc" / "convert-roundtrip" / "convert-report.md").is_file()
+
+    res2 = run_demo("doc", "text-extract", tmp_path, model="none")
+    assert res2["success"] and res2["all_cli_ok"]
+    assert (tmp_path / "doc" / "text-extract" / "text-report.md").is_file()
+
+    res3 = run_demo("doc", "combine-split", tmp_path, model="none")
+    assert res3["success"] and res3["all_cli_ok"]
+    assert (tmp_path / "doc" / "combine-split" / "combine-report.md").is_file()
