@@ -369,3 +369,21 @@ def test_git_recipes(tmp_path):
     res3 = run_demo("git", "pr-list-fleet", tmp_path, model="none")
     assert res3["success"] and res3["all_cli_ok"]
     assert (tmp_path / "git" / "pr-list-fleet" / "fleet-report.md").is_file()
+
+
+@_needs("container")
+def test_container_recipes(tmp_path):
+    res1 = run_demo("container", "list", tmp_path, model="none")
+    assert res1["success"] and res1["all_cli_ok"]
+    inv = (tmp_path / "container" / "list" / "inventory-report.md").read_text(encoding="utf-8")
+    assert "Engine status:" in inv
+
+    res2 = run_demo("container", "logs-tail", tmp_path, model="none")
+    assert res2["success"] and res2["all_cli_ok"]
+    assert (tmp_path / "container" / "logs-tail" / "logs-report.md").is_file()
+
+    res3 = run_demo("container", "exec-echo", tmp_path, model="none")
+    assert res3["success"] and res3["all_cli_ok"]
+    echo = (tmp_path / "container" / "exec-echo" / "echo-report.md").read_text(encoding="utf-8")
+    # The receipt must be stated, never implied: ok, skipped or down.
+    assert any(f"`{s}`" in echo for s in ("ok", "skipped", "down"))

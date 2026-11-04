@@ -2042,6 +2042,89 @@ def git_pr_list_fleet(ctx: RunCtx) -> dict | None:
     return None
 
 
+def _parse_json(res: dict) -> dict:
+    """Parse a CLI step's stdout as one JSON object; {} when it is not JSON."""
+    try:
+        data = json.loads(res.get("stdout") or "{}")
+    except json.JSONDecodeError:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def container_list(ctx: RunCtx) -> dict | None:
+    """ContainerCraft Demo 1: live container inventory and daemon probe."""
+    res_st = ctx.do(["status"])
+    res_ps = ctx.do(["ps"])
+    st = _parse_json(res_st)
+    ps = _parse_json(res_ps)
+    states: dict[str, int] = {}
+    for row in ps.get("containers", []):
+        states[str(row.get("state"))] = states.get(str(row.get("state")), 0) + 1
+
+    report = [
+        "# ContainerCraft Inventory Report",
+        "",
+        f"- Engine status: `{st.get('status', 'unknown')}`",
+        f"- Server version: `{st.get('server_version', 'n/a')}`",
+        f"- Containers: {ps.get('count', 0)} ({ps.get('running', 0)} running)",
+        f"- States: `{json.dumps(states, sort_keys=True)}`",
+        f"- Inventory latency: {res_ps.get('ms', 0)} ms",
+    ]
+    if st.get("status") == "down":
+        report.append(f"- DOWN: {st.get('message', 'daemon not reachable')} (nothing measured)")
+    (ctx.run_dir / "inventory-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def container_logs_tail(ctx: RunCtx) -> dict | None:
+    """ContainerCraft Demo 2: read-only log tail of the first running container."""
+    ps = _parse_json(ctx.do(["ps", "--running"]))
+    running = [r for r in ps.get("containers", []) if r.get("state") == "running"]
+    target = running[0]["name"] if running else None
+    lines = 0
+    status = ps.get("status", "unknown")
+    res_logs: dict = {}
+    if target:
+        res_logs = ctx.do(["logs", "--ctr", target, "--tail", "5"])
+        parsed = _parse_json(res_logs)
+        lines = parsed.get("line_count", 0)
+        status = parsed.get("status", "unknown")
+
+    report = [
+        "# ContainerCraft Log Tail Report",
+        "",
+        f"- Engine/query status: `{status}`",
+        f"- Target container: `{target or 'none running'}`",
+        f"- Log lines read: {lines}",
+        f"- Latency: {res_logs.get('ms', 0)} ms",
+    ]
+    if not target:
+        report.append("- No running container, so nothing was tailed (not a pass of log reading).")
+    (ctx.run_dir / "logs-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def container_exec_echo(ctx: RunCtx) -> dict | None:
+    """ContainerCraft Demo 3: throwaway echo container; skips instead of pulling."""
+    res = ctx.do(["run-echo", "--image", "hello-world", "--text", "democraft-container-echo"])
+    out = _parse_json(res)
+    status = out.get("status", "unknown")
+    report = [
+        "# ContainerCraft Echo Report",
+        "",
+        f"- Receipt: `{status}`",
+        f"- Image: `{out.get('image', 'hello-world')}`",
+        f"- Return code: `{out.get('returncode', 'n/a')}`",
+        f"- Latency: {res.get('ms', 0)} ms",
+    ]
+    if status == "skipped":
+        report.append(f"- SKIPPED: {out.get('reason', 'image not local')}. Nothing ran.")
+    if status == "down":
+        report.append(f"- DOWN: {out.get('message', 'daemon not reachable')}. Nothing ran.")
+    (ctx.run_dir / "echo-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
 RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("design", "print-spread"): design_print_spread,
     ("design", "fleet-poster-a2"): design_fleet_poster_a2,
@@ -2079,4 +2162,7 @@ RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("git", "status-clean-check"): git_status_clean_check,
     ("git", "log-recent"): git_log_recent,
     ("git", "pr-list-fleet"): git_pr_list_fleet,
+    ("container", "list"): container_list,
+    ("container", "logs-tail"): container_logs_tail,
+    ("container", "exec-echo"): container_exec_echo,
 }

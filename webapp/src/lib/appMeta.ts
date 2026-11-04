@@ -3,6 +3,7 @@ import {
 	Binary,
 	Box,
 	Clapperboard,
+	Container,
 	Database,
 	DraftingCompass,
 	FileStack,
@@ -48,6 +49,7 @@ const META: Record<string, AppMeta> = {
 	doc: { hue: "#0284c7", icon: FileText },
 	file: { hue: "#14b8a6", icon: HardDrive },
 	git: { hue: "#f97316", icon: GitBranch },
+	container: { hue: "#0ea5e9", icon: Container },
 };
 
 const FALLBACK: AppMeta = { hue: "#a1a1aa", icon: Box };

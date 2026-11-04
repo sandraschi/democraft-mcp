@@ -1325,6 +1325,45 @@ APPS: tuple[CraftApp, ...] = (
         maker="Storytold",
     ),
     CraftApp(
+        "container",
+        "ContainerCraft",
+        "containercraft-cli.exe",
+        "Container workstation over docker/podman: ps, logs, exec, images, compose.",
+        (
+            Demo(
+                "list",
+                "Demo 1: Live container inventory and daemon probe",
+                "Probes the engine and lists every container with its state; reports "
+                "`down` when no daemon answers.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-05",
+            ),
+            Demo(
+                "logs-tail",
+                "Demo 2: Tail logs from a running container",
+                "Reads the last lines of the first running container's log, read-only.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-05",
+            ),
+            Demo(
+                "exec-echo",
+                "Demo 3: Throwaway echo container, never pulls",
+                "Runs echo in a network-less container if the image is already local; "
+                "otherwise records an honest skipped receipt.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-05",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
         "app",
         "AppCraft",
         "appcraft-cli.exe",
@@ -1779,6 +1818,14 @@ HERO: dict[str, dict[str, object]] = {
         "gaps": (
             "Deep GitHub Actions log streaming requires elevated OAuth scopes",
             "Submodule recursive auto-resolution sandboxed in read-only mode",
+        ),
+    },
+    "container": {
+        "clone_of": "Docker Desktop / Portainer / Podman Desktop",
+        "description": "Container, image, and compose inspection over docker or podman.",
+        "gaps": (
+            "Kubernetes cluster verbs are not fused yet; kubectl stays a separate tool",
+            "Image pulls are deliberately never issued by recipes",
         ),
     },
     "app": {
