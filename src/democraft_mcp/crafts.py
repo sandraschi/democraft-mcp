@@ -513,7 +513,21 @@ class CraftApp:
 
     @property
     def cli_path(self) -> Path:
-        return PROGRAM_FILES / self.name / self.cli
+        pf = PROGRAM_FILES / self.name / self.cli
+        if pf.is_file():
+            return pf
+        repo_base = Path(r"D:\Dev\repos")
+        for folder in (self.name.lower(), self.key, f"{self.key}craft"):
+            v_exe = repo_base / folder / ".venv" / "Scripts" / self.cli
+            if v_exe.is_file():
+                return v_exe
+            r_exe = repo_base / folder / "target" / "release" / self.cli
+            if r_exe.is_file():
+                return r_exe
+            d_exe = repo_base / folder / "target" / "debug" / self.cli
+            if d_exe.is_file():
+                return d_exe
+        return pf
 
     def installed(self) -> bool:
         return self.cli_path.is_file()
@@ -1302,9 +1316,59 @@ APPS: tuple[CraftApp, ...] = (
         family="core",
         maker="Storytold",
     ),
+    CraftApp(
+        "splat",
+        "SplatCraft",
+        "splatcraft-cli.exe",
+        "3D Gaussian Splats & radiance fields: inspection, SPZ conversion, "
+        "GLB colliders, local 4090 training.",
+        (
+            Demo(
+                "info-inspect",
+                "Demo 1: 3D Gaussian Splat inspection & bounds",
+                "Fast header inspection of PLY/SPZ files: extracts vertex count, "
+                "SH degrees, and scene bounding box.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+            Demo(
+                "convert-spz",
+                "Demo 2: Compact SPZ format compression",
+                "Compresses uncompressed 3D Gaussian Splat PLY files into compact SPZ format, "
+                "measuring compression ratio.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+            Demo(
+                "collider-extract",
+                "Demo 3: Binary GLB collider extraction for gamecraft",
+                "Extracts scene bounds and synthesizes a binary GLTF 2.0 (.glb) box collider mesh "
+                "for game engines.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="community",
+        maker="Storytold / Fleet",
+    ),
 )
 
 HERO: dict[str, dict[str, object]] = {
+    "splat": {
+        "clone_of": "World Labs Marble / Nerfstudio",
+        "description": "3D Gaussian Splat & radiance field workstation: unifies cloud generation "
+        "(World Labs Marble) and local zero-cost RTX 4090 training (Nerfstudio/Postshot).",
+        "gaps": (
+            "Nerfstudio local training requires 4090 VRAM and capture dataset",
+            "Marble API requires WORLDLABS_API_KEY for live generations",
+        ),
+    },
     "anything": {
         "clone_of": "REA (morluto/rea, rea.tools)",
         "description": "Autonomous clean-room software reconstruction in pure Rust: "

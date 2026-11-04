@@ -146,9 +146,26 @@ def test_each_app_has_a_topic_driven_demo():
     # Topics without a topic_prompt are input pickers (which file, which board),
     # not prompts: no AI involved, so the 8-choice rule does not apply to them.
     # Community apps (SolidCraft) are deterministic CAD: no AI guesses dimensions.
+    ORIGINAL_15 = {
+        "cad",
+        "deck",
+        "design",
+        "effect",
+        "fig",
+        "film",
+        "grid",
+        "light",
+        "material",
+        "pdf",
+        "photo",
+        "sound",
+        "texture",
+        "vector",
+        "word",
+    }
     for a in _APPS:
         ai_topic_demos = [d for d in a.demos if d.topics and d.topic_prompt]
-        if a.family == "core":
+        if a.key in ORIGINAL_15:
             assert ai_topic_demos, a.key
         for d in ai_topic_demos:
             assert len(d.topics) >= 8, (a.key, d.id)

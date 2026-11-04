@@ -1476,6 +1476,24 @@ def deck_pitch_deck(ctx: RunCtx) -> dict | None:
     return None
 
 
+def splat_info_inspect(ctx: RunCtx) -> dict | None:
+    """SplatCraft Demo 1: 3D Gaussian Splat inspection and bounds extraction."""
+    ctx.do(["recipe", "info", "--out", str(ctx.run_dir.parent)])
+    return None
+
+
+def splat_convert_spz(ctx: RunCtx) -> dict | None:
+    """SplatCraft Demo 2: Compact SPZ format compression."""
+    ctx.do(["recipe", "convert", "--out", str(ctx.run_dir.parent)])
+    return None
+
+
+def splat_collider_extract(ctx: RunCtx) -> dict | None:
+    """SplatCraft Demo 3: Binary GLB collider extraction for gamecraft."""
+    ctx.do(["recipe", "collider", "--out", str(ctx.run_dir.parent)])
+    return None
+
+
 RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("design", "print-spread"): design_print_spread,
     ("design", "fleet-poster-a2"): design_fleet_poster_a2,
@@ -1492,4 +1510,7 @@ RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("anything", "study-and-spec"): anything_study_and_spec,
     ("anything", "oracle-check"): anything_oracle_check,
     ("material", "facade-material"): material_facade_material,
+    ("splat", "info-inspect"): splat_info_inspect,
+    ("splat", "convert-spz"): splat_convert_spz,
+    ("splat", "collider-extract"): splat_collider_extract,
 }
