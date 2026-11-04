@@ -27,7 +27,16 @@ from pathlib import Path
 
 from . import __version__, recipes, texture_demo
 from .compat import probe_version
-from .windows import GridCraftLiveClient, ensure_foreground, open_file_in_gui
+from .windows import (
+    CADCraftLiveClient,
+    DeckCraftLiveClient,
+    FigCraftLiveClient,
+    GridCraftLiveClient,
+    PhotoCraftLiveClient,
+    WordCraftLiveClient,
+    ensure_foreground,
+    open_file_in_gui,
+)
 
 PROGRAM_FILES = Path(os.getenv("DEMOCRAFT_PROGRAM_FILES", r"C:\Program Files"))
 OLLAMA_URL = os.getenv("DEMOCRAFT_OLLAMA_URL", "http://127.0.0.1:11434")
@@ -527,6 +536,7 @@ APPS: tuple[CraftApp, ...] = (
                 topics=CAD_TOPICS,
                 topic_prompt="Return JSON for a '{topic}' small house: {{\"title\": str, "
                 '"rooms": [{{name, note}} x5]}}. No prose.',
+                live=True,
             ),
         ),
     ),
@@ -617,6 +627,7 @@ APPS: tuple[CraftApp, ...] = (
                 "Features sub: ... / F1 title: ... / F1 text: ... / F2 title: ... / F2 text: ... / "
                 "F3 title: ... / F3 text: ... / Quote: ... (illustrative) / CTA title: ... / "
                 "CTA sub: ... Keep every line under 25 words.",
+                live=True,
             ),
             Demo(
                 "retro-board",
@@ -836,6 +847,7 @@ APPS: tuple[CraftApp, ...] = (
                 topics=WORD_TOPICS,
                 topic_prompt="Write a one-page report on '{topic}' as markdown: a # title "
                 "line, then 4-6 short paragraphs. No preamble.",
+                live=True,
             ),
             Demo(
                 "scale-fonts",
@@ -1665,6 +1677,22 @@ def run_demo(
                 0,
                 ["text", _json.dumps({"at": [0, 6.6], "text": topic[:40], "height": 0.3})],
             )
+
+        # Hands-in live streaming to CADCraft GUI
+        cad_client = CADCraftLiveClient() if focus else None
+        if cad_client and cad_client.connect():
+            import json as _json
+            import time as _time
+
+            cad_client.execute_command("cmdline.input", {"text": "METRIC"})
+            for cid, params in plan[:10]:
+                try:
+                    p = _json.loads(params) if isinstance(params, str) else params
+                    cad_client.execute_command(cid, p)
+                    _time.sleep(0.3)
+                except Exception:
+                    pass
+
         argv: list[str] = ["run", "--metric"]
         for cid, params in plan:
             argv += ["--cmd", f"{cid} {params}"]
@@ -1672,6 +1700,10 @@ def run_demo(
         do(["convert", "house.dxf", "house-plan.pdf"])
         do(["convert", "house.dxf", "house-plan.svg"])
         do(["info", "house.dxf"])
+        if focus:
+            open_file_in_gui(app.cli_path, run_dir / "house.dxf")
+        if cad_client:
+            cad_client.close()
         elev = [
             ["line", '{"points": [[-1, 0], [8.28, 0]]}'],
             ["rectang", '{"p1": [0, 0], "p2": [7.28, 2.6]}'],
@@ -1721,6 +1753,26 @@ def run_demo(
             cmds.append(
                 f"transition.set={_json.dumps({'kind': kind, 'duration': 900, 'index': i})}"
             )
+        # Hands-in live streaming into DeckCraft GUI
+        deck_client = DeckCraftLiveClient() if focus else None
+        if deck_client and deck_client.connect():
+            import time as _time
+
+            deck_client.execute_command("file.new", {})
+            _time.sleep(0.4)
+            for _name, title, kind in plates:
+                deck_client.execute_command("slide.new", {"layout": "titleOnly", "title": title})
+                _time.sleep(0.4)
+                deck_client.execute_command(
+                    "shape.insert",
+                    {
+                        "preset": "roundRect",
+                        "rect": [80, 150, 420, 280],
+                        "text": f"[{kind.upper()}] {title}",
+                    },
+                )
+                _time.sleep(0.3)
+
         argv = ["run"]
         for c in cmds:
             argv += ["--cmd", c]
@@ -1735,6 +1787,10 @@ def run_demo(
         do(argv)
         do(["convert", "reel.deckcraft", "reel.pptx"])
         do(["render", "reel.deckcraft", "--all", "slides"])
+        if focus:
+            open_file_in_gui(app.cli_path, run_dir / "reel.pptx")
+        if deck_client:
+            deck_client.close()
         for i in (1, 2):
             do(
                 [
@@ -1893,11 +1949,28 @@ def run_demo(
                     )
         script = run_dir / "landing.jsonl"
         script.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+        # Hands-in live streaming into FigCraft GUI
+        fig_client = FigCraftLiveClient() if focus else None
+        if fig_client and fig_client.connect():
+            import time as _time
+
+            fig_client.execute_command("file.newFromTemplate", {"template": "landing-page"})
+            _time.sleep(0.5)
+            for nid, text in sets:
+                if text:
+                    fig_client.execute_command("text.set", {"id": nid, "characters": text})
+                    _time.sleep(0.2)
+
         built = do(["run", str(script), "--out", "landing.figcraft"])
         if customized and not built.get("success"):
             steps[-1].setdefault("note", "copy text.set failed - template render is the demo")
         if (run_dir / "landing.figcraft").is_file():
             do(["render", str(run_dir / "landing.figcraft"), "-o", "landing.png"])
+        if focus:
+            open_file_in_gui(app.cli_path, run_dir / "landing.figcraft")
+        if fig_client:
+            fig_client.close()
         brief = run_dir / "copy-brief.md"
         if brief_text:
             brief.write_text(brief_text, encoding="utf-8")
@@ -2347,6 +2420,23 @@ def run_demo(
         do(["convert", "brief.md", "brief.pdf"])
         do(["info", "brief.docx"])
         paras = [p.strip() for p in brief.read_text(encoding="utf-8").split("\n\n") if p.strip()]
+        # Hands-in live streaming into WordCraft GUI
+        word_client = WordCraftLiveClient() if focus else None
+        if word_client and word_client.connect():
+            import time as _time
+
+            for para in paras[:6]:
+                # Stream words of each paragraph with human-readable pacing
+                words = para.split()
+                for i in range(0, len(words), 3):
+                    chunk = " ".join(words[i : i + 3]) + " "
+                    word_client.insert_text(chunk)
+                    _time.sleep(0.15)
+                word_client.send_command(
+                    "engine.execute", {"command": "text.newParagraph", "params": {}}
+                )
+                _time.sleep(0.3)
+
         if paras:
             import json as _json
 
@@ -2362,6 +2452,13 @@ def run_demo(
                 steps[-1].setdefault(
                     "note", "template styling failed - plain brief.* remain the demo"
                 )
+        target_doc = run_dir / (
+            "report.docx" if (run_dir / "report.docx").is_file() else "brief.docx"
+        )
+        if focus:
+            open_file_in_gui(app.cli_path, target_doc)
+        if word_client:
+            word_client.close()
     elif k == "pdf":
         src = run_dir / "brief.pdf"
         if not src.is_file():
@@ -2410,6 +2507,29 @@ def run_demo(
             (run_dir / "brief.md").write_text(ai["text"][:2000], encoding="utf-8")
         shutil.copy2(src, run_dir / "source.jpg")
         inputs.append("source.jpg")
+        # Hands-in live streaming into PhotoCraft GUI
+        photo_client = PhotoCraftLiveClient() if focus else None
+        if photo_client and photo_client.connect():
+            import time as _time
+
+            photo_client.send_command("file.open", {"path": str(Path(src).resolve())})
+            _time.sleep(0.5)
+            photo_client.execute_command(
+                "layer.newAdjustmentLayer.blackWhite",
+                {"reds": 45, "yellows": 70, "greens": 35, "cyans": 55, "blues": 10, "magentas": 60},
+            )
+            _time.sleep(0.4)
+            photo_client.execute_command(
+                "layer.newAdjustmentLayer.curves",
+                {"points": [[0, 10], [64, 52], [128, 128], [192, 202], [255, 242]]},
+            )
+            _time.sleep(0.4)
+            photo_client.execute_command(
+                "layer.newAdjustmentLayer.gradientMap",
+                {"stops": [[0, "#0b1020"], [0.5, "#8a7656"], [1, "#f4e8d0"]]},
+            )
+            _time.sleep(0.4)
+
         do(
             [
                 "run",
@@ -2433,11 +2553,41 @@ def run_demo(
         do(["convert", "plate-grade.pcraft", "plate-grade.png"])
         do(["convert", "plate-grade.pcraft", "plate-grade.jpg", "--quality", "88"])
         do(["info", "plate-grade.pcraft"])
+        if focus:
+            open_file_in_gui(app.cli_path, run_dir / "plate-grade.pcraft")
+        if photo_client:
+            photo_client.close()
     elif k == "photo" and demo.id == "lighthouse-live":
         from .strokes import LIGHTHOUSE_STAGES
 
+        # Hands-in live streaming into PhotoCraft GUI
+        photo_client = PhotoCraftLiveClient() if focus else None
+        if photo_client and photo_client.connect():
+            import time as _time
+
+            photo_client.execute_command(
+                "file.new", {"width": 1200, "height": 800, "name": "Lighthouse"}
+            )
+            _time.sleep(0.5)
+
         previous = ""
         for index, stage in enumerate(LIGHTHOUSE_STAGES, 1):
+            if photo_client:
+                import time as _time
+
+                for stroke in stage["strokes"]:
+                    photo_client.execute_command(
+                        "paint.stroke",
+                        {
+                            "points": stroke,
+                            "size": stage["size"],
+                            "hardness": 0.85,
+                            "opacity": stage["opacity"],
+                            "color": stage["color"],
+                        },
+                    )
+                    _time.sleep(0.1)
+
             out = f"stage-{index:02d}.pcraft"
             argv = ["run"]
             if not previous:
@@ -2461,6 +2611,10 @@ def run_demo(
             do(["convert", out, f"frame-{index:02d}.png"])
             previous = out
         do(["info", previous])
+        if focus:
+            open_file_in_gui(app.cli_path, run_dir / previous)
+        if photo_client:
+            photo_client.close()
     elif k == "photo" and demo.id == "batch-treatment":
         root = Path(__file__).resolve().parents[2]
         actions = root / "assets" / "photo" / "batch-actions.json"

@@ -201,3 +201,25 @@ def test_gridcraft_live_client_methods():
     assert client.send_command("test", {}) is None
     assert client.set_cell("A1", "100") is False
     assert client.open_workbook("test.xlsx") is False
+
+
+def test_generalized_live_clients():
+    wc = windows.WordCraftLiveClient(port=9998)
+    assert wc.port == 9998
+    assert wc.insert_text("hello") is False
+
+    cad = windows.CADCraftLiveClient(port=9997)
+    assert cad.port == 9997
+    assert cad.execute_command("line", {}) is False
+
+    pc = windows.PhotoCraftLiveClient(port=9996)
+    assert pc.port == 9996
+    assert pc.execute_command("brush", {}) is False
+
+    dc = windows.DeckCraftLiveClient(port=9995)
+    assert dc.port == 9995
+    assert dc.execute_command("slide.new", {}) is False
+
+    fc = windows.FigCraftLiveClient(port=9994)
+    assert fc.port == 9994
+    assert fc.execute_command("text.set", {}) is False
