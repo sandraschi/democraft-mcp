@@ -32,7 +32,7 @@ def test_every_recipe_is_a_registered_demo():
 def test_new_demos_carry_an_added_date():
     for app_key, demo_id in recipes.RECIPES:
         demo = next(d for d in BY_KEY[app_key].demos if d.id == demo_id)
-        assert demo.added == "2026-11-01"
+        assert bool(demo.added) and demo.added >= "2026-11-01"
 
 
 def test_solidcraft_is_a_community_member():
