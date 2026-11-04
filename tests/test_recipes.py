@@ -339,3 +339,18 @@ def test_doc_recipes(tmp_path):
     res3 = run_demo("doc", "combine-split", tmp_path, model="none")
     assert res3["success"] and res3["all_cli_ok"]
     assert (tmp_path / "doc" / "combine-split" / "combine-report.md").is_file()
+
+
+@_needs("file")
+def test_file_recipes(tmp_path):
+    res1 = run_demo("file", "hash-grep", tmp_path, model="none")
+    assert res1["success"] and res1["all_cli_ok"]
+    assert (tmp_path / "file" / "hash-grep" / "hash-grep-report.md").is_file()
+
+    res2 = run_demo("file", "du-top10", tmp_path, model="none")
+    assert res2["success"] and res2["all_cli_ok"]
+    assert (tmp_path / "file" / "du-top10" / "du-report.md").is_file()
+
+    res3 = run_demo("file", "find-dups", tmp_path, model="none")
+    assert res3["success"] and res3["all_cli_ok"]
+    assert (tmp_path / "file" / "find-dups" / "dups-report.md").is_file()

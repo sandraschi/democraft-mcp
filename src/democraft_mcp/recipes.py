@@ -1837,6 +1837,111 @@ def doc_combine_split(ctx: RunCtx) -> dict | None:
     return None
 
 
+def file_hash_grep(ctx: RunCtx) -> dict | None:
+    """FileCraft Demo 1: Cryptographic file hashing and code regex search."""
+    src_file = ctx.run_dir / "module.py"
+    code = "def authenticate_user(username, token):\n    return True\n"
+    src_file.write_text(code, encoding="utf-8")
+
+    res_h = ctx.do(["hash", "--path", str(src_file), "--algo", "sha256", "--json"])
+    res_g = ctx.do(
+        [
+            "grep",
+            "--path",
+            str(ctx.run_dir),
+            "--pattern",
+            "authenticate_user",
+            "--glob",
+            "*.py",
+            "--json",
+        ]
+    )
+
+    sha = "unknown"
+    matches = 0
+    try:
+        sha = json.loads(res_h.get("stdout", "{}")).get("hash", "unknown")
+        matches = json.loads(res_g.get("stdout", "{}")).get("match_count", 0)
+    except Exception:
+        pass
+
+    report = [
+        "# FileCraft Hash and Regex Search Report",
+        "",
+        f"- Target file: `{src_file.name}`",
+        f"- SHA-256 Checksum: `{sha}`",
+        f"- Regex match count: {matches}",
+        f"- Hashing latency: {res_h.get('ms', 0)} ms",
+        f"- Search latency: {res_g.get('ms', 0)} ms",
+    ]
+    (ctx.run_dir / "hash-grep-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def file_du_top10(ctx: RunCtx) -> dict | None:
+    """FileCraft Demo 2: Disk usage breakdown and top-consumers telemetry."""
+    fixtures = ctx.run_dir / "tree"
+    sub_a = fixtures / "sub_a"
+    sub_b = fixtures / "sub_b"
+    sub_a.mkdir(parents=True, exist_ok=True)
+    sub_b.mkdir(parents=True, exist_ok=True)
+
+    (sub_a / "asset1.dat").write_bytes(b"A" * 50000)
+    (sub_b / "asset2.dat").write_bytes(b"B" * 120000)
+
+    res_du = ctx.do(["du", "--path", str(fixtures), "--depth", "2", "--json"])
+    res_large = ctx.do(["find-large", "--path", str(fixtures), "--min-size", "1000", "--json"])
+
+    total_bytes = 0
+    large_count = 0
+    try:
+        total_bytes = json.loads(res_du.get("stdout", "{}")).get("total_bytes", 0)
+        large_count = json.loads(res_large.get("stdout", "{}")).get("count", 0)
+    except Exception:
+        pass
+
+    report = [
+        "# FileCraft Disk Usage Telemetry Report",
+        "",
+        f"- Target Directory: `{fixtures.name}`",
+        f"- Total Footprint: {total_bytes:,} bytes",
+        f"- Large files detected (>=1KB): {large_count}",
+        f"- DU analysis latency: {res_du.get('ms', 0)} ms",
+    ]
+    (ctx.run_dir / "du-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def file_find_dups(ctx: RunCtx) -> dict | None:
+    """FileCraft Demo 3: Content-addressable duplicate file identification."""
+    data_dir = ctx.run_dir / "pool"
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    payload = b"Identical Duplicate Payload 9876543210" * 20
+    (data_dir / "file_v1.bin").write_bytes(payload)
+    (data_dir / "file_copy.bin").write_bytes(payload)
+    (data_dir / "unique.bin").write_bytes(b"Different data")
+
+    res_dups = ctx.do(["find-dups", "--path", str(data_dir), "--json"])
+
+    groups = 0
+    try:
+        groups = json.loads(res_dups.get("stdout", "{}")).get("duplicate_groups", 0)
+    except Exception:
+        pass
+
+    report = [
+        "# FileCraft Content-Addressable Duplicate Report",
+        "",
+        f"- Scanned pool: `{data_dir.name}`",
+        f"- Duplicate groups discovered: {groups}",
+        f"- Execution status: `{res_dups.get('success', False)}`",
+        f"- Deduplication latency: {res_dups.get('ms', 0)} ms",
+    ]
+    (ctx.run_dir / "dups-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
 RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("design", "print-spread"): design_print_spread,
     ("design", "fleet-poster-a2"): design_fleet_poster_a2,
@@ -1868,4 +1973,7 @@ RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("doc", "convert-roundtrip"): doc_convert_roundtrip,
     ("doc", "text-extract"): doc_text_extract,
     ("doc", "combine-split"): doc_combine_split,
+    ("file", "hash-grep"): file_hash_grep,
+    ("file", "du-top10"): file_du_top10,
+    ("file", "find-dups"): file_find_dups,
 }

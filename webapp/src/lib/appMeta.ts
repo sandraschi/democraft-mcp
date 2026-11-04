@@ -8,6 +8,7 @@ import {
 	FileStack,
 	FileText,
 	Frame,
+	HardDrive,
 	Image,
 	Lamp,
 	LayoutTemplate,
@@ -44,6 +45,7 @@ const META: Record<string, AppMeta> = {
 	virt: { hue: "#3b82f6", icon: Server },
 	rev: { hue: "#a855f7", icon: Binary },
 	doc: { hue: "#0284c7", icon: FileText },
+	file: { hue: "#14b8a6", icon: HardDrive },
 };
 
 const FALLBACK: AppMeta = { hue: "#a1a1aa", icon: Box };

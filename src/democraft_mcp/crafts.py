@@ -1250,6 +1250,44 @@ APPS: tuple[CraftApp, ...] = (
         maker="Storytold",
     ),
     CraftApp(
+        "file",
+        "FileCraft",
+        "filecraft-cli.exe",
+        "Filesystem, disk usage, volume analytics, regex search, and integrity workstation.",
+        (
+            Demo(
+                "hash-grep",
+                "Demo 1: Cryptographic file hashing and code regex search",
+                "Computes cryptographic checksums and performs high-speed recursive code search.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+            Demo(
+                "du-top10",
+                "Demo 2: Disk usage breakdown and top-consumers telemetry",
+                "Analyzes directory subtree byte footprints and identifies largest "
+                "storage consumers.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+            Demo(
+                "find-dups",
+                "Demo 3: Content-addressable duplicate file identification",
+                "Finds identical redundant files using two-pass size and SHA-256 hash clustering.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
         "app",
         "AppCraft",
         "appcraft-cli.exe",
@@ -1688,6 +1726,14 @@ HERO: dict[str, dict[str, object]] = {
         "gaps": (
             "Real-time collaborative editing requires live UNO extension bridge",
             "VBA macro execution sandboxed in headless mode",
+        ),
+    },
+    "file": {
+        "clone_of": "Everything / TreeSize / ripgrep / GNU coreutils",
+        "description": "High-performance filesystem analytics, recursive search, and hashing.",
+        "gaps": (
+            "Direct NTFS USN journal streaming requires administrator privileges",
+            "Remote SMB/NFS share browsing relies on Windows network provider mount",
         ),
     },
     "app": {
