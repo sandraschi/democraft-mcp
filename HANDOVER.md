@@ -19,6 +19,8 @@ Ports: **11245** frontend, **11246** backend. Gates: `just ci`.
 2. **Recipe test assertion**: updated `test_recipes.py` to support recipe added dates >= 2026-11-01.
 3. **MaterialCraft integrated** as core app: added `material/facade-material` procedural PBR material recipe (6 channels + HQ beauty render) and 5-stage CAD Board flow (`cad-board`: 2D plan -> procedural facade -> 3D textured prop -> print spread -> client PDF portfolio).
 4. **Release v0.4.0 tagged.** Full test suite, ruff lint, biome check, and webapp vite build passing.
+5. **Phase 1 Recipe Migrations**: migrated `design:print-spread`, `effect:title-card`, and `deck:pitch-deck` from procedural `crafts.py` branching into typed recipe handlers in `recipes.py`.
+6. **Documentation Screenshots**: regenerated `dashboard.png`, `craft-solid.png`, `craft-vector.png`, and `depot.png` in `docs/screenshots/` via headless Playwright against the live running server (`:11245`).
 
 1. **Oct 31 builds.** All 13 core CLIs bumped; drift additive only (104 verbs). Every existing
    demo re-run green on the new builds, baselines accepted for all 14 apps
@@ -42,13 +44,10 @@ Ports: **11245** frontend, **11246** backend. Gates: `just ci`.
 
 ## Next step
 
-1. EffectCraft camera track to Blender: chain works, solve does not (see `docs/apps/effect.md`).
+1. Phase 1 of `docs/PLAN.md` continues: port remaining legacy branches of `run_demo` (`word`, `pdf`, `photo`, `film`, `fig`, `cad`) into `recipes.py`.
+2. EffectCraft camera track to Blender: chain works, solve does not (see `docs/apps/effect.md`).
    Retry with filmed footage or a textured SolidCraft render (appearances exist).
-2. Phase 1 of `docs/PLAN.md` continues: port legacy branches of `run_demo` into `recipes.py`
-   one app at a time; the recipe pattern is the typed-adapter seam.
-3. Regenerate README screenshots after UI changes: start the app, then
-   `node webapp/scripts/shots.mjs docs/screenshots` (Node, not Bun: Playwright hangs under
-   Bun on Windows).
+3. Phase 2 of `docs/PLAN.md`: Job engine SQLite persistence and cancellation signal handling.
 
 ## Blockers / open items
 
