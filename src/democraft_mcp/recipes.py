@@ -1453,6 +1453,16 @@ def design_print_spread(ctx: RunCtx) -> dict | None:
     return None
 
 
+def design_fleet_poster_a2(ctx: RunCtx) -> dict | None:
+    """Generate official A2 Craft Fleet exhibition poster (PDF + 300 DPI PNG)."""
+    poster_src = ASSETS / "poster"
+    if poster_src.is_dir():
+        for item in poster_src.iterdir():
+            if item.is_file():
+                shutil.copy2(item, ctx.run_dir / item.name)
+    return None
+
+
 def effect_title_card(ctx: RunCtx) -> dict | None:
     """Open demo project and render frame in EffectCraft."""
     ctx.do(["exec", "file.openDemoProject"])
@@ -1468,6 +1478,7 @@ def deck_pitch_deck(ctx: RunCtx) -> dict | None:
 
 RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("design", "print-spread"): design_print_spread,
+    ("design", "fleet-poster-a2"): design_fleet_poster_a2,
     ("effect", "title-card"): effect_title_card,
     ("deck", "pitch-deck"): deck_pitch_deck,
     ("vector", "cleanup-pass"): vector_cleanup_pass,

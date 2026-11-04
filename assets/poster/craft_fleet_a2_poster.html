@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Craft Fleet A2 Exhibition Poster</title>
+<style>
+    @page {
+        size: 420mm 594mm;
+        margin: 0;
+    }
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    body {
+        width: 420mm;
+        height: 594mm;
+        background: radial-gradient(circle at 50% 10%, #171b26 0%, #0c0e14 60%, #06070a 100%);
+        color: #f1f5f9;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* Architectural layout guides / crop marks */
+    .crop-mark {
+        position: absolute;
+        width: 15mm;
+        height: 15mm;
+        border-color: rgba(255,255,255,0.25);
+        pointer-events: none;
+    }
+    .cm-tl { top: 8mm; left: 8mm; border-top: 1px solid; border-left: 1px solid; }
+    .cm-tr { top: 8mm; right: 8mm; border-top: 1px solid; border-right: 1px solid; }
+    .cm-bl { bottom: 8mm; left: 8mm; border-bottom: 1px solid; border-left: 1px solid; }
+    .cm-br { bottom: 8mm; right: 8mm; border-bottom: 1px solid; border-right: 1px solid; }
+
+    .poster-container {
+        padding: 22mm 24mm 18mm 24mm;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    /* Header */
+    .header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        padding-bottom: 10mm;
+        margin-bottom: 8mm;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+    .header-main {
+        max-width: 260mm;
+    }
+    .super-title {
+        font-size: 11pt;
+        letter-spacing: 0.35em;
+        text-transform: uppercase;
+        color: #f59e0b;
+        font-weight: 700;
+        margin-bottom: 3mm;
+    }
+    .main-title {
+        font-size: 42pt;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.05;
+        background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 4mm;
+    }
+    .subtitle {
+        font-size: 13pt;
+        color: #94a3b8;
+        line-height: 1.4;
+        font-weight: 400;
+        max-width: 230mm;
+    }
+    .spec-block {
+        text-align: right;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 8.5pt;
+        color: #64748b;
+        line-height: 1.6;
+        border-left: 1px solid rgba(255, 255, 255, 0.08);
+        padding-left: 6mm;
+    }
+    .spec-block strong {
+        color: #e2e8f0;
+    }
+
+    /* Squadrons Area */
+    .fleet-matrix {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 6mm;
+    }
+    .squadron {
+        background: rgba(18, 22, 34, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 4mm;
+        padding: 5mm 6mm 6mm 6mm;
+        backdrop-filter: blur(10px);
+    }
+    .squadron-header {
+        font-size: 11.5pt;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        padding-left: 3.5mm;
+        margin-bottom: 4mm;
+        display: flex;
+        align-items: center;
+    }
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 3.5mm;
+    }
+    .card {
+        background: rgba(30, 41, 59, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 2.5mm;
+        padding: 3.8mm 3.2mm;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 25.5mm;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.2s;
+    }
+    .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2.5px;
+        background: var(--card-accent);
+    }
+    .card-top {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 2mm;
+    }
+    .card-title {
+        font-size: 10pt;
+        font-weight: 700;
+        color: #f8fafc;
+        letter-spacing: -0.01em;
+        margin-bottom: 1mm;
+    }
+    .card-badge {
+        display: inline-block;
+        align-self: flex-start;
+        font-family: ui-monospace, SFMono-Regular, monospace;
+        font-size: 6.8pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 0.6mm 1.8mm;
+        border-radius: 1mm;
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--card-accent);
+    }
+    .card-desc {
+        font-size: 7.2pt;
+        color: #94a3b8;
+        line-height: 1.35;
+    }
+
+    /* Footer / Colophon */
+    .footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 5mm;
+        margin-top: 6mm;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 8.5pt;
+        color: #64748b;
+    }
+    .footer-left {
+        display: flex;
+        align-items: center;
+        gap: 5mm;
+    }
+    .stamp {
+        display: inline-block;
+        border: 1px solid #f59e0b;
+        color: #f59e0b;
+        font-family: ui-monospace, monospace;
+        font-weight: 800;
+        font-size: 8pt;
+        padding: 1.2mm 3.5mm;
+        border-radius: 1.5mm;
+        letter-spacing: 0.12em;
+    }
+    .footer-text strong {
+        color: #e2e8f0;
+    }
+    .footer-right {
+        font-family: ui-monospace, monospace;
+        font-size: 8pt;
+        color: #475569;
+        letter-spacing: 0.05em;
+    }
+</style>
+</head>
+<body>
+    <div class="crop-mark cm-tl"></div>
+    <div class="crop-mark cm-tr"></div>
+    <div class="crop-mark cm-bl"></div>
+    <div class="crop-mark cm-br"></div>
+
+    <div class="poster-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-main">
+                <div class="super-title">The Unified Autonomous Craft Architecture · 2026 Fleet Edition</div>
+                <h1 class="main-title">THE CRAFT FLEET</h1>
+                <p class="subtitle">
+                    A comprehensive taxonomy of 28 high-performance creative, mechanical, scientific,
+                    and life-automation engines. Engineered in pure native Rust and FastMCP for offline sovereignty.
+                </p>
+            </div>
+            <div class="spec-block">
+                <div>FORMAT: <strong>ISO 216 A2 (420 × 594 mm)</strong></div>
+                <div>FLEET SCALE: <strong>28 PRODUCTION APPLICATIONS</strong></div>
+                <div>ARCHITECTURE: <strong>RUST CORE · FASTMCP · EGUI · THREE.JS</strong></div>
+                <div>LICENSE: <strong>STORYTOLD & COMMUNITY ALLIANCE</strong></div>
+                <div>PRINT GRADE: <strong>300 DPI MASTER · FULL COLOR CMYK</strong></div>
+            </div>
+        </header>
+
+        <!-- Main 4-Quadrant Fleet Grid -->
+        <main class="fleet-matrix">
+
+        <div class="squadron">
+            <div class="squadron-header" style="border-left: 4px solid #f59e0b; color: #f59e0b;">
+                I. CREATIVE & VISUAL MEDIA
+            </div>
+            <div class="cards-grid">
+
+                <div class="card" style="--card-accent: #f59e0b">
+                    <div class="card-top">
+                        <span class="card-title">DesignCraft</span>
+                        <span class="card-badge">design</span>
+                    </div>
+                    <div class="card-desc">Page layout, typography, threaded stories & PDF/X-4</div>
+                </div>
+
+                <div class="card" style="--card-accent: #f59e0b">
+                    <div class="card-top">
+                        <span class="card-title">FigCraft</span>
+                        <span class="card-badge">fig</span>
+                    </div>
+                    <div class="card-desc">Vector UI components, autolayout & interactive prototypes</div>
+                </div>
+
+                <div class="card" style="--card-accent: #f59e0b">
+                    <div class="card-top">
+                        <span class="card-title">VectorCraft</span>
+                        <span class="card-badge">vector</span>
+                    </div>
+                    <div class="card-desc">Precision Bézier curves, path ops, SVG & clean-room geometry</div>
+                </div>
+
+                <div class="card" style="--card-accent: #f59e0b">
+                    <div class="card-top">
+                        <span class="card-title">PhotoCraft</span>
+                        <span class="card-badge">photo</span>
+                    </div>
+                    <div class="card-desc">Non-destructive adjustment stacks, filters & raw mastering</div>
+                </div>
+
+                <div class="card" style="--card-accent: #f59e0b">
+                    <div class="card-top">
+                        <span class="card-title">TextureCraft</span>
+                        <span class="card-badge">texture</span>
+                    </div>
+                    <div class="card-desc">PBR materials, ORM channel packing & game engine export</div>
+                </div>
+
+                <div class="card" style="--card-accent: #f59e0b">
+                    <div class="card-top">
+                        <span class="card-title">MaterialCraft</span>
+                        <span class="card-badge">material</span>
+                    </div>
+                    <div class="card-desc">Procedural multi-channel node synthesis & beauty rendering</div>
+                </div>
+
+                <div class="card" style="--card-accent: #f59e0b">
+                    <div class="card-top">
+                        <span class="card-title">EffectCraft</span>
+                        <span class="card-badge">effect</span>
+                    </div>
+                    <div class="card-desc">Keyframed motion graphics, timeline expressions & still renders</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="squadron">
+            <div class="squadron-header" style="border-left: 4px solid #06b6d4; color: #06b6d4;">
+                II. ENGINEERING, CODE & WORKSPACES
+            </div>
+            <div class="cards-grid">
+
+                <div class="card" style="--card-accent: #06b6d4">
+                    <div class="card-top">
+                        <span class="card-title">CoderCraft</span>
+                        <span class="card-badge">coder</span>
+                    </div>
+                    <div class="card-desc">Autonomous agent IDE, AST inspections & multi-crate MCP hub</div>
+                </div>
+
+                <div class="card" style="--card-accent: #06b6d4">
+                    <div class="card-top">
+                        <span class="card-title">CADCraft</span>
+                        <span class="card-badge">cad</span>
+                    </div>
+                    <div class="card-desc">2D parametric drafting, architectural plans & DXF engine</div>
+                </div>
+
+                <div class="card" style="--card-accent: #06b6d4">
+                    <div class="card-top">
+                        <span class="card-title">SolidCraft</span>
+                        <span class="card-badge">solid</span>
+                    </div>
+                    <div class="card-desc">Parametric 3D CAD, feature timeline & STEP/STL solids</div>
+                </div>
+
+                <div class="card" style="--card-accent: #06b6d4">
+                    <div class="card-top">
+                        <span class="card-title">MakerCraft</span>
+                        <span class="card-badge">maker</span>
+                    </div>
+                    <div class="card-desc">G-code toolpaths, sheet nesting & digital fabrication</div>
+                </div>
+
+                <div class="card" style="--card-accent: #06b6d4">
+                    <div class="card-top">
+                        <span class="card-title">DatabaseCraft</span>
+                        <span class="card-badge">database</span>
+                    </div>
+                    <div class="card-desc">Unified multi-model datastore: vector, graph & relational</div>
+                </div>
+
+                <div class="card" style="--card-accent: #06b6d4">
+                    <div class="card-top">
+                        <span class="card-title">AppCraft</span>
+                        <span class="card-badge">app</span>
+                    </div>
+                    <div class="card-desc">Visual enterprise desktop app builder, telemetry & flows</div>
+                </div>
+
+                <div class="card" style="--card-accent: #06b6d4">
+                    <div class="card-top">
+                        <span class="card-title">ModCraft</span>
+                        <span class="card-badge">mod</span>
+                    </div>
+                    <div class="card-desc">Binary reverse engineering, disassembly & patch injection</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="squadron">
+            <div class="squadron-header" style="border-left: 4px solid #8b5cf6; color: #8b5cf6;">
+                III. AUDIO, ROBOTICS & VIRTUAL WORLDS
+            </div>
+            <div class="cards-grid">
+
+                <div class="card" style="--card-accent: #8b5cf6">
+                    <div class="card-top">
+                        <span class="card-title">SoundCraft</span>
+                        <span class="card-badge">sound</span>
+                    </div>
+                    <div class="card-desc">Multi-track audio session, mixing, synthesis & stems</div>
+                </div>
+
+                <div class="card" style="--card-accent: #8b5cf6">
+                    <div class="card-top">
+                        <span class="card-title">DJCraft</span>
+                        <span class="card-badge">dj</span>
+                    </div>
+                    <div class="card-desc">4-channel beatgrid sync, stems isolation & Three.js DJ decks</div>
+                </div>
+
+                <div class="card" style="--card-accent: #8b5cf6">
+                    <div class="card-top">
+                        <span class="card-title">RobotCraft</span>
+                        <span class="card-badge">robot</span>
+                    </div>
+                    <div class="card-desc">Saschibot & Nori A3 3D kinematics, virtual space & CAD plans</div>
+                </div>
+
+                <div class="card" style="--card-accent: #8b5cf6">
+                    <div class="card-top">
+                        <span class="card-title">GameCraft</span>
+                        <span class="card-badge">game</span>
+                    </div>
+                    <div class="card-desc">wgpu/egui scene-graph editor & interactive Godot arcade depot</div>
+                </div>
+
+                <div class="card" style="--card-accent: #8b5cf6">
+                    <div class="card-top">
+                        <span class="card-title">DemoCraft</span>
+                        <span class="card-badge">demo</span>
+                    </div>
+                    <div class="card-desc">Autonomous headless demo orchestrator & multi-craft testbench</div>
+                </div>
+
+                <div class="card" style="--card-accent: #8b5cf6">
+                    <div class="card-top">
+                        <span class="card-title">CraftAnything</span>
+                        <span class="card-badge">anything</span>
+                    </div>
+                    <div class="card-desc">Clean-room reverse engineering & perceptual route oracle</div>
+                </div>
+
+                <div class="card" style="--card-accent: #8b5cf6">
+                    <div class="card-top">
+                        <span class="card-title">LightCraft</span>
+                        <span class="card-badge">light</span>
+                    </div>
+                    <div class="card-desc">Headless lighting passes, HDR maps & photographic grading</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="squadron">
+            <div class="squadron-header" style="border-left: 4px solid #10b981; color: #10b981;">
+                IV. DOCUMENTS, LIFE & PERFORMANCE
+            </div>
+            <div class="cards-grid">
+
+                <div class="card" style="--card-accent: #10b981">
+                    <div class="card-top">
+                        <span class="card-title">WordCraft</span>
+                        <span class="card-badge">word</span>
+                    </div>
+                    <div class="card-desc">Markdown to publication DOCX, styles & typographic reports</div>
+                </div>
+
+                <div class="card" style="--card-accent: #10b981">
+                    <div class="card-top">
+                        <span class="card-title">PdfCraft</span>
+                        <span class="card-badge">pdf</span>
+                    </div>
+                    <div class="card-desc">Engine-level PDF combining, preflight validation & redaction</div>
+                </div>
+
+                <div class="card" style="--card-accent: #10b981">
+                    <div class="card-top">
+                        <span class="card-title">GridCraft</span>
+                        <span class="card-badge">grid</span>
+                    </div>
+                    <div class="card-desc">Spreadsheet computation, formulas, charts & typed macros</div>
+                </div>
+
+                <div class="card" style="--card-accent: #10b981">
+                    <div class="card-top">
+                        <span class="card-title">DeckCraft</span>
+                        <span class="card-badge">deck</span>
+                    </div>
+                    <div class="card-desc">Slide decks, visual pitch presentations & export reels</div>
+                </div>
+
+                <div class="card" style="--card-accent: #10b981">
+                    <div class="card-top">
+                        <span class="card-title">WriterCraft</span>
+                        <span class="card-badge">writer</span>
+                    </div>
+                    <div class="card-desc">Narrative worldbuilding bible, character graphs & pacing</div>
+                </div>
+
+                <div class="card" style="--card-accent: #10b981">
+                    <div class="card-top">
+                        <span class="card-title">TravelCraft</span>
+                        <span class="card-badge">travel</span>
+                    </div>
+                    <div class="card-desc">Multimodal route optimization, transit & itinerary budget</div>
+                </div>
+
+                <div class="card" style="--card-accent: #10b981">
+                    <div class="card-top">
+                        <span class="card-title">SportsCraft</span>
+                        <span class="card-badge">sports</span>
+                    </div>
+                    <div class="card-desc">Athletic training load, power profiling & biomechanics</div>
+                </div>
+
+            </div>
+        </div>
+
+        </main>
+
+        <!-- Colophon -->
+        <footer class="footer">
+            <div class="footer-left">
+                <div class="stamp">OFFICIAL FLEET FOLIO</div>
+                <div class="footer-text">
+                    Printed for <strong>Goliath Studio & Kitchen Gallery</strong> · Vienna / Tangency Labs / Storytold
+                </div>
+            </div>
+            <div class="footer-right">
+                STORYTOLD CRAFT ECOSYSTEM · SHA256 VERIFIED · NO GENERATIVE NOISE
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

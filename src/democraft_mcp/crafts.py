@@ -590,6 +590,17 @@ APPS: tuple[CraftApp, ...] = (
                 topic_prompt="Describe a 2-page print spread about '{topic}' as JSON "
                 "{{left, right, palette}}. No prose.",
             ),
+            Demo(
+                "fleet-poster-a2",
+                "Demo 2: Fleet Exhibition Poster A2 (Glossy 300 DPI)",
+                "Generates the official ISO 216 A2 (420 x 594 mm) full-color exhibition "
+                "poster for all 28 Craft engines, complete with crop marks, CMYK-grade "
+                "layout, and 300 DPI printmaster PNG for shop printing.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
         ),
     ),
     CraftApp(
