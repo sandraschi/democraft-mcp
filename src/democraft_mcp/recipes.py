@@ -17,6 +17,7 @@ import math
 import os
 import re
 import shutil
+import subprocess
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -1942,6 +1943,105 @@ def file_find_dups(ctx: RunCtx) -> dict | None:
     return None
 
 
+def git_status_clean_check(ctx: RunCtx) -> dict | None:
+    """GitCraft Demo 1: Non-mutating repository status and tracking inspection."""
+    repo_dir = ctx.run_dir / "test_repo"
+    repo_dir.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["git", "init", "-b", "main"], cwd=repo_dir, check=True, capture_output=True)
+    subprocess.run(["git", "config", "user.name", "CI Bot"], cwd=repo_dir, check=True)
+    subprocess.run(["git", "config", "user.email", "ci@storytold.dev"], cwd=repo_dir, check=True)
+
+    (repo_dir / "README.md").write_text("# Demo Repository\n", encoding="utf-8")
+    subprocess.run(["git", "add", "README.md"], cwd=repo_dir, check=True)
+    subprocess.run(["git", "commit", "-m", "chore: init"], cwd=repo_dir, check=True)
+
+    res_st = ctx.do(["status", "--repo", str(repo_dir), "--json"])
+
+    clean = False
+    branch = "unknown"
+    try:
+        data = json.loads(res_st.get("stdout", "{}"))
+        clean = data.get("is_clean", False)
+        branch = data.get("branch", "unknown")
+    except Exception:
+        pass
+
+    report = [
+        "# GitCraft Repository Status Report",
+        "",
+        f"- Target Repo: `{repo_dir.name}`",
+        f"- Active Branch: `{branch}`",
+        f"- Clean Working Tree: `{clean}`",
+        f"- Status query latency: {res_st.get('ms', 0)} ms",
+    ]
+    (ctx.run_dir / "status-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def git_log_recent(ctx: RunCtx) -> dict | None:
+    """GitCraft Demo 2: Structured commit history parsing and telemetry."""
+    repo_dir = ctx.run_dir / "test_repo"
+    if not (repo_dir / ".git").is_dir():
+        repo_dir.mkdir(parents=True, exist_ok=True)
+        subprocess.run(["git", "init", "-b", "main"], cwd=repo_dir, check=True, capture_output=True)
+        subprocess.run(["git", "config", "user.name", "CI Bot"], cwd=repo_dir, check=True)
+        subprocess.run(["git", "config", "user.email", "ci@fleet.dev"], cwd=repo_dir, check=True)
+        (repo_dir / "README.md").write_text("# Demo Repository\n", encoding="utf-8")
+        subprocess.run(["git", "add", "README.md"], cwd=repo_dir, check=True)
+        subprocess.run(["git", "commit", "-m", "chore: initial baseline"], cwd=repo_dir, check=True)
+
+    res_log = ctx.do(["log", "--repo", str(repo_dir), "--count", "5", "--json"])
+
+    commit_count = 0
+    try:
+        commit_count = json.loads(res_log.get("stdout", "{}")).get("commit_count", 0)
+    except Exception:
+        pass
+
+    report = [
+        "# GitCraft Commit History Telemetry Report",
+        "",
+        f"- Repository: `{repo_dir.name}`",
+        f"- Commits retrieved: {commit_count}",
+        f"- Query success: `{res_log.get('success', False)}`",
+        f"- Log parsing latency: {res_log.get('ms', 0)} ms",
+    ]
+    (ctx.run_dir / "log-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def git_pr_list_fleet(ctx: RunCtx) -> dict | None:
+    """GitCraft Demo 3: Fleet pull request discovery and repository audit."""
+    res_pr = ctx.do(["pr-list", "--repo", "sandraschi/democraft-mcp", "--limit", "5", "--json"])
+    res_fleet = ctx.do(["fleet-dirty", "--root", str(Path(r"D:\Dev\repos")), "--json"])
+
+    pr_status = "unknown"
+    clean_count = 0
+    dirty_count = 0
+    try:
+        pr_status = json.loads(res_pr.get("stdout", "{}")).get("status", "unknown")
+        fleet_data = json.loads(res_fleet.get("stdout", "{}"))
+        clean_count = fleet_data.get("clean_count", 0)
+        dirty_count = fleet_data.get("dirty_count", 0)
+    except Exception:
+        pass
+
+    report = [
+        "# GitCraft Fleet Audit and Pull Request Report",
+        "",
+        "## GitHub Integration",
+        "- Remote target: `sandraschi/democraft-mcp`",
+        f"- GitHub PR query status: `{pr_status}`",
+        "",
+        "## Fleet Working Tree Audit",
+        f"- Total clean repos: {clean_count}",
+        f"- Total dirty repos: {dirty_count}",
+        f"- Fleet audit latency: {res_fleet.get('ms', 0)} ms",
+    ]
+    (ctx.run_dir / "fleet-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
 RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("design", "print-spread"): design_print_spread,
     ("design", "fleet-poster-a2"): design_fleet_poster_a2,
@@ -1976,4 +2076,7 @@ RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("file", "hash-grep"): file_hash_grep,
     ("file", "du-top10"): file_du_top10,
     ("file", "find-dups"): file_find_dups,
+    ("git", "status-clean-check"): git_status_clean_check,
+    ("git", "log-recent"): git_log_recent,
+    ("git", "pr-list-fleet"): git_pr_list_fleet,
 }

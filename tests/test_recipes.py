@@ -354,3 +354,18 @@ def test_file_recipes(tmp_path):
     res3 = run_demo("file", "find-dups", tmp_path, model="none")
     assert res3["success"] and res3["all_cli_ok"]
     assert (tmp_path / "file" / "find-dups" / "dups-report.md").is_file()
+
+
+@_needs("git")
+def test_git_recipes(tmp_path):
+    res1 = run_demo("git", "status-clean-check", tmp_path, model="none")
+    assert res1["success"] and res1["all_cli_ok"]
+    assert (tmp_path / "git" / "status-clean-check" / "status-report.md").is_file()
+
+    res2 = run_demo("git", "log-recent", tmp_path, model="none")
+    assert res2["success"] and res2["all_cli_ok"]
+    assert (tmp_path / "git" / "log-recent" / "log-report.md").is_file()
+
+    res3 = run_demo("git", "pr-list-fleet", tmp_path, model="none")
+    assert res3["success"] and res3["all_cli_ok"]
+    assert (tmp_path / "git" / "pr-list-fleet" / "fleet-report.md").is_file()

@@ -8,6 +8,7 @@ import {
 	FileStack,
 	FileText,
 	Frame,
+	GitBranch,
 	HardDrive,
 	Image,
 	Lamp,
@@ -46,6 +47,7 @@ const META: Record<string, AppMeta> = {
 	rev: { hue: "#a855f7", icon: Binary },
 	doc: { hue: "#0284c7", icon: FileText },
 	file: { hue: "#14b8a6", icon: HardDrive },
+	git: { hue: "#f97316", icon: GitBranch },
 };
 
 const FALLBACK: AppMeta = { hue: "#a1a1aa", icon: Box };

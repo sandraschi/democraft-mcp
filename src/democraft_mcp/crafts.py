@@ -1288,6 +1288,43 @@ APPS: tuple[CraftApp, ...] = (
         maker="Storytold",
     ),
     CraftApp(
+        "git",
+        "GitCraft",
+        "gitcraft-cli.exe",
+        "Git and GitHub fleet repository craft workstation: telemetry, PRs, and dirty scanning.",
+        (
+            Demo(
+                "status-clean-check",
+                "Demo 1: Non-mutating repository status and tracking inspection",
+                "Queries git working tree, ahead/behind tracking metrics, and branch info.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+            Demo(
+                "log-recent",
+                "Demo 2: Structured commit history parsing and telemetry",
+                "Extracts structured commit history, author identities, and commit metadata.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+            Demo(
+                "pr-list-fleet",
+                "Demo 3: Fleet pull request discovery and repository audit",
+                "Queries pull requests and scans local repositories for dirty working trees.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
         "app",
         "AppCraft",
         "appcraft-cli.exe",
@@ -1734,6 +1771,14 @@ HERO: dict[str, dict[str, object]] = {
         "gaps": (
             "Direct NTFS USN journal streaming requires administrator privileges",
             "Remote SMB/NFS share browsing relies on Windows network provider mount",
+        ),
+    },
+    "git": {
+        "clone_of": "GitKraken / GitHub Desktop / Magit",
+        "description": "Git and GitHub fleet repository craft workstation and telemetry.",
+        "gaps": (
+            "Deep GitHub Actions log streaming requires elevated OAuth scopes",
+            "Submodule recursive auto-resolution sandboxed in read-only mode",
         ),
     },
     "app": {
