@@ -21,6 +21,11 @@ Ports: **11245** frontend, **11246** backend. Gates: `just ci`.
 4. **Release v0.4.0 tagged.** Full test suite, ruff lint, biome check, and webapp vite build passing.
 5. **Phase 1 Recipe Migrations**: migrated `design:print-spread`, `effect:title-card`, and `deck:pitch-deck` from procedural `crafts.py` branching into typed recipe handlers in `recipes.py`.
 6. **Documentation Screenshots**: regenerated `dashboard.png`, `craft-solid.png`, `craft-vector.png`, and `depot.png` in `docs/screenshots/` via headless Playwright against the live running server (`:11245`).
+7. **Hands-in Live Visibility & Real-time Streaming**:
+   - Resolved empty/blank spreadsheet problem during live focus runs (`homepage-grid`, `pivot-report`, `macro-replay`).
+   - Wired live control bridge via `GridCraftLiveClient`: authenticates over port 7979 with user session control token and streams cell entries (`A1` title, column headers, and data rows) in real time with human-visible delays (200ms–400ms per cell) directly onto the open canvas.
+   - Automatically loads the generated final workbook (`report-final.xlsx`, `pivot-report.xlsx`, `macro-replay.xlsx`) into the interactive GUI window via `app.open` once headless rendering completes.
+   - Configured user-level persistent environment variables `GRIDCRAFT_CONTROL_PORT=7979` and `GRIDCRAFT_CONTROL_TOKEN=democraft-gridcraft-token-2026` so that the desktop GUI application reliably maintains its live control server across Windows sessions.
 
 1. **Oct 31 builds.** All 13 core CLIs bumped; drift additive only (104 verbs). Every existing
    demo re-run green on the new builds, baselines accepted for all 14 apps
