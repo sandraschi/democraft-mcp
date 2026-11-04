@@ -174,3 +174,30 @@ def test_quarantine_is_a_noop_without_stale_state(tmp_path):
 def test_app_data_name_is_install_folder():
     cli = Path(r"C:\Program Files\SoundCraft\soundcraft-cli.exe")
     assert windows.app_data_name(cli) == "SoundCraft"
+
+
+def test_open_file_in_gui_falls_back_to_launch(tmp_path, monkeypatch):
+    cli = tmp_path / "gridcraft-cli.exe"
+    cli.write_text("stub", encoding="utf-8")
+    windows.gui_exe(cli).write_text("stub", encoding="utf-8")
+    file_path = tmp_path / "report.xlsx"
+    file_path.write_text("data", encoding="utf-8")
+
+    launched = []
+    monkeypatch.setattr(windows, "_launch", lambda exe, extra=None: launched.append((exe, extra)))
+    monkeypatch.setattr(windows.GridCraftLiveClient, "connect", lambda self: False)
+
+    ok = windows.open_file_in_gui(cli, file_path)
+    assert ok is True
+    assert len(launched) == 1
+    assert launched[0][0].name == "gridcraft.exe"
+    assert str(file_path.resolve()) in (launched[0][1] or [])
+
+
+def test_gridcraft_live_client_methods():
+    client = windows.GridCraftLiveClient(port=9999, token="test-token")
+    assert client.port == 9999
+    assert client.token == "test-token"
+    assert client.send_command("test", {}) is None
+    assert client.set_cell("A1", "100") is False
+    assert client.open_workbook("test.xlsx") is False

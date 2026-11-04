@@ -24,6 +24,7 @@ from pathlib import Path
 from . import grid_macros
 from .texture_demo import godot_prop, godot_prop_ai
 from .vba_demo import TABLE_NOTE
+from .windows import open_file_in_gui
 
 ASSETS = Path(__file__).resolve().parents[2] / "assets"
 UPSTREAM = Path(os.getenv("DEMOCRAFT_UPSTREAM", r"D:\Dev\repos\_upstream"))
@@ -41,6 +42,7 @@ class RunCtx:
     inputs: list[str]
     program_files: Path
     model: str = ""
+    focus: bool = False
 
     def do(self, argv: list[str], **kw) -> dict:
         return self.do_with(self.cli, argv, **kw)
@@ -618,6 +620,8 @@ def grid_macro_replay(ctx: RunCtx) -> dict | None:
         "```",
     ]
     ctx.write("macro-report.md", "\n".join(md) + "\n")
+    if ctx.focus:
+        open_file_in_gui(ctx.cli, ctx.run_dir / "macro-replay.xlsx")
     return None
 
 

@@ -27,7 +27,7 @@ from pathlib import Path
 
 from . import __version__, recipes, texture_demo
 from .compat import probe_version
-from .windows import ensure_foreground
+from .windows import GridCraftLiveClient, ensure_foreground, open_file_in_gui
 
 PROGRAM_FILES = Path(os.getenv("DEMOCRAFT_PROGRAM_FILES", r"C:\Program Files"))
 OLLAMA_URL = os.getenv("DEMOCRAFT_OLLAMA_URL", "http://127.0.0.1:11434")
@@ -1594,6 +1594,7 @@ def run_demo(
                 inputs=inputs,
                 program_files=PROGRAM_FILES,
                 model=model,
+                focus=focus,
             )
         )
         if early is not None:
@@ -2108,6 +2109,8 @@ def run_demo(
             ]
         )
         do(["cat", "pivot-report.xlsx", "--csv"])
+        if focus:
+            open_file_in_gui(app.cli_path, run_dir / "pivot-report.xlsx")
     elif k == "grid":
         import json as _json
 
@@ -2118,6 +2121,23 @@ def run_demo(
         ncols = min(len(headers), 8)
         headers = headers[:ncols]
         col_letters = "ABCDEFGH"[:ncols]
+
+        live_client = GridCraftLiveClient() if focus else None
+        if live_client and live_client.connect():
+            # Hands-in: stream the cell entries live to the foreground GUI
+            # at a human-observable speed so the user sees the sheet populated.
+            import time as _time
+
+            live_client.set_cell("A1", title)
+            _time.sleep(0.4)
+            for c, h in enumerate(headers):
+                live_client.set_cell(f"{col_letters[c]}2", h)
+                _time.sleep(0.2)
+            for r, row in enumerate(rows):
+                for c in range(min(ncols, len(row))):
+                    live_client.set_cell(f"{col_letters[c]}{r + 3}", str(row[c]))
+                    _time.sleep(0.25)
+
         argv = ["run", "--cmd", f"cell.set={_json.dumps({'cell': 'A1', 'input': title})}"]
         for c, h in enumerate(headers):
             argv += ["--cmd", f"cell.set={_json.dumps({'cell': f'{col_letters[c]}2', 'input': h})}"]
@@ -2204,6 +2224,10 @@ def run_demo(
         else:
             final = "report-chart.xlsx"
         do(["cat", final, "--csv"])
+        if focus:
+            open_file_in_gui(app.cli_path, run_dir / final)
+        if live_client:
+            live_client.close()
     elif k == "sound" and demo.id == "melody-vst3":
         from .midi_util import render_piano_roll, render_waveform, write_melody
 

@@ -20,8 +20,10 @@ No third-party dependencies; ctypes only.
 from __future__ import annotations
 
 import ctypes
+import json
 import os
 import shutil
+import socket
 import subprocess
 import sys
 import time
@@ -36,6 +38,9 @@ VK_MENU = 0x12
 KEYEVENTF_KEYUP = 0x0002
 PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
 CREATE_DETACHED = 0x00000008
+
+GRIDCRAFT_CONTROL_PORT = 7979
+GRIDCRAFT_CONTROL_TOKEN = "democraft-gridcraft-token-2026"
 
 if IS_WINDOWS:
     _user32 = ctypes.WinDLL("user32", use_last_error=True)
@@ -121,15 +126,153 @@ def _find_window(exe: Path) -> tuple[int, int, str] | None:
     return None
 
 
-def _launch(exe: Path) -> None:
+def _launch(exe: Path, extra_args: list[str] | None = None) -> None:
+    argv = [str(exe)]
+    if extra_args:
+        argv.extend(extra_args)
+    elif exe.name.lower() == "gridcraft.exe":
+        argv.extend(
+            [
+                "--control",
+                str(GRIDCRAFT_CONTROL_PORT),
+                "--control-token",
+                GRIDCRAFT_CONTROL_TOKEN,
+            ]
+        )
+    # Use explorer.exe to launch interactive GUI apps into the active user session.
+    # When spawned directly inside background task/job hierarchies, Windows GUI apps
+    # can be terminated when the spawning job object ends.
+    if IS_WINDOWS and exe.name.lower() == "gridcraft.exe":
+        try:
+            subprocess.Popen(
+                ["explorer.exe", str(exe)],
+                cwd=str(exe.parent),
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            return
+        except Exception:
+            pass
     subprocess.Popen(  # noqa: S603 - absolute path, no shell, fixed argv
-        [str(exe)],
+        argv,
         cwd=str(exe.parent),
         stdin=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         creationflags=CREATE_DETACHED,
     )
+
+
+class GridCraftLiveClient:
+    """Client for driving live GridCraft GUI via localhost control protocol."""
+
+    def __init__(
+        self,
+        port: int = GRIDCRAFT_CONTROL_PORT,
+        token: str = GRIDCRAFT_CONTROL_TOKEN,
+    ) -> None:
+        self.port = port
+        self.token = token
+        self._sock: socket.socket | None = None
+        self._reader = None
+        self._id = 0
+
+    def connect(self, timeout: float = 1.0) -> bool:
+        if not IS_WINDOWS:
+            return False
+        try:
+            s = socket.create_connection(("127.0.0.1", self.port), timeout=timeout)
+            auth_msg = (
+                json.dumps({"id": 0, "method": "auth", "params": {"token": self.token}}).encode(
+                    "utf-8"
+                )
+                + b"\n"
+            )
+            s.sendall(auth_msg)
+            r = s.makefile("r", encoding="utf-8")
+            line = r.readline()
+            if '"authenticated":true' in line:
+                self._sock = s
+                self._reader = r
+                return True
+            s.close()
+            return False
+        except Exception:
+            return False
+
+    def send_command(self, method: str, params: dict, wait_reply: bool = True) -> dict | None:
+        if not self._sock:
+            return None
+        self._id += 1
+        try:
+            payload = (
+                json.dumps({"id": self._id, "method": method, "params": params}).encode("utf-8")
+                + b"\n"
+            )
+            self._sock.sendall(payload)
+            if wait_reply and self._reader:
+                line = self._reader.readline()
+                try:
+                    return json.loads(line)
+                except Exception:
+                    return {"ok": True}
+            return {"ok": True}
+        except Exception:
+            self.close()
+            return None
+
+    def set_cell(self, cell: str, value: str) -> bool:
+        res = self.send_command(
+            "engine.execute",
+            {"command": "cell.set", "params": {"cell": cell, "input": str(value)}},
+        )
+        return bool(res and res.get("ok"))
+
+    def open_workbook(self, path: Path | str) -> bool:
+        res = self.send_command("app.open", {"path": str(Path(path).resolve())})
+        return bool(res and res.get("ok"))
+
+    def close(self) -> None:
+        if self._reader:
+            try:
+                self._reader.close()
+            except Exception:
+                pass
+            self._reader = None
+        if self._sock:
+            try:
+                self._sock.close()
+            except Exception:
+                pass
+            self._sock = None
+
+    def __enter__(self) -> GridCraftLiveClient:
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.close()
+
+
+def open_file_in_gui(cli_path: Path, file_path: Path) -> bool:
+    """Open a file in the app GUI (via live control bridge or launch)."""
+    exe = gui_exe(cli_path)
+    if not IS_WINDOWS or not exe.is_file() or not Path(file_path).is_file():
+        return False
+    if exe.name.lower() == "gridcraft.exe":
+        client = GridCraftLiveClient()
+        if client.connect():
+            try:
+                if client.open_workbook(file_path):
+                    found = _find_window(exe)
+                    if found:
+                        _foreground(found[0])
+                    return True
+            finally:
+                client.close()
+    _launch(exe, [str(Path(file_path).resolve())])
+    return True
 
 
 def _maximize(hwnd: int) -> None:
