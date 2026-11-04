@@ -244,3 +244,68 @@ def test_craft_anything_recipes(tmp_path):
     verdict = json.loads((tmp_path / "oracle-verdict.json").read_text(encoding="utf-8"))
     assert verdict["verdict"] == "Level 3 Equivalent"
     assert len(verdict["viewports_checked"]) == 3
+
+
+@_needs("database")
+def test_database_recipes(tmp_path):
+    res1 = run_demo("database", "store-health", tmp_path, model="none")
+    assert res1["success"] and res1["all_cli_ok"]
+    assert (tmp_path / "database" / "store-health" / "yardstick-report.md").is_file()
+
+    res2 = run_demo("database", "backup-roundtrip", tmp_path, model="none")
+    assert res2["success"] and res2["all_cli_ok"]
+    assert (tmp_path / "database" / "backup-roundtrip" / "backup-report.md").is_file()
+
+    res3 = run_demo("database", "schema-diff", tmp_path, model="none")
+    assert res3["success"] and res3["all_cli_ok"]
+    assert (tmp_path / "database" / "schema-diff" / "diff-report.md").is_file()
+
+
+@_needs("virt")
+def test_virt_recipes(tmp_path):
+    res1 = run_demo("virt", "list-and-info", tmp_path, model="none")
+    assert res1["success"] and res1["all_cli_ok"]
+    assert (tmp_path / "virt" / "list-and-info" / "vm-inventory-report.md").is_file()
+
+    res2 = run_demo("virt", "sandbox-echo", tmp_path, model="none")
+    assert res2["success"] and res2["all_cli_ok"]
+    assert (tmp_path / "virt" / "sandbox-echo" / "sandbox-report.md").is_file()
+
+    res3 = run_demo("virt", "snapshot-roundtrip", tmp_path, model="none")
+    assert res3["success"] and res3["all_cli_ok"]
+    assert (tmp_path / "virt" / "snapshot-roundtrip" / "snapshot-report.md").is_file()
+
+
+def test_midi_util_and_renders(tmp_path):
+    import wave
+
+    from democraft_mcp import midi_util
+
+    midi_file = tmp_path / "test.mid"
+    notes = midi_util.write_melody(midi_file)
+    assert notes > 0
+    assert midi_file.is_file() and midi_file.stat().st_size > 100
+
+    piano_png = tmp_path / "piano.png"
+    midi_util.render_piano_roll(piano_png)
+    assert piano_png.is_file()
+
+    wav_file = tmp_path / "test.wav"
+    with wave.open(str(wav_file), "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(44100)
+        wf.writeframes(b"\x00\x01" * 1000)
+    wave_png = tmp_path / "wave.png"
+    midi_util.render_waveform(wav_file, wave_png)
+    assert wave_png.is_file()
+
+
+@_needs("splat")
+def test_splat_recipes(tmp_path):
+    res1 = run_demo("splat", "info-inspect", tmp_path, model="none")
+    assert res1["success"]
+    res2 = run_demo("splat", "convert-spz", tmp_path, model="none")
+    assert res2["success"]
+    res3 = run_demo("splat", "collider-extract", tmp_path, model="none")
+    assert res3["success"]

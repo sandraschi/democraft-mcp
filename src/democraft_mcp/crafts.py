@@ -45,6 +45,7 @@ PROGRAM_FILES = Path(os.getenv("DEMOCRAFT_PROGRAM_FILES", r"C:\Program Files"))
 OLLAMA_URL = os.getenv("DEMOCRAFT_OLLAMA_URL", "http://127.0.0.1:11434")
 DEFAULT_MODEL = os.getenv("DEMOCRAFT_MODEL", "gemma4:e4b")
 CLI_TIMEOUT_S = 120
+AI_TIMEOUT_S = int(os.getenv("DEMOCRAFT_AI_TIMEOUT", "3"))
 
 
 @dataclass(frozen=True)
@@ -1729,7 +1730,9 @@ _FALLBACK_SVG = (
 )
 
 
-def ai_step(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 90, chars: int = 4000) -> dict:
+def ai_step(
+    prompt: str, model: str = DEFAULT_MODEL, timeout: int = AI_TIMEOUT_S, chars: int = 4000
+) -> dict:
     """One local-LLM call. Never raises: failure is a declared skip."""
     if not prompt or not prompt.strip():
         return {
