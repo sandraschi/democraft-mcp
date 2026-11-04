@@ -1,5 +1,6 @@
 import {
 	AudioWaveform,
+	Binary,
 	Box,
 	Clapperboard,
 	Database,
@@ -41,6 +42,7 @@ const META: Record<string, AppMeta> = {
 	solid: { hue: "#94a3b8", icon: Box },
 	database: { hue: "#10b981", icon: Database },
 	virt: { hue: "#3b82f6", icon: Server },
+	rev: { hue: "#a855f7", icon: Binary },
 };
 
 const FALLBACK: AppMeta = { hue: "#a1a1aa", icon: Box };

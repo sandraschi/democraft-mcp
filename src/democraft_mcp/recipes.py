@@ -1673,6 +1673,82 @@ def virt_snapshot_roundtrip(ctx: RunCtx) -> dict | None:
     return None
 
 
+def rev_strings_entropy(ctx: RunCtx) -> dict | None:
+    """ReveCraft Demo 1: Static triage, entropy calculation, and string extraction."""
+    sample_bin = ctx.run_dir / "target.bin"
+    header = b"MZ" + b"\x00" * 58 + b"\x40\x00\x00\x00" + b"PE\x00\x00"
+    payload = b"ReveCraft Demo String: Enterprise Reverse Engineering Triage\x00" * 10
+    sample_bin.write_bytes(header + payload)
+
+    res_ent = ctx.do(["entropy", "--file", str(sample_bin), "--json"])
+    res_str = ctx.do(["strings", "--file", str(sample_bin), "--json"])
+    res_pe = ctx.do(["pe-info", "--file", str(sample_bin), "--json"])
+
+    ent_val = 0.0
+    try:
+        data = json.loads(res_ent.get("stdout", "{}"))
+        ent_val = data.get("overall", 0.0)
+    except Exception:
+        pass
+
+    report = [
+        "# ReveCraft Static Binary Triage Report",
+        "",
+        "## Metrics",
+        f"- Target file: `{sample_bin.name}` ({sample_bin.stat().st_size} bytes)",
+        f"- Shannon Entropy: `{ent_val:.4f}`",
+        f"- PE Structure check: `{res_pe.get('success', False)}`",
+        f"- String extraction: `{res_str.get('success', False)}`",
+        f"- Triage latency: {res_ent.get('ms', 0) + res_str.get('ms', 0)} ms",
+    ]
+    (ctx.run_dir / "entropy-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def rev_die_capa_smoke(ctx: RunCtx) -> dict | None:
+    """ReveCraft Demo 2: Engine smoke check across Detect It Easy and Mandiant capa."""
+    sample_bin = ctx.run_dir / "target.bin"
+    if not sample_bin.is_file():
+        sample_bin.write_bytes(b"MZ\x00\x00ReveCraft Engine Smoke Test" * 8)
+
+    res_die = ctx.do(["die", "--file", str(sample_bin), "--json"])
+    res_capa = ctx.do(["capa", "--file", str(sample_bin), "--json"])
+
+    report = [
+        "# ReveCraft Engine Smoke Report",
+        "",
+        "## Engine Statuses",
+        f"- Detect It Easy (diec): `{res_die.get('success', False)}`",
+        f"- Mandiant capa: `{res_capa.get('success', False)}`",
+        "",
+        "Note: Engines report declared `down` receipt if external tools are not in PATH.",
+    ]
+    (ctx.run_dir / "engine-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def rev_dki_decode(ctx: RunCtx) -> dict | None:
+    """ReveCraft Demo 3: Directmedia .DKI decompression and stream recovery."""
+    dki_file = ctx.run_dir / "TEXT.DKI"
+    text_content = "ReveCraft Directmedia Stream: German Literature Corpus Index 2026."
+    import zlib
+
+    dki_file.write_bytes(zlib.compress(text_content.encode("utf-8")))
+
+    out_txt = ctx.run_dir / "TEXT.TXT"
+    res_dki = ctx.do(["dki-decode", "--file", str(dki_file), "--out", str(out_txt), "--json"])
+
+    report = [
+        "# ReveCraft Directmedia .DKI Stream Recovery Report",
+        "",
+        f"- DKI file: `{dki_file.name}` ({dki_file.stat().st_size} bytes compressed)",
+        f"- Decompression success: `{res_dki.get('success', False)}`",
+        f"- Output file: `{out_txt.name}` (exists: {out_txt.is_file()})",
+    ]
+    (ctx.run_dir / "dki-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
 RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("design", "print-spread"): design_print_spread,
     ("design", "fleet-poster-a2"): design_fleet_poster_a2,
@@ -1698,4 +1774,7 @@ RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("virt", "list-and-info"): virt_list_and_info,
     ("virt", "sandbox-echo"): virt_sandbox_echo,
     ("virt", "snapshot-roundtrip"): virt_snapshot_roundtrip,
+    ("rev", "strings-entropy"): rev_strings_entropy,
+    ("rev", "die-capa-smoke"): rev_die_capa_smoke,
+    ("rev", "dki-decode"): rev_dki_decode,
 }

@@ -309,3 +309,18 @@ def test_splat_recipes(tmp_path):
     assert res2["success"]
     res3 = run_demo("splat", "collider-extract", tmp_path, model="none")
     assert res3["success"]
+
+
+@_needs("rev")
+def test_rev_recipes(tmp_path):
+    res1 = run_demo("rev", "strings-entropy", tmp_path, model="none")
+    assert res1["success"] and res1["all_cli_ok"]
+    assert (tmp_path / "rev" / "strings-entropy" / "entropy-report.md").is_file()
+
+    res2 = run_demo("rev", "die-capa-smoke", tmp_path, model="none")
+    assert res2["success"] and res2["all_cli_ok"]
+    assert (tmp_path / "rev" / "die-capa-smoke" / "engine-report.md").is_file()
+
+    res3 = run_demo("rev", "dki-decode", tmp_path, model="none")
+    assert res3["success"] and res3["all_cli_ok"]
+    assert (tmp_path / "rev" / "dki-decode" / "dki-report.md").is_file()

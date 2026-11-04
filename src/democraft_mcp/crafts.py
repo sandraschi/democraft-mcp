@@ -1176,6 +1176,43 @@ APPS: tuple[CraftApp, ...] = (
         maker="Storytold",
     ),
     CraftApp(
+        "rev",
+        "ReveCraft",
+        "revecraft-cli.exe",
+        "Binary reverse-engineering, PE static triage, entropy analysis, and DKI tools.",
+        (
+            Demo(
+                "strings-entropy",
+                "Demo 1: Static triage, entropy calculation, and string extraction",
+                "Analyzes Shannon entropy, printable string tables, and Windows PE headers.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+            Demo(
+                "die-capa-smoke",
+                "Demo 2: External engine triage across Detect It Easy and Mandiant capa",
+                "Executes compiler and capability detection, gracefully reporting tool receipt.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+            Demo(
+                "dki-decode",
+                "Demo 3: Directmedia .DKI decompression and stream recovery",
+                "Decompresses zlib/gzip chunked payloads from Directmedia archives.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
         "app",
         "AppCraft",
         "appcraft-cli.exe",
@@ -1597,6 +1634,15 @@ HERO: dict[str, dict[str, object]] = {
         "gaps": (
             "Live VM migration across remote hypervisor hosts requires Proxmox bridge",
             "Nested virtualization requires host hardware enablement",
+        ),
+    },
+    "rev": {
+        "clone_of": "IDA Pro / Ghidra / Detect It Easy / capa",
+        "description": "Binary reverse-engineering, PE static triage, entropy analysis, "
+        "and DKI tools.",
+        "gaps": (
+            "Interactive Ghidra GUI integration requires running headless or local bridge",
+            "Dynamic emulation requires Unicorn/Frida runtime enablement",
         ),
     },
     "app": {
