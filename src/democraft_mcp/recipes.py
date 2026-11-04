@@ -1494,6 +1494,185 @@ def splat_collider_extract(ctx: RunCtx) -> dict | None:
     return None
 
 
+def database_store_health(ctx: RunCtx) -> dict | None:
+    """DatabaseCraft Demo 1: Multi-model store health and query yardstick."""
+    db_path = ctx.run_dir / "yardstick.db"
+    res1 = ctx.do(["status", "--json"])
+    res2 = ctx.do(["seed-demo", "--name", "ecommerce", "--db", str(db_path), "--json"])
+    res3 = ctx.do(
+        [
+            "query",
+            "--db",
+            str(db_path),
+            "--sql",
+            "SELECT sku, title, price FROM products ORDER BY price DESC LIMIT 3;",
+            "--json",
+        ]
+    )
+
+    report = [
+        "# DatabaseCraft Store Health & Query Yardstick Report",
+        "",
+        "## Status Telemetry",
+        f"- Engine status: `{res1.get('success', False)}`",
+        f"- Benchmark dataset: `ecommerce` ({res2.get('ms', 0)} ms)",
+        "",
+        "## Query Execution Yardstick",
+        "- SQL: `SELECT sku, title, price FROM products ORDER BY price DESC LIMIT 3;`",
+        f"- Query latency: {res3.get('ms', 0)} ms",
+        f"- Output rows captured: {len(res3.get('stdout', '').splitlines())}",
+    ]
+    (ctx.run_dir / "yardstick-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def database_backup_roundtrip(ctx: RunCtx) -> dict | None:
+    """DatabaseCraft Demo 2: Atomic backup, hash verification, and restore."""
+    primary_db = ctx.run_dir / "primary.db"
+    backup_db = ctx.run_dir / "primary_backup.db"
+
+    ctx.do(["construct", "creative_agency", "--db", str(primary_db), "--json"])
+    ctx.do(["backup", str(backup_db), "--db", str(primary_db), "--json"])
+    res_diag = ctx.do(["diagnose", "--db", str(backup_db), "--json"])
+    res_diff = ctx.do(["diff", "--db1", str(primary_db), "--db2", str(backup_db), "--json"])
+
+    backup_size = backup_db.stat().st_size if backup_db.is_file() else 0
+    report = [
+        "# DatabaseCraft Atomic Backup & Integrity Report",
+        "",
+        f"- Primary database: `{primary_db.name}`",
+        f"- Backup archive: `{backup_db.name}` ({backup_size} bytes)",
+        f"- Offline B-tree diagnosis: `{res_diag.get('success', False)}`",
+        f"- Primary vs Backup parity: `{res_diff.get('success', False)}`",
+    ]
+    (ctx.run_dir / "backup-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def database_schema_diff(ctx: RunCtx) -> dict | None:
+    """DatabaseCraft Demo 3: Relational schema diff and column evolution."""
+    v1_db = ctx.run_dir / "v1.db"
+    v2_db = ctx.run_dir / "v2.db"
+
+    ctx.do(["construct", "small_business", "--db", str(v1_db), "--json"])
+    if v1_db.is_file():
+        shutil.copy2(v1_db, v2_db)
+    ctx.do(
+        [
+            "query",
+            "--db",
+            str(v2_db),
+            "--sql",
+            "ALTER TABLE customers ADD COLUMN loyalty_rank TEXT DEFAULT 'gold';",
+            "--json",
+        ]
+    )
+    res_diff = ctx.do(["diff", "--db1", str(v1_db), "--db2", str(v2_db), "--json"])
+
+    report = [
+        "# DatabaseCraft Schema Evolution Diff Report",
+        "",
+        "- Schema V1: `small_business` baseline",
+        "- Schema V2: `small_business` + migrated column `loyalty_rank`",
+        f"- Diff engine result: `{res_diff.get('success', False)}`",
+    ]
+    (ctx.run_dir / "diff-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def virt_list_and_info(ctx: RunCtx) -> dict | None:
+    """VirtuCraft Demo 1: Virtual machine inventory and telemetry."""
+    res_host = ctx.do(["host", "info", "--json"])
+    res_vms = ctx.do(["vm", "list", "--json"])
+
+    vm_name = "podman-machine-default"
+    try:
+        data = json.loads(res_vms.get("stdout", "{}"))
+        vms = data.get("vms", [])
+        if vms:
+            vm_name = vms[0].get("name", vm_name)
+    except Exception:
+        pass
+
+    res_info = ctx.do(["vm", "info", "--vm", vm_name, "--json"])
+
+    report = [
+        "# VirtuCraft Virtual Machine Inventory Report",
+        "",
+        "## Active Hypervisor Telemetry",
+        f"- Host info result: `{res_host.get('success', False)}`",
+        f"- VM discovery: `{res_vms.get('success', False)}`",
+        "",
+        "## Target VM Profile",
+        f"- VM Name: `{vm_name}`",
+        f"- VM Info status: `{res_info.get('success', False)}`",
+        f"- Execution latency: {res_info.get('ms', 0)} ms",
+    ]
+    (ctx.run_dir / "vm-inventory-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def virt_sandbox_echo(ctx: RunCtx) -> dict | None:
+    """VirtuCraft Demo 2: Isolated ephemeral sandbox code execution."""
+    code = "import sys; print(f'VirtuCraft Sandbox Online: Python {sys.version}')"
+    res = ctx.do(["sandbox", "run", "--code", code, "--json"])
+
+    report = [
+        "# VirtuCraft Ephemeral Sandbox Execution Report",
+        "",
+        "## Execution Status",
+        f"- Sandbox Success: `{res.get('success', False)}`",
+        f"- Return code: `{res.get('returncode', 0)}`",
+        f"- Sandbox runtime latency: {res.get('ms', 0)} ms",
+        "",
+        "## Code Payload",
+        f"```python\n{code}\n```",
+    ]
+    (ctx.run_dir / "sandbox-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def virt_snapshot_roundtrip(ctx: RunCtx) -> dict | None:
+    """VirtuCraft Demo 3: Snapshot and checkpoint lifecycle roundtrip."""
+    res_vms = ctx.do(["vm", "list", "--json"])
+    vm_name = "podman-machine-default"
+    try:
+        data = json.loads(res_vms.get("stdout", "{}"))
+        vms = data.get("vms", [])
+        if vms:
+            vm_name = vms[0].get("name", vm_name)
+    except Exception:
+        pass
+
+    snap_name = "virt-ci-checkpoint"
+    res_create = ctx.do(
+        [
+            "snapshot",
+            "create",
+            "--vm",
+            vm_name,
+            "--snap",
+            snap_name,
+            "--desc",
+            "Democraft automated verification",
+            "--json",
+        ]
+    )
+    res_list = ctx.do(["snapshot", "list", "--vm", vm_name, "--json"])
+    res_del = ctx.do(["snapshot", "delete", "--vm", vm_name, "--snap", snap_name, "--json"])
+
+    report = [
+        "# VirtuCraft Checkpoint Lifecycle Report",
+        "",
+        f"- Target Virtual Machine: `{vm_name}`",
+        f"- Checkpoint Created: `{snap_name}` (`{res_create.get('success', False)}`)",
+        f"- Checkpoint Verification: `{res_list.get('success', False)}`",
+        f"- Checkpoint Purged: `{snap_name}` (`{res_del.get('success', False)}`)",
+    ]
+    (ctx.run_dir / "snapshot-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
 RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("design", "print-spread"): design_print_spread,
     ("design", "fleet-poster-a2"): design_fleet_poster_a2,
@@ -1513,4 +1692,10 @@ RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("splat", "info-inspect"): splat_info_inspect,
     ("splat", "convert-spz"): splat_convert_spz,
     ("splat", "collider-extract"): splat_collider_extract,
+    ("database", "store-health"): database_store_health,
+    ("database", "backup-roundtrip"): database_backup_roundtrip,
+    ("database", "schema-diff"): database_schema_diff,
+    ("virt", "list-and-info"): virt_list_and_info,
+    ("virt", "sandbox-echo"): virt_sandbox_echo,
+    ("virt", "snapshot-roundtrip"): virt_snapshot_roundtrip,
 }

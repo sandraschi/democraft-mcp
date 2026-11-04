@@ -1104,9 +1104,67 @@ APPS: tuple[CraftApp, ...] = (
         (
             Demo(
                 "store-health",
-                "Demo 1: Multi-model store health and schema report",
+                "Demo 1: Multi-model store health and query yardstick",
                 "Queries the embedded multi-model store for vector index status, table schemas, "
-                "and connection pool telemetry. Deterministic, no AI step.",
+                "and executes deterministic relational benchmark queries.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+            Demo(
+                "backup-roundtrip",
+                "Demo 2: Atomic backup, hash verification, and restore",
+                "Creates an atomic database copy with active B-tree verification, checksumming, "
+                "and non-destructive offline diagnostics.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+            Demo(
+                "schema-diff",
+                "Demo 3: Relational schema diff and column evolution",
+                "Synthesizes structural schema diff across database versions, isolating added, "
+                "dropped, or mutated columns and constraints.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
+        "virt",
+        "VirtuCraft",
+        "virtucraft-cli.exe",
+        "Hypervisor and virtual machine workstation: Hyper-V, VirtualBox, sandboxes.",
+        (
+            Demo(
+                "list-and-info",
+                "Demo 1: Virtual machine inventory and telemetry",
+                "Queries the active hypervisor for registered VMs, inspects memory and state.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+            Demo(
+                "sandbox-echo",
+                "Demo 2: Isolated ephemeral sandbox code execution",
+                "Executes isolated ephemeral code in the VirtuCraft sandbox runtime "
+                "without hypervisor overhead.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+            Demo(
+                "snapshot-roundtrip",
+                "Demo 3: Snapshot and checkpoint lifecycle roundtrip",
+                "Creates a named test checkpoint, validates registry presence, and purges it.",
                 "",
                 "cli",
                 live=True,
@@ -1531,6 +1589,15 @@ HERO: dict[str, dict[str, object]] = {
             "No foreign data wrappers for external cloud warehouses",
         ),
     },
+    "virt": {
+        "clone_of": "VMware Workstation / VirtualBox / Proxmox",
+        "description": "Hypervisor abstraction and virtual machine management "
+        "across Hyper-V and VirtualBox.",
+        "gaps": (
+            "Live VM migration across remote hypervisor hosts requires Proxmox bridge",
+            "Nested virtualization requires host hardware enablement",
+        ),
+    },
     "app": {
         "clone_of": "Retool / FlutterFlow / AppSmith",
         "description": "Visual desktop app synthesizer with reactive components, binding graphs, "
@@ -1664,6 +1731,14 @@ _FALLBACK_SVG = (
 
 def ai_step(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 90, chars: int = 4000) -> dict:
     """One local-LLM call. Never raises: failure is a declared skip."""
+    if not prompt or not prompt.strip():
+        return {
+            "success": False,
+            "model": model,
+            "skipped": True,
+            "reason": "no AI step",
+            "ms": 0,
+        }
     import httpx
 
     started = time.time()

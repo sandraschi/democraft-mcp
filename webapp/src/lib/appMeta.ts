@@ -2,6 +2,7 @@ import {
 	AudioWaveform,
 	Box,
 	Clapperboard,
+	Database,
 	DraftingCompass,
 	FileStack,
 	FileText,
@@ -12,6 +13,7 @@ import {
 	type LucideIcon,
 	PenTool,
 	Presentation,
+	Server,
 	Sheet,
 	Wand2,
 } from "lucide-react";
@@ -37,6 +39,8 @@ const META: Record<string, AppMeta> = {
 	photo: { hue: "#22d3ee", icon: Image },
 	vector: { hue: "#fbbf24", icon: PenTool },
 	solid: { hue: "#94a3b8", icon: Box },
+	database: { hue: "#10b981", icon: Database },
+	virt: { hue: "#3b82f6", icon: Server },
 };
 
 const FALLBACK: AppMeta = { hue: "#a1a1aa", icon: Box };
