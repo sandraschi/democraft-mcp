@@ -1765,15 +1765,6 @@ def run_demo(
                 disposal=2,
             )
             artifacts.append(str(run_dir / "transitions.gif"))
-    elif k == "deck":
-        do(["render", "--sample", "--all", "slides"])
-    elif k == "design":
-        do(["run", "--sample", "--all-pages", "pages"])
-    elif k == "effect":
-        do(["exec", "file.openDemoProject"])
-        still = do(["render-frame", "--out", "title-card.png"])
-        if not still.get("success"):
-            steps[-1]["note"] = "render needs an open project - capability map is the demo"
     elif k == "fig" and demo.id == "retro-board":
         import json as _json
 

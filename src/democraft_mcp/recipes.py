@@ -1391,7 +1391,29 @@ def material_facade_material(ctx: RunCtx) -> dict | None:
     return None
 
 
+def design_print_spread(ctx: RunCtx) -> dict | None:
+    """Render sample spread and all pages for DesignCraft."""
+    ctx.do(["run", "--sample", "--all-pages", "pages"])
+    return None
+
+
+def effect_title_card(ctx: RunCtx) -> dict | None:
+    """Open demo project and render frame in EffectCraft."""
+    ctx.do(["exec", "file.openDemoProject"])
+    ctx.do(["render-frame", "--out", "title-card.png"])
+    return None
+
+
+def deck_pitch_deck(ctx: RunCtx) -> dict | None:
+    """Render sample slide deck for DeckCraft."""
+    ctx.do(["render", "--sample", "--all", "slides"])
+    return None
+
+
 RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
+    ("design", "print-spread"): design_print_spread,
+    ("effect", "title-card"): effect_title_card,
+    ("deck", "pitch-deck"): deck_pitch_deck,
     ("vector", "cleanup-pass"): vector_cleanup_pass,
     ("pdf", "auto-bookmarks"): pdf_auto_bookmarks,
     ("grid", "macro-replay"): grid_macro_replay,
