@@ -223,3 +223,43 @@ def test_generalized_live_clients():
     fc = windows.FigCraftLiveClient(port=9994)
     assert fc.port == 9994
     assert fc.execute_command("text.set", {}) is False
+
+    film = windows.FilmCraftLiveClient(port=9993, token="film-tok")
+    assert film.port == 9993
+    assert film.token == "film-tok"
+    assert film.execute_command("sequence.cut", {}) is False
+
+    solid = windows.SolidCraftLiveClient(port=9992)
+    assert solid.port == 9992
+    assert solid.execute_command("parameters.change", {}) is False
+
+    vec = windows.VectorCraftLiveClient(port=9991)
+    assert vec.port == 9991
+    assert vec.execute_command("addon.cleanup.fix", {}) is False
+
+    snd = windows.SoundCraftLiveClient(port=9990)
+    assert snd.port == 9990
+    assert snd.execute_command("mix.solo", {}) is False
+
+
+def test_open_file_in_gui_with_new_clients(tmp_path, monkeypatch):
+    for name, client_cls in [
+        ("filmcraft", windows.FilmCraftLiveClient),
+        ("solidcraft", windows.SolidCraftLiveClient),
+        ("vectorcraft", windows.VectorCraftLiveClient),
+        ("soundcraft", windows.SoundCraftLiveClient),
+        ("figcraft", windows.FigCraftLiveClient),
+    ]:
+        cli = tmp_path / f"{name}-cli.exe"
+        cli.write_text("stub", encoding="utf-8")
+        windows.gui_exe(cli).write_text("stub", encoding="utf-8")
+        target_file = tmp_path / f"out.{name[:3]}"
+        target_file.write_text("data", encoding="utf-8")
+
+        monkeypatch.setattr(client_cls, "connect", lambda self: True)
+        monkeypatch.setattr(client_cls, "execute_command", lambda self, cmd, params: True)
+        monkeypatch.setattr(windows, "_find_window", lambda exe, n=name: (100, 200, f"{n.title()}"))
+        monkeypatch.setattr(windows, "_foreground", lambda hwnd: True)
+
+        ok = windows.open_file_in_gui(cli, target_file)
+        assert ok is True

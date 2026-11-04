@@ -31,8 +31,11 @@ from .windows import (
     CADCraftLiveClient,
     DeckCraftLiveClient,
     FigCraftLiveClient,
+    FilmCraftLiveClient,
     GridCraftLiveClient,
     PhotoCraftLiveClient,
+    SoundCraftLiveClient,
+    VectorCraftLiveClient,
     WordCraftLiveClient,
     ensure_foreground,
     open_file_in_gui,
@@ -829,6 +832,7 @@ APPS: tuple[CraftApp, ...] = (
                 topics=SOUND_TOPICS,
                 topic_prompt="Brief the bounced groove with focus on '{topic}' "
                 "(tempo, key, layers) as JSON. No prose.",
+                live=True,
             ),
         ),
     ),
@@ -941,6 +945,7 @@ APPS: tuple[CraftApp, ...] = (
                 "from 2024, re-encoded as JPEG. Deterministic, no AI step.",
                 "",
                 "cli",
+                live=True,
             ),
             Demo(
                 "lighthouse-live",
@@ -963,6 +968,7 @@ APPS: tuple[CraftApp, ...] = (
                 "cli",
                 topics=PHOTO_TOPICS,
                 topic_prompt="Draw an SVG of {topic}. Raw SVG only.",
+                live=True,
             ),
         ),
     ),
@@ -981,6 +987,7 @@ APPS: tuple[CraftApp, ...] = (
                 "cli",
                 topics=VECTOR_TOPICS,
                 topic_prompt="Draw an SVG of {topic}. Raw SVG only.",
+                live=True,
             ),
             Demo(
                 "cleanup-pass",
@@ -993,6 +1000,7 @@ APPS: tuple[CraftApp, ...] = (
                 "",
                 "cli",
                 topics=recipes.VECTOR_TOPICS,
+                live=True,
                 added="2026-11-01",
             ),
         ),
@@ -1025,6 +1033,7 @@ APPS: tuple[CraftApp, ...] = (
                 "",
                 "cli",
                 topics=recipes.SOLID_BOARD_TOPICS,
+                live=True,
                 added="2026-11-01",
             ),
         ),
@@ -1996,6 +2005,12 @@ def run_demo(
                 },
             },
         ]
+        film_client = FilmCraftLiveClient() if focus else None
+        if film_client and film_client.connect():
+            for step in build:
+                film_client.execute_command(step["id"], step.get("params", {}))
+                time.sleep(0.35)
+
         (run_dir / "build.jsonl").write_text(
             "\n".join(json.dumps(step) for step in build) + "\n", encoding="utf-8"
         )
@@ -2019,6 +2034,12 @@ def run_demo(
             clip_id = None
 
         if clip_id is not None:
+            if film_client:
+                film_client.execute_command(
+                    "sequence.applyVideoTransition",
+                    {"clip": clip_id, "effect": "cross_dissolve", "frames": 12, "edge": "in"},
+                )
+                time.sleep(0.35)
             # Real exec step (not a note): --save persists the transition into
             # cut.fcproj so the export below renders the dissolve.
             do(
@@ -2079,6 +2100,10 @@ def run_demo(
                 "0.5",
             ]
         )
+        if focus:
+            open_file_in_gui(app.cli_path, run_dir / "cut.fcproj")
+        if film_client:
+            film_client.close()
     elif k == "film" and demo.id == "interchange-kit":
         if _film_build_cut(app, run_dir, do):
             for cmd, out in (
@@ -2306,6 +2331,25 @@ def run_demo(
 
         notes = write_melody(run_dir / "melody.mid")
         reverb = _find_vst3(app.cli_path, run_dir, "ValhallaSupermassive")
+
+        # Hands-in live streaming into SoundCraft GUI
+        sound_client = SoundCraftLiveClient() if focus else None
+        if sound_client and sound_client.connect():
+            sound_client.execute_command("event.tempo", {"bpm": 112})
+            time.sleep(0.35)
+            sound_client.execute_command(
+                "file.import_midi", {"path": str((run_dir / "melody.mid").resolve()), "at": 0}
+            )
+            time.sleep(0.35)
+            sound_client.execute_command(
+                "mix.solo", {"tracks": ["MIDI 1"], "value": True, "exclusive": True}
+            )
+            time.sleep(0.35)
+            sound_client.execute_command(
+                "mix.insert", {"track": "MIDI 1", "plugin": reverb, "slot": "a"}
+            )
+            time.sleep(0.35)
+
         do(
             [
                 "run",
@@ -2366,7 +2410,17 @@ def run_demo(
                     "note": f"Valhalla not found; {notes} notes bounced dry",
                 }
             )
+        if focus:
+            open_file_in_gui(app.cli_path, run_dir / "stage3.scraft")
+        if sound_client:
+            sound_client.close()
     elif k == "sound":
+        sound_client = SoundCraftLiveClient() if focus else None
+        if sound_client and sound_client.connect():
+            sound_client.execute_command("project.load_demo", {})
+            time.sleep(0.4)
+            sound_client.execute_command("project.inspect", {})
+            time.sleep(0.35)
         do(["run", "--demo", "--inspect"])
         bounced = dict(
             cli_run(
@@ -2376,8 +2430,12 @@ def run_demo(
         steps.append(bounced)
         if bounced.get("success") and (run_dir / "ident.wav").is_file():
             do(["info", "ident.wav"])
+            if focus:
+                open_file_in_gui(app.cli_path, run_dir / "ident.wav")
         else:
             steps[-1]["note"] = "bounce produced no file - inspect JSON is the demo"
+        if sound_client:
+            sound_client.close()
     elif k == "word" and demo.id == "scale-fonts":
         import json as _json
 
@@ -2642,6 +2700,8 @@ def run_demo(
             ]
         )
         do(["info", "batch-out/demon-christ.jpg"])
+        if focus and (run_dir / "batch-out" / "demon-christ.jpg").is_file():
+            open_file_in_gui(app.cli_path, run_dir / "batch-out" / "demon-christ.jpg")
     elif k in ("photo", "vector"):
         # Pelican benchmark: the SAME plain prompt on every contender model,
         # each rendered through the real engine pipeline. Quality deltas are
@@ -2649,6 +2709,18 @@ def run_demo(
         bench_prompt = demo.topic_prompt.format(topic=topic) if topic else demo.ai_prompt
         rendered: list[str] = []
         seen: set[str] = set()
+
+        live_client = None
+        if focus:
+            if k == "vector":
+                live_client = VectorCraftLiveClient()
+                if not live_client.connect():
+                    live_client = None
+            elif k == "photo":
+                live_client = PhotoCraftLiveClient()
+                if not live_client.connect():
+                    live_client = None
+
         for m in (model, *BENCH_MODELS):
             if m in seen:
                 continue
@@ -2678,6 +2750,16 @@ def run_demo(
                         do(["run", "--in", svg_path.name, "--export", png])
                     if (run_dir / png).is_file():
                         rendered.append(png)
+                        if live_client:
+                            if k == "vector":
+                                live_client.execute_command(
+                                    "app.open", {"path": str(svg_path.resolve())}
+                                )
+                            elif k == "photo":
+                                live_client.send_command(
+                                    "file.open", {"path": str((run_dir / png).resolve())}
+                                )
+                            time.sleep(0.35)
         if not rendered:
             (run_dir / "pelican-fallback.svg").write_text(_FALLBACK_SVG, encoding="utf-8")
             if k == "photo":
@@ -2689,6 +2771,15 @@ def run_demo(
             )
         if rendered:
             do(["info", rendered[0]])
+            if focus:
+                target_open = (
+                    (run_dir / f"pelican-{tag}.svg")
+                    if k == "vector" and (run_dir / f"pelican-{tag}.svg").is_file()
+                    else run_dir / rendered[0]
+                )
+                open_file_in_gui(app.cli_path, target_open)
+        if live_client:
+            live_client.close()
     manifest = _write_manifest(
         run_dir, app_key, demo_id, topic, started_at, inputs, focus=focus_info
     )

@@ -50,6 +50,9 @@ DECKCRAFT_CONTROL_PORT = 7984
 FIGCRAFT_CONTROL_PORT = 7985
 FILMCRAFT_CONTROL_PORT = 7986
 FILMCRAFT_CONTROL_TOKEN = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+VECTORCRAFT_CONTROL_PORT = 7987
+SOUNDCRAFT_CONTROL_PORT = 7988
+SOLIDCRAFT_CONTROL_PORT = 27878
 
 if IS_WINDOWS:
     _user32 = ctypes.WinDLL("user32", use_last_error=True)
@@ -159,6 +162,9 @@ def _launch(exe: Path, extra_args: list[str] | None = None) -> None:
         "deckcraft.exe",
         "figcraft.exe",
         "filmcraft.exe",
+        "solidcraft.exe",
+        "vectorcraft.exe",
+        "soundcraft.exe",
     }:
         try:
             subprocess.Popen(
@@ -682,12 +688,318 @@ class FigCraftLiveClient:
         self.close()
 
 
+class FilmCraftLiveClient:
+    """Client for driving live FilmCraft GUI via localhost control protocol."""
+
+    def __init__(
+        self,
+        port: int = FILMCRAFT_CONTROL_PORT,
+        token: str = FILMCRAFT_CONTROL_TOKEN,
+    ) -> None:
+        self.port = port
+        self.token = token
+        self._sock: socket.socket | None = None
+        self._reader = None
+        self._id = 0
+
+    def connect(self, timeout: float = 1.0) -> bool:
+        if not IS_WINDOWS:
+            return False
+        try:
+            s = socket.create_connection(("127.0.0.1", self.port), timeout=timeout)
+            auth_payload = {"id": "auth", "method": "auth", "params": {"token": self.token}}
+            s.sendall(json.dumps(auth_payload).encode("utf-8") + b"\n")
+            r = s.makefile("r", encoding="utf-8")
+            line = r.readline()
+            if '"authenticated":true' in line or '"ok":true' in line:
+                self._sock = s
+                self._reader = r
+                return True
+            s.close()
+            return False
+        except Exception:
+            return False
+
+    def send_command(self, method: str, params: dict, wait_reply: bool = True) -> dict | None:
+        if not self._sock:
+            return None
+        self._id += 1
+        try:
+            payload = (
+                json.dumps({"id": self._id, "method": method, "params": params}).encode("utf-8")
+                + b"\n"
+            )
+            self._sock.sendall(payload)
+            if wait_reply and self._reader:
+                line = self._reader.readline()
+                try:
+                    return json.loads(line)
+                except Exception:
+                    return {"ok": True}
+            return {"ok": True}
+        except Exception:
+            self.close()
+            return None
+
+    def execute_command(self, command: str, params: dict | None = None) -> bool:
+        res = self.send_command("engine.execute", {"command": command, "params": params or {}})
+        return bool(res and res.get("ok"))
+
+    def close(self) -> None:
+        if self._reader:
+            try:
+                self._reader.close()
+            except Exception:
+                pass
+            self._reader = None
+        if self._sock:
+            try:
+                self._sock.close()
+            except Exception:
+                pass
+            self._sock = None
+
+    def __enter__(self) -> FilmCraftLiveClient:
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.close()
+
+
+class SolidCraftLiveClient:
+    """Client for driving live SolidCraft GUI via localhost control protocol."""
+
+    def __init__(self, port: int = SOLIDCRAFT_CONTROL_PORT) -> None:
+        self.port = port
+        self.token = ""
+        self._sock: socket.socket | None = None
+        self._reader = None
+        self._id = 0
+
+    def _read_token(self) -> str:
+        if self.token:
+            return self.token
+        try:
+            local = Path(os.environ.get("LOCALAPPDATA", ""))
+            token_file = local / "SolidCraft" / "control" / f"{self.port}.token"
+            if token_file.is_file():
+                self.token = token_file.read_text(encoding="utf-8").strip()
+                return self.token
+        except Exception:
+            pass
+        return ""
+
+    def connect(self, timeout: float = 1.0) -> bool:
+        if not IS_WINDOWS:
+            return False
+        token = self._read_token()
+        try:
+            s = socket.create_connection(("127.0.0.1", self.port), timeout=timeout)
+            r = s.makefile("r", encoding="utf-8")
+            if token:
+                auth_payload = {"id": 0, "method": "auth", "params": {"token": token}}
+                s.sendall(json.dumps(auth_payload).encode("utf-8") + b"\n")
+                line = r.readline()
+                if not ('"authenticated":true' in line or '"ok":true' in line):
+                    s.close()
+                    return False
+            self._sock = s
+            self._reader = r
+            return True
+        except Exception:
+            return False
+
+    def send_command(self, method: str, params: dict, wait_reply: bool = True) -> dict | None:
+        if not self._sock:
+            return None
+        self._id += 1
+        try:
+            payload = (
+                json.dumps({"id": self._id, "method": method, "params": params}).encode("utf-8")
+                + b"\n"
+            )
+            self._sock.sendall(payload)
+            if wait_reply and self._reader:
+                line = self._reader.readline()
+                try:
+                    return json.loads(line)
+                except Exception:
+                    return {"ok": True}
+            return {"ok": True}
+        except Exception:
+            self.close()
+            return None
+
+    def execute_command(self, command: str, params: dict | None = None) -> bool:
+        res = self.send_command("engine.execute", {"command": command, "params": params or {}})
+        return bool(res and res.get("ok"))
+
+    def close(self) -> None:
+        if self._reader:
+            try:
+                self._reader.close()
+            except Exception:
+                pass
+            self._reader = None
+        if self._sock:
+            try:
+                self._sock.close()
+            except Exception:
+                pass
+            self._sock = None
+
+    def __enter__(self) -> SolidCraftLiveClient:
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.close()
+
+
+class VectorCraftLiveClient:
+    """Client for driving live VectorCraft GUI via localhost control protocol."""
+
+    def __init__(self, port: int = VECTORCRAFT_CONTROL_PORT) -> None:
+        self.port = port
+        self._sock: socket.socket | None = None
+        self._reader = None
+        self._id = 0
+
+    def connect(self, timeout: float = 1.0) -> bool:
+        if not IS_WINDOWS:
+            return False
+        try:
+            s = socket.create_connection(("127.0.0.1", self.port), timeout=timeout)
+            r = s.makefile("r", encoding="utf-8")
+            self._sock = s
+            self._reader = r
+            return True
+        except Exception:
+            return False
+
+    def send_command(self, method: str, params: dict, wait_reply: bool = True) -> dict | None:
+        if not self._sock:
+            return None
+        self._id += 1
+        try:
+            payload = (
+                json.dumps({"id": self._id, "method": method, "params": params}).encode("utf-8")
+                + b"\n"
+            )
+            self._sock.sendall(payload)
+            if wait_reply and self._reader:
+                line = self._reader.readline()
+                try:
+                    return json.loads(line)
+                except Exception:
+                    return {"ok": True}
+            return {"ok": True}
+        except Exception:
+            self.close()
+            return None
+
+    def execute_command(self, command: str, params: dict | None = None) -> bool:
+        res = self.send_command("engine.execute", {"command": command, "params": params or {}})
+        return bool(res and res.get("ok"))
+
+    def close(self) -> None:
+        if self._reader:
+            try:
+                self._reader.close()
+            except Exception:
+                pass
+            self._reader = None
+        if self._sock:
+            try:
+                self._sock.close()
+            except Exception:
+                pass
+            self._sock = None
+
+    def __enter__(self) -> VectorCraftLiveClient:
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.close()
+
+
+class SoundCraftLiveClient:
+    """Client for driving live SoundCraft GUI via localhost control protocol."""
+
+    def __init__(self, port: int = SOUNDCRAFT_CONTROL_PORT) -> None:
+        self.port = port
+        self._sock: socket.socket | None = None
+        self._reader = None
+        self._id = 0
+
+    def connect(self, timeout: float = 1.0) -> bool:
+        if not IS_WINDOWS:
+            return False
+        try:
+            s = socket.create_connection(("127.0.0.1", self.port), timeout=timeout)
+            r = s.makefile("r", encoding="utf-8")
+            self._sock = s
+            self._reader = r
+            return True
+        except Exception:
+            return False
+
+    def send_command(self, method: str, params: dict, wait_reply: bool = True) -> dict | None:
+        if not self._sock:
+            return None
+        self._id += 1
+        try:
+            payload = (
+                json.dumps({"id": self._id, "method": method, "params": params}).encode("utf-8")
+                + b"\n"
+            )
+            self._sock.sendall(payload)
+            if wait_reply and self._reader:
+                line = self._reader.readline()
+                try:
+                    return json.loads(line)
+                except Exception:
+                    return {"ok": True}
+            return {"ok": True}
+        except Exception:
+            self.close()
+            return None
+
+    def execute_command(self, command: str, params: dict | None = None) -> bool:
+        res = self.send_command("engine.execute", {"command": command, "params": params or {}})
+        return bool(res and res.get("ok"))
+
+    def close(self) -> None:
+        if self._reader:
+            try:
+                self._reader.close()
+            except Exception:
+                pass
+            self._reader = None
+        if self._sock:
+            try:
+                self._sock.close()
+            except Exception:
+                pass
+            self._sock = None
+
+    def __enter__(self) -> SoundCraftLiveClient:
+        self.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        self.close()
+
+
 def open_file_in_gui(cli_path: Path, file_path: Path) -> bool:
     """Open a file in the app GUI (via live control bridge or launch)."""
     exe = gui_exe(cli_path)
     if not IS_WINDOWS or not exe.is_file() or not Path(file_path).is_file():
         return False
     name_lower = exe.name.lower()
+    resolved_path = str(Path(file_path).resolve())
     if name_lower == "gridcraft.exe":
         client = GridCraftLiveClient()
         if client.connect():
@@ -703,7 +1015,7 @@ def open_file_in_gui(cli_path: Path, file_path: Path) -> bool:
         client = DeckCraftLiveClient()
         if client.connect():
             try:
-                if client.execute_command("app.open", {"path": str(Path(file_path).resolve())}):
+                if client.execute_command("app.open", {"path": resolved_path}):
                     found = _find_window(exe)
                     if found:
                         _foreground(found[0])
@@ -714,7 +1026,7 @@ def open_file_in_gui(cli_path: Path, file_path: Path) -> bool:
         client = CADCraftLiveClient()
         if client.connect():
             try:
-                if client.send_command("app.open", {"path": str(Path(file_path).resolve())}):
+                if client.send_command("app.open", {"path": resolved_path}):
                     found = _find_window(exe)
                     if found:
                         _foreground(found[0])
@@ -725,14 +1037,69 @@ def open_file_in_gui(cli_path: Path, file_path: Path) -> bool:
         client = PhotoCraftLiveClient()
         if client.connect():
             try:
-                if client.send_command("file.open", {"path": str(Path(file_path).resolve())}):
+                if client.send_command("file.open", {"path": resolved_path}):
                     found = _find_window(exe)
                     if found:
                         _foreground(found[0])
                     return True
             finally:
                 client.close()
-    _launch(exe, [str(Path(file_path).resolve())])
+    elif name_lower == "filmcraft.exe":
+        client = FilmCraftLiveClient()
+        if client.connect():
+            try:
+                if client.execute_command("app.open", {"path": resolved_path}):
+                    found = _find_window(exe)
+                    if found:
+                        _foreground(found[0])
+                    return True
+            finally:
+                client.close()
+    elif name_lower == "solidcraft.exe":
+        client = SolidCraftLiveClient()
+        if client.connect():
+            try:
+                if client.execute_command("app.open", {"path": resolved_path}):
+                    found = _find_window(exe)
+                    if found:
+                        _foreground(found[0])
+                    return True
+            finally:
+                client.close()
+    elif name_lower == "vectorcraft.exe":
+        client = VectorCraftLiveClient()
+        if client.connect():
+            try:
+                if client.execute_command("app.open", {"path": resolved_path}):
+                    found = _find_window(exe)
+                    if found:
+                        _foreground(found[0])
+                    return True
+            finally:
+                client.close()
+    elif name_lower == "soundcraft.exe":
+        client = SoundCraftLiveClient()
+        if client.connect():
+            try:
+                if client.execute_command("app.open", {"path": resolved_path}):
+                    found = _find_window(exe)
+                    if found:
+                        _foreground(found[0])
+                    return True
+            finally:
+                client.close()
+    elif name_lower == "figcraft.exe":
+        client = FigCraftLiveClient()
+        if client.connect():
+            try:
+                if client.execute_command("app.open", {"path": resolved_path}):
+                    found = _find_window(exe)
+                    if found:
+                        _foreground(found[0])
+                    return True
+            finally:
+                client.close()
+    _launch(exe, [resolved_path])
     return True
 
 

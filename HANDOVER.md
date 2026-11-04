@@ -32,6 +32,15 @@ Ports: **11245** frontend, **11246** backend. Gates: `just ci`.
      - `FigCraftLiveClient` (:7985): live interactive template instantiation and text node streaming for brand, hero, and features.
    - Paced steps with human-observable delays (150ms-500ms) and ensured `open_file_in_gui` opens final rendered artifacts in foreground GUI.
    - Configured user-level persistent registry environment variables for all control ports and tokens.
+8. **Hands-in Live Visibility & Real-time Streaming (Extended Suite)**:
+   - Extended live human-observable hands-in pacing (200ms–400ms) to `SolidCraft`, `VectorCraft`, `SoundCraft`, `FilmCraft`, and `PhotoCraft`:
+     - `SolidCraftLiveClient` (:27878): streams parametric CAD changes (`parameters.change`) with live timeline rebuilds in `solid/parametric-bracket` and `solid/enclosure-fit`, opening `.sc` designs in the SolidCraft viewport.
+     - `VectorCraftLiveClient` (:7987): streams open file, health check inspection, fix-all, selection, and keep-shape simplification in `vector/cleanup-pass` and opens generated SVGs live during `vector/pelican-vector`.
+     - `SoundCraftLiveClient` (:7988): streams tempo adjustments, MIDI import, track soloing, and VST3 reverb insertion live with audible pacing for `sound/melody-vst3` and `sound/ident-jingle`.
+     - `FilmCraftLiveClient` (:7986): streams project setup, footage imports, sequence creation, and cross-dissolve video transition in real time for `film/timeline-cut`, then opens `cut.fcproj` in the GUI.
+     - `PhotoCraftLiveClient` (:7983): streams batch image actions and pelican benchmark renders live into the PhotoCraft workspace, opening the final artifacts in the GUI.
+   - Registered persistent environment variables `SOLIDCRAFT_CONTROL_PORT`, `VECTORCRAFT_CONTROL_PORT`, `SOUNDCRAFT_CONTROL_PORT` in `HKCU\Environment`.
+   - Updated `windows.open_file_in_gui` to route open commands across all 10 live control bridge clients.
 
 1. **Oct 31 builds.** All 13 core CLIs bumped; drift additive only (104 verbs). Every existing
    demo re-run green on the new builds, baselines accepted for all 14 apps

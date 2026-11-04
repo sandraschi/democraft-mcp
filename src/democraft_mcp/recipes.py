@@ -17,6 +17,7 @@ import math
 import os
 import re
 import shutil
+import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -24,7 +25,7 @@ from pathlib import Path
 from . import grid_macros
 from .texture_demo import godot_prop, godot_prop_ai
 from .vba_demo import TABLE_NOTE
-from .windows import open_file_in_gui
+from .windows import SolidCraftLiveClient, VectorCraftLiveClient, open_file_in_gui
 
 ASSETS = Path(__file__).resolve().parents[2] / "assets"
 UPSTREAM = Path(os.getenv("DEMOCRAFT_UPSTREAM", r"D:\Dev\repos\_upstream"))
@@ -226,6 +227,24 @@ def vector_cleanup_pass(ctx: RunCtx) -> dict | None:
         origin = "traced sample: smooth shapes as dense polylines, six planted defects"
     ctx.inputs.append(str(src))
 
+    # Hands-in live streaming into VectorCraft GUI
+    vector_client = VectorCraftLiveClient() if ctx.focus else None
+    if vector_client and vector_client.connect():
+        vector_client.execute_command("app.open", {"path": str(src.resolve())})
+        time.sleep(0.4)
+        vector_client.execute_command("addon.cleanup.check", {"scope": "document"})
+        time.sleep(0.35)
+        vector_client.execute_command("addon.cleanup.fix", {"scope": "document"})
+        time.sleep(0.35)
+        vector_client.execute_command("select.all", {})
+        time.sleep(0.25)
+        vector_client.execute_command(
+            "addon.cleanup.simplify", {"tolerance": 20, "protectCorners": True}
+        )
+        time.sleep(0.35)
+        vector_client.execute_command("addon.cleanup.check", {"scope": "document"})
+        time.sleep(0.35)
+
     ctx.do(["convert", "input.svg", "before.png", "--scale", scale])
     ctx.write(
         "check.steps.json",
@@ -339,6 +358,10 @@ def vector_cleanup_pass(ctx: RunCtx) -> dict | None:
             ),
         ]
     ctx.write("cleanup-report.md", "\n".join(lines) + "\n")
+    if ctx.focus and out_svg.is_file():
+        open_file_in_gui(ctx.cli, out_svg)
+    if vector_client:
+        vector_client.close()
     return None
 
 
@@ -1023,9 +1046,22 @@ def solid_parametric_bracket(ctx: RunCtx) -> dict | None:
     )
     if not (ctx.run_dir / "bracket-base.sc").is_file():
         return None
+
+    solid_client = SolidCraftLiveClient() if ctx.focus else None
+    if solid_client and solid_client.connect():
+        solid_client.execute_command(
+            "app.open", {"path": str((ctx.run_dir / "bracket-base.sc").resolve())}
+        )
+        time.sleep(0.4)
+
     rows = []
     shots = []
     for name, params in SOLID_VARIANTS:
+        if solid_client:
+            for k, v in params.items():
+                solid_client.execute_command("parameters.change", {"name": k, "expression": v})
+                time.sleep(0.2)
+            time.sleep(0.2)
         ctx.write(
             f"{name}.params.json",
             {
@@ -1113,6 +1149,10 @@ def solid_parametric_bracket(ctx: RunCtx) -> dict | None:
         "Material is SolidCraft's Default (density from eval). STEP and STL per variant.",
     ]
     ctx.write("bracket-report.md", "\n".join(md) + "\n")
+    if ctx.focus and (ctx.run_dir / "bracket-heavy.sc").is_file():
+        open_file_in_gui(ctx.cli, ctx.run_dir / "bracket-heavy.sc")
+    if solid_client:
+        solid_client.close()
     return None
 
 
@@ -1162,6 +1202,14 @@ def solid_enclosure_fit(ctx: RunCtx) -> dict | None:
     ctx.inputs.append(str(script))
     board, params = board_params(ctx.topic)
     outs = ["--out", "enclosure.step", "--out", "enclosure.3mf"]
+
+    solid_client = SolidCraftLiveClient() if ctx.focus else None
+    if solid_client and solid_client.connect():
+        if params:
+            for k, v in params.items():
+                solid_client.execute_command("parameters.change", {"name": k, "expression": v})
+                time.sleep(0.25)
+
     if params:
         ctx.do(
             ["run", "enclosure.script.json", "--save", "base.sc", "--quiet"],
@@ -1259,6 +1307,10 @@ def solid_enclosure_fit(ctx: RunCtx) -> dict | None:
         f"Section cut at z = {cut} mm. The x-ray view draws the lid at 25% opacity.",
     ]
     ctx.write("enclosure-report.md", "\n".join(md) + "\n")
+    if ctx.focus and (ctx.run_dir / "enclosure.sc").is_file():
+        open_file_in_gui(ctx.cli, ctx.run_dir / "enclosure.sc")
+    if solid_client:
+        solid_client.close()
     return None
 
 
