@@ -1071,6 +1071,226 @@ APPS: tuple[CraftApp, ...] = (
         family="community",
         maker="Storytold",
     ),
+    CraftApp(
+        "database",
+        "DatabaseCraft",
+        "databasecraft-cli.exe",
+        "Embedded unified multi-model store: vector, relational, key-value, graph, and spatial.",
+        (
+            Demo(
+                "store-health",
+                "Demo 1: Multi-model store health and schema report",
+                "Queries the embedded multi-model store for vector index status, table schemas, "
+                "and connection pool telemetry. Deterministic, no AI step.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
+        "app",
+        "AppCraft",
+        "appcraft-cli.exe",
+        "Visual enterprise desktop app builder: widgets, bindings, flows, telemetry.",
+        (
+            Demo(
+                "build-layout",
+                "Demo 1: Synthesize adaptive responsive layout",
+                "Synthesizes an adaptive multi-pane dashboard layout with reactive widgets "
+                "and data bindings.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
+        "robot",
+        "RobotCraft",
+        "robotcraft-cli.exe",
+        "Robotics workstation: 3D kinematics, virtual space, teleop, CAD boms.",
+        (
+            Demo(
+                "robot-kinematics",
+                "Demo 1: Saschibot and NoriRobotics 3D kinematics reachability",
+                "Evaluates forward kinematics and reachability envelopes for Saschibot "
+                "and Nori A3 in virtual space.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
+        "money",
+        "MoneyCraft",
+        "moneycraft-cli.exe",
+        "Financial analytics, ledger reconciliation, portfolios, cashflow forecasts.",
+        (
+            Demo(
+                "ledger-reconcile",
+                "Demo 1: Portfolio reconciliation and forecast",
+                "Computes cashflow projections and multi-currency reconciliations "
+                "with Monte Carlo simulation.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
+        "dj",
+        "DJCraft",
+        "djcraft-cli.exe",
+        "DJ performance console, stems, beatgrid sync, controller mappings.",
+        (
+            Demo(
+                "beatgrid-sync",
+                "Demo 1: Harmonic mix analysis and stems separation",
+                "Performs 4-stem waveform isolation, tempo locking, and harmonic key matching "
+                "across two tracks.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
+        "mod",
+        "ModCraft",
+        "modcraft-cli.exe",
+        "Modding and binary reverse engineering, patch pipelines, hook inject.",
+        (
+            Demo(
+                "patch-analysis",
+                "Demo 1: Binary symbol mapping and hooking dry-run",
+                "Analyzes executable sections, maps virtual function tables, "
+                "and verifies patch safety.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
+        "writer",
+        "WriterCraft",
+        "writercraft-cli.exe",
+        "Creative authoring studio, worldbuilding bible, character graphs, chapters.",
+        (
+            Demo(
+                "character-graph",
+                "Demo 1: Narrative arc timeline and entity relation graph",
+                "Generates entity relation graphs, pacing curves, and continuity audits "
+                "for long-form prose.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
+        "coder",
+        "CoderCraft",
+        "codercraft-cli.exe",
+        "Autonomous code studio, MCP hub, git workflows, AST inspections.",
+        (
+            Demo(
+                "ast-refactor",
+                "Demo 1: Multi-crate AST inspection and MCP tool calling",
+                "Parses workspace crates, inspects syntax trees, and invokes MCP servers "
+                "for static diagnostics.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
+        "travel",
+        "TravelCraft",
+        "travelcraft-cli.exe",
+        "Travel planner, itinerary builder, flight/train routing, budget calculator.",
+        (
+            Demo(
+                "itinerary-opt",
+                "Demo 1: Multi-city multimodal itinerary optimization",
+                "Optimizes multimodal routes, layover buffers, and regional transit costs "
+                "across destinations.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
+        "maker",
+        "MakerCraft",
+        "makercraft-cli.exe",
+        "Hardware maker workstation, CNC/3D print g-code, laser sheet layouts.",
+        (
+            Demo(
+                "gcode-nesting",
+                "Demo 1: Sheet metal 2D nesting and toolpath generation",
+                "Nests 2D sheet metal profiles with kerf compensation and computes "
+                "optimized laser toolpaths.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
+        "sports",
+        "SportsCraft",
+        "sportscraft-cli.exe",
+        "Athletic training telemetry, biomechanics analysis, workout plans.",
+        (
+            Demo(
+                "training-load",
+                "Demo 1: Biomechanical load and aerobic strain evaluation",
+                "Evaluates power-duration curves, heart-rate zones, and acute-to-chronic "
+                "training load ratios.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-04",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
 )
 
 HERO: dict[str, dict[str, object]] = {
@@ -1225,6 +1445,105 @@ HERO: dict[str, dict[str, object]] = {
         "gaps": (
             "No DOCX import/export in the catalog",
             "No image-placement verbs",
+        ),
+    },
+    "database": {
+        "clone_of": "Supabase / DBeaver / SurrealDB",
+        "description": "Embedded multi-model unified datastore with vector indexing "
+        "and relational tables.",
+        "gaps": (
+            "No multi-region active-active master replication",
+            "No foreign data wrappers for external cloud warehouses",
+        ),
+    },
+    "app": {
+        "clone_of": "Retool / FlutterFlow / AppSmith",
+        "description": "Visual desktop app synthesizer with reactive components, binding graphs, "
+        "and UI telemetry.",
+        "gaps": (
+            "No web-assembly compilation target in current headless runner",
+            "Third-party component marketplace currently in read-only mode",
+        ),
+    },
+    "robot": {
+        "clone_of": "MoveIt / ROS2 RViz / RoboDK",
+        "description": "Robotics design, 3D kinematics evaluation, virtual space workflows, "
+        "and teleop control.",
+        "gaps": (
+            "Full physics dynamics require headless Gazebo or MuJoCo sidecar",
+            "Direct CAN bus hardware execution requires elevated administrator privilege",
+        ),
+    },
+    "money": {
+        "clone_of": "Bloomberg Terminal / QuickBooks / Firefly III",
+        "description": "Financial analytics, ledger reconciliation, portfolio forecasts, "
+        "and multi-currency budgeting.",
+        "gaps": (
+            "Live market tick feeds require external broker API credentials",
+            "Tax compliance modules currently limited to standard GAAP / IFRS profiles",
+        ),
+    },
+    "dj": {
+        "clone_of": "Pioneer Rekordbox / Serato DJ Pro / Traktor",
+        "description": "Digital DJ workstation with 4-channel mixing, stem isolation, "
+        "beatgrid analysis, and Three.js hardware views.",
+        "gaps": (
+            "Real-time DVS vinyl timecode input requires low-latency ASIO hardware",
+            "Direct streaming to online radio servers requires Icecast endpoint configuration",
+        ),
+    },
+    "mod": {
+        "clone_of": "Ghidra / IDA Pro / Cheat Engine",
+        "description": "Binary reverse engineering, executable patching, disassembly inspection, "
+        "and hooking simulation.",
+        "gaps": (
+            "Kernel-mode driver analysis requires isolated VM sandbox harness",
+            "Dynamic debugger attach restricted on protected anti-cheat game binaries",
+        ),
+    },
+    "writer": {
+        "clone_of": "Scrivener / Ulysses / World Anvil",
+        "description": "Creative authoring studio with character graph tracking, "
+        "worldbuilding codex, and chapter pacing analysis.",
+        "gaps": (
+            "Direct e-book store publishing requires retailer API tokens",
+            "Multiplayer real-time co-authoring requires central relay server",
+        ),
+    },
+    "coder": {
+        "clone_of": "Claude Desktop / Cursor / OpenCode",
+        "description": "Autonomous engineering studio with AST analysis, multi-agent workspaces, "
+        "and MCP server orchestration.",
+        "gaps": (
+            "Remote SSH terminal remoting requires configured keypair identities",
+            "LSP autocompletion latency depends on background indexing cache",
+        ),
+    },
+    "travel": {
+        "clone_of": "TripIt / Google Flights / Wanderlog",
+        "description": "Multimodal travel planning, route optimization, reservation tracking, "
+        "and itinerary budgeting.",
+        "gaps": (
+            "Live airline GDS booking requires certified IATA credentials",
+            "Real-time transit delay alerts depend on regional GTFS-RT feed availability",
+        ),
+    },
+    "maker": {
+        "clone_of": "LightBurn / PrusaSlicer / Vectric Aspire",
+        "description": "Hardware fabrication studio for CNC routing, 3D printing slicing, "
+        "laser cutting, and sheet nesting.",
+        "gaps": (
+            "5-axis continuous toolpath generation currently experimental",
+            "Direct GRBL USB serial streaming requires local COM port assignment",
+        ),
+    },
+    "sports": {
+        "clone_of": "Strava / TrainingPeaks / GoldenCheetah",
+        "description": "Athletic telemetry analytics, power profiling, fatigue modeling, "
+        "and endurance training periodization.",
+        "gaps": (
+            "Direct ANT+ dongle communication requires WinUSB driver binding",
+            "VO2max algorithmic estimation requires calibrated lab reference samples",
         ),
     },
 }
