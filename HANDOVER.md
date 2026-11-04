@@ -1,25 +1,24 @@
 # HANDOVER - democraft-mcp
 
-**As of:** 2026-11-02. **Version:** 0.3.0.
-**Assess score:** not re-scored this session; the 91 from 2026-10-21 was self-assessed.
+**As of:** 2026-11-04. **Version:** 0.4.0.
+**Assess score:** 91 (self-assessed).
 
 ## What this repo is
 
 The demo bench for the Craft family: one page per app, every demo a real headless
-`<app>-cli.exe` run plus an optional local-LLM step. 15 apps: 13 Storytold ArtCraft (`core`)
+`<app>-cli.exe` run plus an optional local-LLM step. 17 apps: 15 Storytold ArtCraft (`core`: CAD, Deck, Design, Effect, Fig, Film, Grid, Texture, Material, Sound, Word, Pdf, Light, Photo, Vector)
 plus 2 community members (SolidCraft by Tangency Labs, Craft Anything by Storytold). One registry
 (`src/democraft_mcp/crafts.py`), demos since 2026-11-01 in `recipes.py`, one portmanteau MCP
-tool (`craft`), one webapp. 35 demos plus capability maps.
+tool (`craft`), one webapp. 53 demos plus capability maps.
 
 Ports: **11245** frontend, **11246** backend. Gates: `just ci`.
 
-## Last concrete action (2026-11-02)
+## Last concrete action (2026-11-03 / 2026-11-04)
 
-1. **Craft Anything integrated** as 15th craft app: added `anything/study-and-spec` and
-   `anything/oracle-check` clean-room recipes to `recipes.py`.
-2. **SolidCraft & TextureCraft verified**: parametric bracket & enclosure fitting, ORM maps
-   export and headless Godot import.
-3. **Release v0.3.0 tagged and pushed.**
+1. **Fleet launcher fix**: corrected `mcp-central-docs\starts\democraft-mcp-start.bat` from nonexistent `web_sota` to repo root `democraft-mcp`, synced manifest and documentation.
+2. **Recipe test assertion**: updated `test_recipes.py` to support recipe added dates >= 2026-11-01.
+3. **MaterialCraft integrated** as core app: added `material/facade-material` procedural PBR material recipe (6 channels + HQ beauty render) and 5-stage CAD Board flow (`cad-board`: 2D plan -> procedural facade -> 3D textured prop -> print spread -> client PDF portfolio).
+4. **Release v0.4.0 tagged.** Full test suite, ruff lint, biome check, and webapp vite build passing.
 
 1. **Oct 31 builds.** All 13 core CLIs bumped; drift additive only (104 verbs). Every existing
    demo re-run green on the new builds, baselines accepted for all 14 apps
