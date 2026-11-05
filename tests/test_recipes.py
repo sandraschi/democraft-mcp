@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -259,6 +260,48 @@ def test_database_recipes(tmp_path):
     res3 = run_demo("database", "schema-diff", tmp_path, model="none")
     assert res3["success"] and res3["all_cli_ok"]
     assert (tmp_path / "database" / "schema-diff" / "diff-report.md").is_file()
+
+
+@_needs("book")
+def test_book_recipes(tmp_path):
+    res1 = run_demo("book", "search-and-info", tmp_path, model="none")
+    assert res1["success"] and res1["all_cli_ok"], res1["message"]
+    out1 = tmp_path / "book" / "search-and-info"
+    report = json.loads((out1 / "search-info-report.json").read_text(encoding="utf-8"))
+    assert report["library_books"] == 2
+    assert report["search_count"] == 1
+    assert report["title"] == "Dune"
+    assert report["formats"] == ["EPUB"]
+    assert report["format_files_exist"] == [True]
+
+    res2 = run_demo("book", "convert-roundtrip", tmp_path, model="none")
+    assert res2["success"] and res2["all_cli_ok"], res2["message"]
+    out2 = tmp_path / "book" / "convert-roundtrip"
+    report = json.loads((out2 / "convert-report.json").read_text(encoding="utf-8"))
+    if report["engine"] == "ok":
+        assert report["outputs"]["txt"]["bytes"] > 0
+        assert report["outputs"]["pdf"]["bytes"] > 0
+        for item in report["outputs"].values():
+            assert Path(item["output"]).is_file()
+    else:
+        assert report["outputs"] == {}
+
+    res3 = run_demo("book", "fulltext-find", tmp_path, model="none")
+    assert res3["success"] and res3["all_cli_ok"], res3["message"]
+    out3 = tmp_path / "book" / "fulltext-find"
+    report = json.loads((out3 / "fulltext-report.json").read_text(encoding="utf-8"))
+    assert report["engine"] == "full_text_search_db"
+    assert report["count"] >= 1
+    assert "lantern" in report["snippet"].lower()
+
+    res4 = run_demo("book", "readly-ingest-sim", tmp_path, model="none")
+    assert res4["success"] and res4["all_cli_ok"], res4["message"]
+    out4 = tmp_path / "book" / "readly-ingest-sim"
+    report = json.loads((out4 / "readly-ingest-report.json").read_text(encoding="utf-8"))
+    assert report["words"] > 10
+    assert report["script_leaked"] is False
+    assert report["style_leaked"] is False
+    assert (out4 / "issue.md").is_file()
 
 
 @_needs("virt")

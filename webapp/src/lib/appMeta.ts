@@ -1,6 +1,7 @@
 import {
 	AudioWaveform,
 	Binary,
+	BookOpen,
 	Box,
 	Clapperboard,
 	Container,
@@ -50,6 +51,7 @@ const META: Record<string, AppMeta> = {
 	file: { hue: "#14b8a6", icon: HardDrive },
 	git: { hue: "#f97316", icon: GitBranch },
 	container: { hue: "#0ea5e9", icon: Container },
+	book: { hue: "#d97706", icon: BookOpen },
 };
 
 const FALLBACK: AppMeta = { hue: "#a1a1aa", icon: Box };

@@ -1364,6 +1364,57 @@ APPS: tuple[CraftApp, ...] = (
         maker="Storytold",
     ),
     CraftApp(
+        "book",
+        "BookCraft",
+        "bookcraft-cli.exe",
+        "Calibre libraries as documents: search, inspect, convert, and ingest saved pages.",
+        (
+            Demo(
+                "search-and-info",
+                "Demo 1: Search a library and read one record",
+                "Builds a small fixture Calibre library, searches it, and dumps the "
+                "book's metadata, format files and measured counts.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-05",
+            ),
+            Demo(
+                "convert-roundtrip",
+                "Demo 2: EPUB to TXT and PDF with measured bytes",
+                "Converts a fixture EPUB twice through Calibre's ebook-convert and "
+                "reports the real on-disk sizes and engine timings; reports `down` "
+                "when Calibre is not installed.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-05",
+            ),
+            Demo(
+                "fulltext-find",
+                "Demo 3: Full-text find with an honest engine receipt",
+                "Queries the fixture's full-text-search.db, then reports which engine "
+                "answered, the hit count and a real snippet.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-05",
+            ),
+            Demo(
+                "readly-ingest-sim",
+                "Demo 4: Saved magazine page to Markdown, no browser",
+                "Turns a local HTML fixture into a Markdown artifact and checks that "
+                "script and style payloads were removed. No network, no token.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-05",
+            ),
+        ),
+        family="core",
+        maker="Storytold",
+    ),
+    CraftApp(
         "app",
         "AppCraft",
         "appcraft-cli.exe",
@@ -1826,6 +1877,16 @@ HERO: dict[str, dict[str, object]] = {
         "gaps": (
             "Kubernetes cluster verbs are not fused yet; kubectl stays a separate tool",
             "Image pulls are deliberately never issued by recipes",
+        ),
+    },
+    "book": {
+        "clone_of": "Calibre / Readly",
+        "description": "Read-only Calibre library workbench: search, inspect, convert "
+        "and ingest saved pages, with a receipt for whichever search engine answered.",
+        "gaps": (
+            "No live Readly scraping; ingest takes a saved HTML page (readly-mcp owns the browser)",
+            "No Calibre metadata writes (calibre-mcp owns mutation)",
+            "No L3 desktop shelf yet",
         ),
     },
     "app": {

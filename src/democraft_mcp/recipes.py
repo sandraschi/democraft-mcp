@@ -17,8 +17,10 @@ import math
 import os
 import re
 import shutil
+import sqlite3
 import subprocess
 import time
+import zipfile
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -2125,6 +2127,321 @@ def container_exec_echo(ctx: RunCtx) -> dict | None:
     return None
 
 
+# ----------------------------------------------------------------------------- book
+
+BOOK_TEXT = (
+    "The desert planet Arrakis turns the spice into the only currency that matters. "
+    "A lantern burns in the stilltent while the blacksmith waits for the dawn."
+)
+
+
+def _book_json(res: dict) -> dict:
+    """Parse the CLI's pretty-printed JSON, tolerating empty or failed output."""
+    text = res.get("stdout") or ""
+    start, end = text.find("{"), text.rfind("}")
+    if start < 0 or end <= start:
+        return {}
+    try:
+        return json.loads(text[start : end + 1])
+    except json.JSONDecodeError:
+        return {}
+
+
+def _book_epub(path: Path, title: str, author: str, body: str) -> None:
+    """Write a minimal, deterministic EPUB 2 that Calibre's ebook-convert accepts."""
+    chapter = (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<html xmlns="http://www.w3.org/1999/xhtml"><head><title>'
+        f"{title}</title></head><body><h1>{title}</h1><p>{body}</p></body></html>\n"
+    )
+    opf = (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<package xmlns="http://www.idpf.org/2007/opf" version="2.0" '
+        'unique-identifier="bookid">\n'
+        '  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">\n'
+        f"    <dc:title>{title}</dc:title>\n"
+        f"    <dc:creator>{author}</dc:creator>\n"
+        '    <dc:identifier id="bookid">urn:uuid:bookcraft-fixture</dc:identifier>\n'
+        "    <dc:language>en</dc:language>\n"
+        "  </metadata>\n"
+        "  <manifest>\n"
+        '    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>\n'
+        '    <item id="ch1" href="chapter1.xhtml" media-type="application/xhtml+xml"/>\n'
+        "  </manifest>\n"
+        '  <spine toc="ncx"><itemref idref="ch1"/></spine>\n'
+        "</package>\n"
+    )
+    ncx = (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">\n'
+        '  <head><meta name="dtb:uid" content="urn:uuid:bookcraft-fixture"/></head>\n'
+        f"  <docTitle><text>{title}</text></docTitle>\n"
+        '  <navMap><navPoint id="np1" playOrder="1"><navLabel><text>'
+        f'{title}</text></navLabel><content src="chapter1.xhtml"/></navPoint></navMap>\n'
+        "</ncx>\n"
+    )
+    container = (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<container version="1.0" '
+        'xmlns="urn:oasis:names:tc:opendocument:xmlns:container">\n'
+        "  <rootfiles>\n"
+        '    <rootfile full-path="OEBPS/content.opf" '
+        'media-type="application/oebps-package+xml"/>\n'
+        "  </rootfiles>\n"
+        "</container>\n"
+    )
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(path, "w") as archive:
+        archive.writestr("mimetype", "application/epub+zip", compress_type=zipfile.ZIP_STORED)
+        archive.writestr("META-INF/container.xml", container)
+        archive.writestr("OEBPS/content.opf", opf)
+        archive.writestr("OEBPS/toc.ncx", ncx)
+        archive.writestr("OEBPS/chapter1.xhtml", chapter)
+
+
+def _book_fixture(run_dir: Path) -> Path:
+    """Create a small Calibre-shaped library plus its full-text index."""
+    library = run_dir / "library"
+    library.mkdir(parents=True, exist_ok=True)
+    dune = library / "Frank Herbert" / "Dune (1)" / "Dune.epub"
+    emma = library / "Jane Austen" / "Emma (2)" / "Emma.epub"
+    _book_epub(dune, "Dune", "Frank Herbert", BOOK_TEXT)
+    _book_epub(emma, "Emma", "Jane Austen", "Emma Woodhouse is handsome, clever and rich.")
+
+    db = sqlite3.connect(library / "metadata.db")
+    try:
+        db.executescript(
+            """
+            CREATE TABLE books (id INTEGER PRIMARY KEY, title TEXT, author_sort TEXT,
+                path TEXT, series_index REAL DEFAULT 1.0, has_cover INTEGER DEFAULT 0,
+                pubdate TIMESTAMP, timestamp TIMESTAMP);
+            CREATE TABLE authors (id INTEGER PRIMARY KEY, name TEXT);
+            CREATE TABLE books_authors_link (book INTEGER, author INTEGER);
+            CREATE TABLE tags (id INTEGER PRIMARY KEY, name TEXT);
+            CREATE TABLE books_tags_link (book INTEGER, tag INTEGER);
+            CREATE TABLE series (id INTEGER PRIMARY KEY, name TEXT);
+            CREATE TABLE books_series_link (book INTEGER, series INTEGER);
+            CREATE TABLE publishers (id INTEGER PRIMARY KEY, name TEXT);
+            CREATE TABLE books_publishers_link (book INTEGER, publisher INTEGER);
+            CREATE TABLE ratings (id INTEGER PRIMARY KEY, rating INTEGER);
+            CREATE TABLE books_ratings_link (book INTEGER, rating INTEGER);
+            CREATE TABLE comments (book INTEGER, text TEXT);
+            CREATE TABLE data (book INTEGER, format TEXT, uncompressed_size INTEGER,
+                name TEXT);
+            """
+        )
+        db.execute(
+            "INSERT INTO books VALUES (1,'Dune','Herbert, Frank','Frank Herbert/Dune (1)',"
+            "1.0,0,'1965-08-01','2026-01-01')"
+        )
+        db.execute(
+            "INSERT INTO books VALUES (2,'Emma','Austen, Jane','Jane Austen/Emma (2)',"
+            "1.0,0,'1815-12-23','2026-01-02')"
+        )
+        db.execute("INSERT INTO authors VALUES (1,'Frank Herbert')")
+        db.execute("INSERT INTO authors VALUES (2,'Jane Austen')")
+        db.execute("INSERT INTO books_authors_link VALUES (1,1)")
+        db.execute("INSERT INTO books_authors_link VALUES (2,2)")
+        db.execute("INSERT INTO tags VALUES (1,'Science Fiction')")
+        db.execute("INSERT INTO books_tags_link VALUES (1,1)")
+        db.execute("INSERT INTO series VALUES (1,'Dune')")
+        db.execute("INSERT INTO books_series_link VALUES (1,1)")
+        db.execute("INSERT INTO comments VALUES (1,'<p>The desert planet <b>Arrakis</b>.</p>')")
+        db.execute("INSERT INTO data VALUES (1,'EPUB',?,'Dune')", (dune.stat().st_size,))
+        db.execute("INSERT INTO data VALUES (2,'EPUB',?,'Emma')", (emma.stat().st_size,))
+        db.commit()
+    finally:
+        db.close()
+
+    fts = sqlite3.connect(library / "full-text-search.db")
+    try:
+        fts.execute("CREATE TABLE books_text (book INTEGER, format TEXT, searchable_text TEXT)")
+        fts.execute("INSERT INTO books_text VALUES (1,'EPUB',?)", (BOOK_TEXT,))
+        fts.commit()
+    finally:
+        fts.close()
+    return library
+
+
+def book_search_and_info(ctx: RunCtx) -> dict | None:
+    """BookCraft Demo 1: search a fixture library and dump one full record."""
+    library = _book_fixture(ctx.run_dir)
+    status = _book_json(ctx.do(["--library", str(library), "status", "--json"]))
+    search = _book_json(ctx.do(["--library", str(library), "search", "--query", "dune", "--json"]))
+    info = _book_json(ctx.do(["--library", str(library), "info", "--id", "1", "--json"]))
+
+    book = info.get("book", {})
+    formats = book.get("format_files", [])
+    summary = {
+        "library_books": status.get("library", {}).get("books"),
+        "search_count": search.get("count", 0),
+        "title": book.get("title", ""),
+        "formats": [item.get("format", "") for item in formats],
+        "format_files_exist": [bool(item.get("exists")) for item in formats],
+        "engine": status.get("ebook_convert", {}).get("status", "down"),
+    }
+    ctx.write("search-info-report.json", summary)
+    all_exist = bool(summary["format_files_exist"]) and all(summary["format_files_exist"])
+    report = [
+        "# BookCraft Search & Record Report",
+        "",
+        f"- Fixture library books: {summary['library_books']}",
+        f"- Search `dune` hits: {summary['search_count']}",
+        f"- Record title: `{summary['title']}`",
+        f"- Formats present: {', '.join(f for f in summary['formats'] if f) or 'none'}",
+        f"- Format files resolved on disk: {all_exist}",
+        f"- Converter engine: `{summary['engine']}`",
+    ]
+    (ctx.run_dir / "search-info-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def book_convert_roundtrip(ctx: RunCtx) -> dict | None:
+    """BookCraft Demo 2: EPUB -> TXT and PDF with on-disk byte measurements."""
+    library = _book_fixture(ctx.run_dir)
+    out_dir = ctx.run_dir / "converted"
+    out_dir.mkdir(exist_ok=True)
+
+    status = _book_json(ctx.do(["--library", str(library), "status", "--json"]))
+    engine = status.get("ebook_convert", {}).get("status", "down")
+    summary: dict = {"engine": engine, "outputs": {}}
+
+    if engine == "ok":
+        for label in ("txt", "pdf"):
+            payload = _book_json(
+                ctx.do(
+                    [
+                        "--library",
+                        str(library),
+                        "convert",
+                        "--id",
+                        "1",
+                        "--from",
+                        "EPUB",
+                        "--to",
+                        label,
+                        "--out-dir",
+                        str(out_dir),
+                        "--json",
+                    ]
+                )
+            )
+            output = Path(payload.get("output", ""))
+            summary["outputs"][label] = {
+                "bytes": output.stat().st_size if output.is_file() else 0,
+                "elapsed_ms": payload.get("elapsed_ms", 0),
+                "output": str(output),
+            }
+
+    ctx.write("convert-report.json", summary)
+    report = [
+        "# BookCraft Conversion Report",
+        "",
+        f"- Converter engine: `{engine}`",
+    ]
+    if summary["outputs"]:
+        for label, item in summary["outputs"].items():
+            report.append(f"- {label.upper()}: {item['bytes']:,} bytes in {item['elapsed_ms']} ms")
+    else:
+        report.append(
+            "- Calibre's ebook-convert is not installed; conversion skipped "
+            "(receipt: down). No output was fabricated."
+        )
+    (ctx.run_dir / "convert-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def book_fulltext_find(ctx: RunCtx) -> dict | None:
+    """BookCraft Demo 3: full-text find with the engine that answered."""
+    library = _book_fixture(ctx.run_dir)
+    payload = _book_json(
+        ctx.do(["--library", str(library), "grep", "--pattern", "lantern", "--json"])
+    )
+    hits = payload.get("hits", [])
+    first = hits[0] if hits else {}
+    summary = {
+        "engine": payload.get("engine", "none"),
+        "count": payload.get("count", 0),
+        "title": first.get("title", ""),
+        "snippet": first.get("snippet", ""),
+        "source": first.get("source", ""),
+    }
+    ctx.write("fulltext-report.json", summary)
+    report = [
+        "# BookCraft Full-Text Find Report",
+        "",
+        "- Query: `lantern`",
+        f"- Engine that answered: `{summary['engine']}`",
+        f"- Hits: {summary['count']}",
+        f"- First hit: `{summary['title']}`",
+        f"- Source: `{summary['source']}`",
+        "",
+        "## Snippet (engine text, whitespace collapsed)",
+        "",
+        summary["snippet"] or "(no snippet)",
+        "",
+        "A library without `full-text-search.db` answers from titles and descriptions "
+        "instead; the engine field says so rather than returning an empty success.",
+    ]
+    (ctx.run_dir / "fulltext-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
+def book_readly_ingest_sim(ctx: RunCtx) -> dict | None:
+    """BookCraft Demo 4: saved magazine page -> Markdown, no browser or token."""
+    html = ctx.run_dir / "issue.html"
+    html.write_text(
+        "<!doctype html><html><head><title>The Lantern Issue</title>"
+        "<style>body { font-family: serif; }</style></head><body>"
+        "<nav>Subscribe | Sign in</nav>"
+        "<h1>The Lantern Issue</h1>"
+        "<p>A lantern burns in the stilltent while the blacksmith waits for dawn.</p>"
+        "<p>Second paragraph with <b>inline markup</b> and a trailing full stop.</p>"
+        "<script>window.tracker = 'should never appear';</script>"
+        "<noscript>Please enable JavaScript.</noscript>"
+        "</body></html>",
+        encoding="utf-8",
+    )
+    out = ctx.run_dir / "issue.md"
+    payload = _book_json(
+        ctx.do(
+            [
+                "ingest",
+                "--html",
+                str(html),
+                "--out",
+                str(out),
+                "--title",
+                "The Lantern Issue",
+                "--json",
+            ]
+        )
+    )
+    markdown = out.read_text(encoding="utf-8") if out.is_file() else ""
+    summary = {
+        "title": payload.get("title", ""),
+        "words": payload.get("words", 0),
+        "bytes": out.stat().st_size if out.is_file() else 0,
+        "script_leaked": "should never appear" in markdown,
+        "style_leaked": "font-family" in markdown,
+        "network": "none",
+    }
+    ctx.write("readly-ingest-report.json", summary)
+    report = [
+        "# BookCraft Readly Ingest (simulated) Report",
+        "",
+        "- Source: local HTML fixture; no browser, no token, no network.",
+        f"- Title: `{summary['title']}`",
+        f"- Words: {summary['words']}",
+        f"- Artifact: {summary['bytes']:,} bytes",
+        f"- Script payload leaked into Markdown: {summary['script_leaked']}",
+        f"- Style payload leaked into Markdown: {summary['style_leaked']}",
+    ]
+    (ctx.run_dir / "readly-ingest-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
 RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("design", "print-spread"): design_print_spread,
     ("design", "fleet-poster-a2"): design_fleet_poster_a2,
@@ -2165,4 +2482,8 @@ RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("container", "list"): container_list,
     ("container", "logs-tail"): container_logs_tail,
     ("container", "exec-echo"): container_exec_echo,
+    ("book", "search-and-info"): book_search_and_info,
+    ("book", "convert-roundtrip"): book_convert_roundtrip,
+    ("book", "fulltext-find"): book_fulltext_find,
+    ("book", "readly-ingest-sim"): book_readly_ingest_sim,
 }
