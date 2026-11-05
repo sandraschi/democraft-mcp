@@ -1441,6 +1441,17 @@ APPS: tuple[CraftApp, ...] = (
                 live=True,
                 added="2026-11-04",
             ),
+            Demo(
+                "scaffold-smoke",
+                "Demo 2: Headless surgery-app scaffold",
+                "Initializes a Medical & Dental Surgery Clinic app from the surgery "
+                "blueprint into a temp workspace: manifest, egui viewer, README, "
+                "SQLite file with seeded tables — verified file by file.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-05",
+            ),
         ),
         family="core",
         maker="Storytold",

@@ -2696,6 +2696,56 @@ def money_ledger_reconcile(ctx: RunCtx) -> dict | None:
     return None
 
 
+def app_scaffold_smoke(ctx: RunCtx) -> dict | None:
+    """AppCraft Demo 2: scaffold a surgery viewer headlessly, verify artifacts."""
+    target = ctx.run_dir / "bohr-smoke"
+    res = ctx.do(
+        [
+            "init",
+            "Bohr Smoke",
+            "--template",
+            "desktop_egui",
+            "--blueprint",
+            "surgery",
+            "--out-dir",
+            str(target),
+        ],
+        timeout_s=300,
+    )
+
+    def _parse(r: dict) -> dict:
+        try:
+            data = json.loads(r.get("stdout", "") or "{}")
+            return data if isinstance(data, dict) else {}
+        except Exception:
+            return {}
+
+    d = _parse(res)
+    emitted = d.get("emitted") or {}
+    listed = emitted.get("files", []) if isinstance(emitted, dict) else []
+    expected = ["Cargo.toml", "src/main.rs", "README.md", ".gitignore"]
+    present = [f for f in expected if (target / f).is_file()]
+    db_file = target / "bohr-smoke.dbcraft"
+    db_bytes = db_file.stat().st_size if db_file.is_file() else 0
+    tables = d.get("tables_scaffolded", [])
+    table_list = ", ".join(str(t) for t in tables) if isinstance(tables, list) else ""
+
+    report = [
+        "# AppCraft Scaffold Smoke Report",
+        "",
+        "- App: `Bohr Smoke` (desktop_egui, surgery blueprint)",
+        f"- Tables scaffolded: {len(tables) if isinstance(tables, list) else '?'} ({table_list})",
+        f"- Files emitted: {len(present)}/{len(expected)} ({', '.join(present)})",
+        f"- Files listed in run.json: {len(listed) if isinstance(listed, list) else 0}",
+        f"- Database file: `{db_file.name}` ({db_bytes} bytes)",
+        f"- Stigmergic tasks emitted: {d.get('stigmergic_tasks_emitted', 0)}",
+        f"- CLI latency: {res.get('ms', 0)} ms",
+        "- Compile check: covered in appcraft CI + golden test (no cargo in this recipe by design)",
+    ]
+    (ctx.run_dir / "scaffold-smoke-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
 RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("design", "print-spread"): design_print_spread,
     ("design", "fleet-poster-a2"): design_fleet_poster_a2,
@@ -2742,4 +2792,5 @@ RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("book", "readly-ingest-sim"): book_readly_ingest_sim,
     ("book", "manage-roundtrip"): book_manage_roundtrip,
     ("money", "ledger-reconcile"): money_ledger_reconcile,
+    ("app", "scaffold-smoke"): app_scaffold_smoke,
 }

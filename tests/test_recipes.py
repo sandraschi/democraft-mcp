@@ -350,6 +350,17 @@ def test_money_recipes(tmp_path):
     assert (out / "ledger-report.md").is_file()
 
 
+@_needs("app")
+def test_app_scaffold_smoke(tmp_path):
+    res = run_demo("app", "scaffold-smoke", tmp_path, model="none")
+    assert res["success"] and res["all_cli_ok"], res["message"]
+    out = tmp_path / "app" / "scaffold-smoke"
+    assert (out / "scaffold-smoke-report.md").is_file()
+    assert (out / "bohr-smoke" / "Cargo.toml").is_file()
+    assert (out / "bohr-smoke" / "src" / "main.rs").is_file()
+    assert (out / "bohr-smoke" / "bohr-smoke.dbcraft").is_file()
+
+
 def test_midi_util_and_renders(tmp_path):
     import wave
 
