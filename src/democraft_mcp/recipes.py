@@ -2615,6 +2615,87 @@ def book_manage_roundtrip(ctx: RunCtx) -> dict | None:
     return None
 
 
+def money_ledger_reconcile(ctx: RunCtx) -> dict | None:
+    """MoneyCraft Demo 1: portfolio reconciliation, market feeds, backtest."""
+    res_status = ctx.do(["status"])
+    res_fx = ctx.do(["ticker", "EUR/USD"], keep_stdout=100000)
+    res_btc = ctx.do(["ticker", "BTC/USD"], keep_stdout=100000)
+    res_bt = ctx.do(["backtest", "sma-cross", "--symbol", "BTC", "--capital", "10000"])
+    res_wealth = ctx.do(["simulate-wealth"])
+    res_pf = ctx.do(["portfolio"])
+
+    def _parse(res: dict) -> dict:
+        try:
+            data = json.loads(res.get("stdout", "") or "{}")
+            return data if isinstance(data, dict) else {}
+        except Exception:
+            return {}
+
+    d_status = _parse(res_status)
+    d_fx = _parse(res_fx)
+    d_btc = _parse(res_btc)
+    d_bt = _parse(res_bt)
+    d_wealth = _parse(res_wealth)
+    d_pf = _parse(res_pf)
+
+    fx_candles = d_fx.get("candles", [])
+    btc_candles = d_btc.get("candles", [])
+    fx_last = fx_candles[-1].get("close") if fx_candles else None
+    btc_last = btc_candles[-1].get("close") if btc_candles else None
+    wealth = d_wealth.get("report", {})
+    positions = d_pf.get("positions", [])
+
+    summary = {
+        "engine_version": d_status.get("version", ""),
+        "modules": len(d_status.get("modules", [])),
+        "fx_symbol": "EUR/USD",
+        "fx_bars": d_fx.get("bars_count", len(fx_candles)),
+        "fx_last_close": fx_last,
+        "btc_symbol": "BTC/USD",
+        "btc_bars": d_btc.get("bars_count", len(btc_candles)),
+        "btc_last_close": btc_last,
+        "strategy": d_bt.get("strategy", "sma-cross"),
+        "initial_capital": d_bt.get("initial_capital", 10000.0),
+        "final_equity": d_bt.get("final_equity"),
+        "roi_pct": d_bt.get("roi_percentage"),
+        "sharpe": d_bt.get("sharpe_ratio"),
+        "win_rate": d_bt.get("win_rate"),
+        "trades": d_bt.get("trades_count"),
+        "max_drawdown_pct": d_bt.get("max_drawdown_pct"),
+        "monthly_free_cashflow_eur": wealth.get("monthly_free_cashflow_eur"),
+        "net_real_yield_pct": wealth.get("net_real_yield_pct"),
+        "annual_inflation_drag_eur": wealth.get("annual_inflation_drag_eur"),
+        "positions": len(positions),
+        "total_equity_usd": d_pf.get("total_equity_usd"),
+        "unrealized_pnl_usd": d_pf.get("unrealized_pnl_usd"),
+        "realized_pnl_ytd": d_pf.get("realized_pnl_ytd"),
+    }
+    ctx.write("ledger-report.json", summary)
+    report = [
+        "# MoneyCraft Ledger Reconciliation Report",
+        "",
+        f"- Engine: `moneycraft-cli` v{summary['engine_version']} ({summary['modules']} modules)",
+        f"- FX feed: `{summary['fx_symbol']}` {summary['fx_bars']} bars,"
+        f" last close {summary['fx_last_close']}",
+        f"- Crypto feed: `{summary['btc_symbol']}` {summary['btc_bars']} bars,"
+        f" last close {summary['btc_last_close']}",
+        f"- Backtest `{summary['strategy']}`: {summary['initial_capital']}"
+        f" -> {summary['final_equity']} ({summary['roi_pct']}% ROI,"
+        f" Sharpe {summary['sharpe']}, win rate {summary['win_rate']},"
+        f" {summary['trades']} trades,"
+        f" max drawdown {summary['max_drawdown_pct']}%)",
+        f"- Wealth sim: free cashflow {summary['monthly_free_cashflow_eur']} EUR/mo,"
+        f" net real yield {summary['net_real_yield_pct']}%,"
+        f" inflation drag {summary['annual_inflation_drag_eur']} EUR/yr",
+        f"- Portfolio: {summary['positions']} positions,"
+        f" equity {summary['total_equity_usd']} USD,"
+        f" unrealized {summary['unrealized_pnl_usd']} USD,"
+        f" realized YTD {summary['realized_pnl_ytd']} USD",
+    ]
+    (ctx.run_dir / "ledger-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
 RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("design", "print-spread"): design_print_spread,
     ("design", "fleet-poster-a2"): design_fleet_poster_a2,
@@ -2660,4 +2741,5 @@ RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("book", "fulltext-find"): book_fulltext_find,
     ("book", "readly-ingest-sim"): book_readly_ingest_sim,
     ("book", "manage-roundtrip"): book_manage_roundtrip,
+    ("money", "ledger-reconcile"): money_ledger_reconcile,
 }

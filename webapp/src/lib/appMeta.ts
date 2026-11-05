@@ -20,6 +20,7 @@ import {
 	Presentation,
 	Server,
 	Sheet,
+	TrendingUp,
 	Wand2,
 } from "lucide-react";
 
@@ -52,6 +53,7 @@ const META: Record<string, AppMeta> = {
 	git: { hue: "#f97316", icon: GitBranch },
 	container: { hue: "#0ea5e9", icon: Container },
 	book: { hue: "#d97706", icon: BookOpen },
+	money: { hue: "#84cc16", icon: TrendingUp },
 };
 
 const FALLBACK: AppMeta = { hue: "#a1a1aa", icon: Box };

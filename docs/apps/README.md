@@ -1,6 +1,6 @@
 ﻿# The apps
 
-Fourteen Storytold ArtCraft apps plus ArtCraft community projects (SolidCraft by
+Fifteen Storytold ArtCraft apps plus ArtCraft community projects (SolidCraft by
 Tangency Labs, since 2026-11-01). One page per app: what it is, what each demo actually executes, what lands on disk,
 and the gaps we observed in the installed CLI. The registry that generates these pages and the
 webapp is `src/democraft_mcp/crafts.py` - if a page and the registry disagree, the registry is
@@ -22,6 +22,7 @@ right and the page is a bug.
 | LightCraft | 2 | - | [light.md](light.md) |
 | PhotoCraft | 5 | plate grade, lighthouse | [photo.md](photo.md) |
 | VectorCraft | 3 | - | [vector.md](vector.md) |
+| MoneyCraft | 1 | - | [money.md](money.md) |
 | SolidCraft (community) | 3 | parametric bracket | [solid.md](solid.md) |
 
 Demo counts include `capability-map`. Demos added 2026-11-01 for the Oct 31 builds live in

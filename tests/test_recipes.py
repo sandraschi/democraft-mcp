@@ -338,6 +338,18 @@ def test_virt_recipes(tmp_path):
     assert (tmp_path / "virt" / "snapshot-roundtrip" / "snapshot-report.md").is_file()
 
 
+@_needs("money")
+def test_money_recipes(tmp_path):
+    res = run_demo("money", "ledger-reconcile", tmp_path, model="none")
+    assert res["success"] and res["all_cli_ok"], res["message"]
+    out = tmp_path / "money" / "ledger-reconcile"
+    rep = json.loads((out / "ledger-report.json").read_text())
+    assert rep["fx_bars"] == 60 and rep["btc_bars"] == 60
+    assert rep["trades"] > 0 and rep["positions"] > 0
+    assert rep["final_equity"] > rep["initial_capital"]
+    assert (out / "ledger-report.md").is_file()
+
+
 def test_midi_util_and_renders(tmp_path):
     import wave
 
