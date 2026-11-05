@@ -2442,6 +2442,179 @@ def book_readly_ingest_sim(ctx: RunCtx) -> dict | None:
     return None
 
 
+BOOK_RW_SCHEMA = """
+CREATE TABLE books (id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL DEFAULT 'Unknown' COLLATE NOCASE,
+    sort TEXT COLLATE NOCASE,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    pubdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    series_index REAL NOT NULL DEFAULT 1.0,
+    author_sort TEXT COLLATE NOCASE,
+    path TEXT NOT NULL DEFAULT '',
+    uuid TEXT,
+    has_cover BOOL DEFAULT 0,
+    last_modified TIMESTAMP NOT NULL DEFAULT '2000-01-01 00:00:00+00:00');
+CREATE TABLE authors (id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL COLLATE NOCASE, sort TEXT COLLATE NOCASE,
+    link TEXT NOT NULL DEFAULT '', UNIQUE(name));
+CREATE TABLE tags (id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL COLLATE NOCASE, link TEXT NOT NULL DEFAULT '',
+    UNIQUE(name));
+CREATE TABLE series (id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL COLLATE NOCASE, sort TEXT COLLATE NOCASE,
+    link TEXT NOT NULL DEFAULT '', UNIQUE(name));
+CREATE TABLE publishers (id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL COLLATE NOCASE, sort TEXT COLLATE NOCASE,
+    link TEXT NOT NULL DEFAULT '', UNIQUE(name));
+CREATE TABLE ratings (id INTEGER PRIMARY KEY,
+    rating INTEGER CHECK(rating > -1 AND rating < 11),
+    link TEXT NOT NULL DEFAULT '', UNIQUE(rating));
+CREATE TABLE languages (id INTEGER PRIMARY KEY,
+    lang_code TEXT NOT NULL COLLATE NOCASE,
+    link TEXT NOT NULL DEFAULT '', UNIQUE(lang_code));
+CREATE TABLE identifiers (id INTEGER PRIMARY KEY, book INTEGER NOT NULL,
+    type TEXT NOT NULL DEFAULT 'isbn' COLLATE NOCASE,
+    val TEXT NOT NULL COLLATE NOCASE, UNIQUE(book, type));
+CREATE TABLE comments (id INTEGER PRIMARY KEY, book INTEGER NOT NULL,
+    text TEXT NOT NULL COLLATE NOCASE, UNIQUE(book));
+CREATE TABLE data (id INTEGER PRIMARY KEY, book INTEGER NOT NULL,
+    format TEXT NOT NULL COLLATE NOCASE, uncompressed_size INTEGER NOT NULL,
+    name TEXT NOT NULL, UNIQUE(book, format));
+CREATE TABLE books_authors_link (id INTEGER PRIMARY KEY,
+    book INTEGER NOT NULL, author INTEGER NOT NULL, UNIQUE(book, author));
+CREATE TABLE books_tags_link (id INTEGER PRIMARY KEY,
+    book INTEGER NOT NULL, tag INTEGER NOT NULL, UNIQUE(book, tag));
+CREATE TABLE books_series_link (id INTEGER PRIMARY KEY,
+    book INTEGER NOT NULL, series INTEGER NOT NULL, UNIQUE(book));
+CREATE TABLE books_languages_link (id INTEGER PRIMARY KEY,
+    book INTEGER NOT NULL, lang_code INTEGER NOT NULL,
+    item_order INTEGER NOT NULL DEFAULT 0, UNIQUE(book, lang_code));
+CREATE TABLE books_publishers_link (id INTEGER PRIMARY KEY,
+    book INTEGER NOT NULL, publisher INTEGER NOT NULL, UNIQUE(book));
+CREATE TABLE books_ratings_link (id INTEGER PRIMARY KEY,
+    book INTEGER NOT NULL, rating INTEGER NOT NULL, UNIQUE(book, rating));
+CREATE TABLE metadata_dirtied(id INTEGER PRIMARY KEY,
+    book INTEGER NOT NULL, UNIQUE(book));
+CREATE TABLE last_read_positions (book INTEGER);
+CREATE TABLE annotations (book INTEGER);
+CREATE TABLE conversion_options (book INTEGER);
+CREATE TABLE books_plugin_data (book INTEGER);
+CREATE TRIGGER books_insert_trg AFTER INSERT ON books BEGIN
+    UPDATE books SET sort=title_sort(NEW.title),uuid=uuid4() WHERE id=NEW.id;
+END;
+CREATE TRIGGER books_update_trg AFTER UPDATE ON books BEGIN
+    UPDATE books SET sort=title_sort(NEW.title)
+    WHERE id=NEW.id AND OLD.title <> NEW.title;
+END;
+CREATE TRIGGER books_delete_trg AFTER DELETE ON books BEGIN
+    DELETE FROM books_authors_link WHERE book=OLD.id;
+    DELETE FROM books_publishers_link WHERE book=OLD.id;
+    DELETE FROM books_ratings_link WHERE book=OLD.id;
+    DELETE FROM books_series_link WHERE book=OLD.id;
+    DELETE FROM books_tags_link WHERE book=OLD.id;
+    DELETE FROM books_languages_link WHERE book=OLD.id;
+    DELETE FROM data WHERE book=OLD.id;
+    DELETE FROM last_read_positions WHERE book=OLD.id;
+    DELETE FROM annotations WHERE book=OLD.id;
+    DELETE FROM comments WHERE book=OLD.id;
+    DELETE FROM conversion_options WHERE book=OLD.id;
+    DELETE FROM books_plugin_data WHERE book=OLD.id;
+    DELETE FROM identifiers WHERE book=OLD.id;
+END;
+"""
+
+
+def _book_empty_library(run_dir: Path) -> Path:
+    """Scratch library with Calibre's real write-relevant shape, no real books."""
+    library = run_dir / "managed"
+    library.mkdir(parents=True, exist_ok=True)
+    db = sqlite3.connect(library / "metadata.db")
+    try:
+        db.executescript(BOOK_RW_SCHEMA)
+        db.commit()
+    finally:
+        db.close()
+    return library
+
+
+def book_manage_roundtrip(ctx: RunCtx) -> dict | None:
+    """BookCraft Demo 5: backup, add, update, verify, remove on a scratch library."""
+    library = _book_empty_library(ctx.run_dir)
+    lib = ["--library", str(library)]
+
+    res_backup = _book_json(ctx.do(lib + ["backup", "--force", "--json"]))
+    res_add = _book_json(
+        ctx.do(
+            lib
+            + [
+                "add-book",
+                "--empty",
+                "--title",
+                "Probe",
+                "--authors",
+                "Tester, Tess",
+                "--tags",
+                "probe, smoke",
+                "--json",
+            ]
+        )
+    )
+    book_id = int(res_add.get("book_id") or -1)
+    res_update = _book_json(
+        ctx.do(
+            lib
+            + [
+                "update",
+                "--id",
+                str(book_id),
+                "--set",
+                "title=Probe Revised",
+                "--set",
+                "rating=4",
+                "--set",
+                "series=Probes",
+                "--set",
+                "series_index=2",
+                "--json",
+            ]
+        )
+    )
+    res_info = _book_json(ctx.do(lib + ["info", "--id", str(book_id), "--json"]))
+    res_remove = _book_json(
+        ctx.do(lib + ["remove-book", "--id", str(book_id), "--permanent", "--json"])
+    )
+    # Proving absence with `list` keeps every CLI step green: the removal itself
+    # is the assertion, not an expected engine error.
+    res_list = _book_json(ctx.do(lib + ["list", "--limit", "5", "--json"]))
+
+    book = res_info.get("book", {})
+    summary = {
+        "backup": res_backup.get("backup", ""),
+        "book_id": book_id,
+        "updated_fields": res_update.get("updated_fields", []),
+        "title": book.get("title", ""),
+        "sort": book.get("sort", ""),
+        "rating": book.get("rating"),
+        "series": book.get("series", ""),
+        "removed": bool(res_remove.get("success", False)),
+        "gone": res_list.get("count", -1) == 0,
+    }
+    ctx.write("manage-report.json", summary)
+    report = [
+        "# BookCraft Manage Roundtrip Report",
+        "",
+        "- Scratch library: built per run, no real books touched.",
+        f"- Backup: `{summary['backup']}`",
+        f"- Added book id: {summary['book_id']}",
+        f"- Updated fields: {', '.join(summary['updated_fields'])}",
+        f"- Read back: `{summary['title']}` / `{summary['sort']}`",
+        f"- Rating {summary['rating']}, series `{summary['series']}`",
+        f"- Removed permanently: {summary['removed']}; record gone afterwards: {summary['gone']}",
+    ]
+    (ctx.run_dir / "manage-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
 RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("design", "print-spread"): design_print_spread,
     ("design", "fleet-poster-a2"): design_fleet_poster_a2,
@@ -2486,4 +2659,5 @@ RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("book", "convert-roundtrip"): book_convert_roundtrip,
     ("book", "fulltext-find"): book_fulltext_find,
     ("book", "readly-ingest-sim"): book_readly_ingest_sim,
+    ("book", "manage-roundtrip"): book_manage_roundtrip,
 }

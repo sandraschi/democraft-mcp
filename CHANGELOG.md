@@ -7,6 +7,7 @@
 - **Honest receipts**: conversion reports `down` and skips when Calibre is absent; a library without `full-text-search.db` is reported as `engine: metadata_db` instead of an empty success.
 - `webapp/src/lib/appMeta.ts`: `book` hue `#d97706`, `BookOpen` icon.
 - Verification: `ruff check` / `ruff format --check` clean, `bun run check` (tsc + biome) clean, full suite 115 passed at 59.19% coverage.
+- **BookCraft goes full manager**: `write.rs` direct-SQL engine in `bookcraft` (backup/IMMEDIATE/trigger functions, no `calibredb`). New demo `book/manage-roundtrip`: scratch library, backup, add, update, verify, remove - all measured from the engine.
 
 ## 0.4.0 (2026-11-03, MaterialCraft, 5-stage CAD Board flow)
 

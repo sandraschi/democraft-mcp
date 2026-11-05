@@ -1410,6 +1410,17 @@ APPS: tuple[CraftApp, ...] = (
                 live=True,
                 added="2026-11-05",
             ),
+            Demo(
+                "manage-roundtrip",
+                "Demo 5: Backup, add, update, verify, remove",
+                "Builds an empty scratch library, then backs it up, adds a record, "
+                "updates it, reads it back and removes it - every step measured "
+                "from the engine, no real library touched.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-05",
+            ),
         ),
         family="core",
         maker="Storytold",

@@ -304,6 +304,25 @@ def test_book_recipes(tmp_path):
     assert (out4 / "issue.md").is_file()
 
 
+@_needs("book")
+def test_book_manage_roundtrip(tmp_path):
+    res = run_demo("book", "manage-roundtrip", tmp_path, model="none")
+    assert res["success"] and res["all_cli_ok"], res["message"]
+    out = tmp_path / "book" / "manage-roundtrip"
+    report = json.loads((out / "manage-report.json").read_text(encoding="utf-8"))
+    assert report["backup"].endswith(".db")
+    assert Path(report["backup"]).is_file()
+    assert report["book_id"] > 0
+    assert "title" in report["updated_fields"]
+    assert "rating" in report["updated_fields"]
+    assert report["title"] == "Probe Revised"
+    assert report["sort"] == "Probe Revised"
+    assert report["rating"] == 4
+    assert report["series"] == "Probes"
+    assert report["removed"] is True
+    assert report["gone"] is True
+
+
 @_needs("virt")
 def test_virt_recipes(tmp_path):
     res1 = run_demo("virt", "list-and-info", tmp_path, model="none")
