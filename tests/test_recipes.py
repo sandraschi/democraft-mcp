@@ -323,6 +323,28 @@ def test_book_manage_roundtrip(tmp_path):
     assert report["gone"] is True
 
 
+@_needs("book")
+def test_book_catalog_roundtrip(tmp_path):
+    res = run_demo("book", "catalog-roundtrip", tmp_path, model="none")
+    assert res["success"] and res["all_cli_ok"], res["message"]
+    out = tmp_path / "book" / "catalog-roundtrip"
+    report = json.loads((out / "catalog-report.json").read_text(encoding="utf-8"))
+    assert report["init_created"] is True
+    assert report["book_ids"][0] > 0
+    assert report["rename_merged"] is False
+    assert report["rename_books"] == 2
+    assert report["bulk_updated"] == 3
+    assert report["duplicate_groups"] == 1
+    assert report["gap_series"] == 1
+    assert report["unread"] == 3
+    assert report["stats_books"] == 3
+    assert report["export_bytes"] > 0
+    assert report["excerpt_hit"] is True
+    assert report["random_id"] > 0
+    assert report["collection_count"] == 3
+    assert (out / "catalog.csv").is_file()
+
+
 @_needs("virt")
 def test_virt_recipes(tmp_path):
     res1 = run_demo("virt", "list-and-info", tmp_path, model="none")
@@ -348,6 +370,19 @@ def test_money_recipes(tmp_path):
     assert rep["trades"] > 0 and rep["positions"] > 0
     assert rep["final_equity"] > rep["initial_capital"]
     assert (out / "ledger-report.md").is_file()
+
+
+@_needs("money")
+def test_money_stripe_reconcile_sim(tmp_path):
+    res = run_demo("money", "stripe-reconcile-sim", tmp_path, model="none")
+    assert res["success"] and res["all_cli_ok"], res["message"]
+    out = tmp_path / "money" / "stripe-reconcile-sim"
+    rep = (out / "stripe-report.md").read_text(encoding="utf-8")
+    # Each planted drift must be detected AND named in the report:
+    assert "past_due" in rep, "status drift (active->past_due) not reported"
+    assert "in_demo_002" in rep, "missing invoice not reported"
+    assert "3900" in rep, "amount drift not reported"
+    assert (out / "shop.dbcraft").is_file()
 
 
 @_needs("app")

@@ -8,6 +8,7 @@
 - `webapp/src/lib/appMeta.ts`: `book` hue `#d97706`, `BookOpen` icon.
 - Verification: `ruff check` / `ruff format --check` clean, `bun run check` (tsc + biome) clean, full suite 115 passed at 59.19% coverage.
 - **BookCraft goes full manager**: `write.rs` direct-SQL engine in `bookcraft` (backup/IMMEDIATE/trigger functions, no `calibredb`). New demo `book/manage-roundtrip`: scratch library, backup, add, update, verify, remove - all measured from the engine.
+- **BookCraft Phase B**: `catalog.rs` (renames, duplicates, gaps, unread, stats, collections) + `extract.rs` (export, excerpt, open, random) + `bulk_update` + `init`, 30 MCP tools. New demo `book/catalog-roundtrip` covers them E2E.
 
 ## 0.4.0 (2026-11-03, MaterialCraft, 5-stage CAD Board flow)
 

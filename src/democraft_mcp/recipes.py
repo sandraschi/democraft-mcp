@@ -2615,6 +2615,150 @@ def book_manage_roundtrip(ctx: RunCtx) -> dict | None:
     return None
 
 
+def book_catalog_roundtrip(ctx: RunCtx) -> dict | None:
+    """BookCraft Demo 6: rename, bulk edit, analytics, export, excerpt, random."""
+    library = ctx.run_dir / "catalog"
+    lib = ["--library", str(library)]
+
+    res_init = _book_json(ctx.do(lib + ["init", "--json"]))
+    res_add1 = _book_json(
+        ctx.do(
+            lib
+            + [
+                "add-book",
+                "--empty",
+                "--title",
+                "Dune",
+                "--authors",
+                "Frank Herbert",
+                "--tags",
+                "sci-fi, classic",
+                "--json",
+            ]
+        )
+    )
+    res_add2 = _book_json(
+        ctx.do(
+            lib
+            + [
+                "add-book",
+                "--empty",
+                "--title",
+                "Dune Messiah",
+                "--authors",
+                "Frank Herbert",
+                "--tags",
+                "sci-fi",
+                "--json",
+            ]
+        )
+    )
+    res_add3 = _book_json(
+        ctx.do(
+            lib
+            + [
+                "add-book",
+                "--empty",
+                "--title",
+                "Dune",
+                "--authors",
+                "Someone Else",
+                "--json",
+            ]
+        )
+    )
+    id1 = int(res_add1.get("book_id") or -1)
+    id2 = int(res_add2.get("book_id") or -1)
+    id3 = int(res_add3.get("book_id") or -1)
+    ctx.do(
+        lib
+        + [
+            "update",
+            "--id",
+            str(id1),
+            "--set",
+            "series=Dune",
+            "--set",
+            "series_index=1",
+            "--set",
+            "rating=5",
+            "--set",
+            "publisher=Chilton",
+            "--json",
+        ]
+    )
+    ctx.do(
+        lib
+        + ["update", "--id", str(id2), "--set", "series=Dune", "--set", "series_index=3", "--json"]
+    )
+    res_rename = _book_json(
+        ctx.do(
+            lib
+            + ["rename", "--kind", "tag", "--old", "sci-fi", "--new", "Science Fiction", "--json"]
+        )
+    )
+    res_bulk = _book_json(
+        ctx.do(
+            lib + ["bulk-update", "--ids", f"{id1},{id2},{id3}", "--set", "languages=en", "--json"]
+        )
+    )
+    res_dups = _book_json(ctx.do(lib + ["duplicates", "--json"]))
+    res_gaps = _book_json(ctx.do(lib + ["series-gaps", "--json"]))
+    res_unread = _book_json(ctx.do(lib + ["unread", "--json"]))
+    res_stats = _book_json(ctx.do(lib + ["reading-stats", "--json"]))
+    res_export = _book_json(
+        ctx.do(
+            lib + ["export", "--format", "csv", "--out", str(ctx.run_dir / "catalog.csv"), "--json"]
+        )
+    )
+
+    lantern = ctx.run_dir / "lantern.epub"
+    _book_epub(
+        lantern, "Lantern", "Tester", "A lantern burns in the stilltent while the blacksmith waits."
+    )
+    ctx.do(lib + ["add-format", "--id", str(id1), "--file", str(lantern), "--json"])
+    res_excerpt = _book_json(
+        ctx.do(lib + ["excerpt", "--id", str(id1), "--chars", "200", "--json"])
+    )
+    res_random = _book_json(ctx.do(lib + ["random", "--tag", "classic", "--json"]))
+    ctx.do(lib + ["collection-save", "--name", "dune books", "--query", "dune", "--json"])
+    res_coll = _book_json(ctx.do(lib + ["collection-run", "--name", "dune books", "--json"]))
+
+    summary = {
+        "init_created": bool(res_init.get("created", False)),
+        "book_ids": [id1, id2, id3],
+        "rename_merged": bool(res_rename.get("merged", True)),
+        "rename_books": res_rename.get("books", -1),
+        "bulk_updated": res_bulk.get("updated", -1),
+        "duplicate_groups": res_dups.get("count", -1),
+        "gap_series": res_gaps.get("count", -1),
+        "unread": res_unread.get("count", -1),
+        "stats_books": res_stats.get("books", -1),
+        "export_bytes": res_export.get("bytes", 0),
+        "excerpt_hit": "lantern" in str(res_excerpt.get("text", "")).lower(),
+        "random_id": res_random.get("book", {}).get("id", -1),
+        "collection_count": res_coll.get("count", -1),
+    }
+    ctx.write("catalog-report.json", summary)
+    report = [
+        "# BookCraft Catalog Roundtrip Report",
+        "",
+        "- Scratch library built by `init` (no real books touched).",
+        f"- Books added: {summary['book_ids']}",
+        f"- Tag renamed (merged={summary['rename_merged']}) on {summary['rename_books']} books",
+        f"- Bulk languages set on {summary['bulk_updated']} books (one transaction)",
+        f"- Duplicate groups: {summary['duplicate_groups']}",
+        f"- Series with gaps: {summary['gap_series']}",
+        f"- Unread: {summary['unread']}, library books: {summary['stats_books']}",
+        f"- CSV export: {summary['export_bytes']:,} bytes",
+        f"- Excerpt hit for 'lantern': {summary['excerpt_hit']}",
+        f"- Random pick with tag filter: #{summary['random_id']}",
+        f"- Saved collection hits: {summary['collection_count']}",
+    ]
+    (ctx.run_dir / "catalog-report.md").write_text("\n".join(report), encoding="utf-8")
+    return None
+
+
 def money_ledger_reconcile(ctx: RunCtx) -> dict | None:
     """MoneyCraft Demo 1: portfolio reconciliation, market feeds, backtest."""
     res_status = ctx.do(["status"])
@@ -2746,6 +2890,171 @@ def app_scaffold_smoke(ctx: RunCtx) -> dict | None:
     return None
 
 
+def money_stripe_reconcile_sim(ctx: RunCtx) -> dict | None:
+    """MoneyCraft Demo 2: Stripe billing mirror reconcile on recorded fixtures (offline)."""
+    base = ctx.run_dir / "baseline"
+    live = ctx.run_dir / "live"
+    base.mkdir(parents=True, exist_ok=True)
+    live.mkdir(parents=True, exist_ok=True)
+    db = ctx.run_dir / "shop.dbcraft"
+
+    customers = {
+        "object": "list",
+        "data": [
+            {
+                "id": "cus_demo_hanse",
+                "object": "customer",
+                "email": "laden@beispiel.shop",
+                "name": "Beispiel Laden",
+            },
+            {
+                "id": "cus_demo_werk",
+                "object": "customer",
+                "email": "werk@beispiel.shop",
+                "name": "Beispiel Werkstatt",
+            },
+        ],
+    }
+    products = {
+        "object": "list",
+        "data": [
+            {
+                "id": "prod_demo_honig",
+                "object": "product",
+                "name": "Akazienhonig 500g",
+                "description": "Hofladen",
+                "active": True,
+            }
+        ],
+    }
+    prices = {
+        "object": "list",
+        "data": [
+            {
+                "id": "price_demo_monat",
+                "object": "price",
+                "product": "prod_demo_honig",
+                "nickname": "Monatlich",
+                "unit_amount": 2900,
+                "currency": "eur",
+                "recurring": {"interval": "month"},
+                "active": True,
+            },
+            {
+                "id": "price_demo_jahr",
+                "object": "price",
+                "product": "prod_demo_honig",
+                "nickname": "Jaehrlich",
+                "unit_amount": 29000,
+                "currency": "eur",
+                "recurring": {"interval": "year"},
+                "active": True,
+            },
+        ],
+    }
+    subs_v1 = {
+        "object": "list",
+        "data": [
+            {
+                "id": "sub_demo_aktiv",
+                "object": "subscription",
+                "customer": "cus_demo_hanse",
+                "status": "active",
+                "items": {"data": [{"id": "si_demo_1", "price": "price_demo_monat"}]},
+                "current_period_start": 1761955200,
+                "current_period_end": 1764547200,
+                "trial_end": None,
+                "cancel_at_period_end": False,
+            },
+            {
+                "id": "sub_demo_ruhig",
+                "object": "subscription",
+                "customer": "cus_demo_werk",
+                "status": "canceled",
+                "items": {"data": [{"id": "si_demo_2", "price": "price_demo_jahr"}]},
+                "current_period_start": 1759276800,
+                "current_period_end": 1790812800,
+                "trial_end": None,
+                "cancel_at_period_end": True,
+            },
+        ],
+    }
+    invs_v1 = {
+        "object": "list",
+        "data": [
+            {
+                "id": "in_demo_001",
+                "object": "invoice",
+                "customer": "cus_demo_hanse",
+                "subscription": "sub_demo_aktiv",
+                "hosted_invoice_url": "https://invoice.stripe.com/test/demo_001",
+                "status": "paid",
+                "amount_due": 2900,
+                "amount_paid": 2900,
+                "currency": "eur",
+            },
+            {
+                "id": "in_demo_002",
+                "object": "invoice",
+                "customer": "cus_demo_werk",
+                "subscription": None,
+                "hosted_invoice_url": "https://invoice.stripe.com/test/demo_002",
+                "status": "open",
+                "amount_due": 2900,
+                "amount_paid": 0,
+                "currency": "eur",
+            },
+        ],
+    }
+    for name, obj in [
+        ("customers", customers),
+        ("products", products),
+        ("prices", prices),
+        ("subscriptions", subs_v1),
+        ("invoices", invs_v1),
+    ]:
+        (base / f"{name}.json").write_text(json.dumps(obj), encoding="utf-8")
+    res_sync = ctx.do(["stripe-sync", "--db", str(db), "--fixtures", str(base)])
+
+    # Drift the "live" set: flip active->past_due, drop one invoice, change one amount.
+    subs_v2 = json.loads(json.dumps(subs_v1))
+    subs_v2["data"][0]["status"] = "past_due"
+    invs_v2 = {"object": "list", "data": [dict(invs_v1["data"][0], amount_due=3900)]}
+    for name, obj in [
+        ("customers", customers),
+        ("products", products),
+        ("prices", prices),
+        ("subscriptions", subs_v2),
+        ("invoices", invs_v2),
+    ]:
+        (live / f"{name}.json").write_text(json.dumps(obj), encoding="utf-8")
+    res_rec = ctx.do(["stripe-reconcile", "--db", str(db), "--fixtures", str(live)])
+
+    def _parse(res: dict) -> dict:
+        try:
+            data = json.loads(res.get("stdout", "") or "{}")
+            return data if isinstance(data, dict) else {}
+        except Exception:
+            return {}
+
+    d_sync, d_rec = _parse(res_sync), _parse(res_rec)
+    report = [
+        "# MoneyCraft Stripe Reconcile Report (simulated, no network)",
+        "",
+        f"- Mirrored rows: {d_sync.get('total_upserted', '?')} (test fixtures only)",
+        "- Mirror clean before drift: n/a (sync then compare)",
+        f"- Missing in mirror: {d_rec.get('missing_in_mirror', [])}",
+        f"- Missing in API: {d_rec.get('missing_in_api', [])}",
+        f"- Status drift: {d_rec.get('status_drift', [])}",
+        f"- Amount drift: {d_rec.get('amount_drift', [])}",
+        f"- Sync latency: {res_sync.get('ms', 0)} ms; reconcile latency: {res_rec.get('ms', 0)} ms",
+    ]
+    (ctx.run_dir / "stripe-report.md").write_text(
+        "\n".join(str(x) for x in report), encoding="utf-8"
+    )
+    return None
+
+
 RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("design", "print-spread"): design_print_spread,
     ("design", "fleet-poster-a2"): design_fleet_poster_a2,
@@ -2791,6 +3100,8 @@ RECIPES: dict[tuple[str, str], Callable[[RunCtx], dict | None]] = {
     ("book", "fulltext-find"): book_fulltext_find,
     ("book", "readly-ingest-sim"): book_readly_ingest_sim,
     ("book", "manage-roundtrip"): book_manage_roundtrip,
+    ("book", "catalog-roundtrip"): book_catalog_roundtrip,
     ("money", "ledger-reconcile"): money_ledger_reconcile,
+    ("money", "stripe-reconcile-sim"): money_stripe_reconcile_sim,
     ("app", "scaffold-smoke"): app_scaffold_smoke,
 }

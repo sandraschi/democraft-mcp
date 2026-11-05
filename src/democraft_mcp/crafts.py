@@ -1421,6 +1421,17 @@ APPS: tuple[CraftApp, ...] = (
                 live=True,
                 added="2026-11-05",
             ),
+            Demo(
+                "catalog-roundtrip",
+                "Demo 6: Rename, bulk edit, analytics, export, excerpt",
+                "Renames a tag across the scratch library, bulk-updates three books, "
+                "then reports duplicates, series gaps, unread, reading stats, a CSV "
+                "export, a chapter excerpt and a saved-collection run.",
+                "",
+                "cli",
+                live=True,
+                added="2026-11-05",
+            ),
         ),
         family="core",
         maker="Storytold",
@@ -1491,6 +1502,16 @@ APPS: tuple[CraftApp, ...] = (
                 "cli",
                 live=True,
                 added="2026-11-04",
+            ),
+            Demo(
+                "stripe-reconcile-sim",
+                "Demo 2: Stripe billing mirror reconcile on recorded fixtures",
+                "Syncs recorded Stripe fixtures into a scratch billing DB, then "
+                "reconciles against a drifted set — no network, no keys.",
+                "",
+                "cli",
+                live=False,
+                added="2026-11-05",
             ),
         ),
         family="core",
