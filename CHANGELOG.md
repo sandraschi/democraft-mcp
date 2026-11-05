@@ -1,5 +1,13 @@
 # CHANGELOG.md
 
+## Unreleased (2026-11-05, BookCraft)
+
+- **BookCraft joins the fleet**: Registered `book` (`bookcraft`, a Calibre/Readly alternative) with 4 demos plus the automatic capability map. Read-only Calibre access: search, record inspection with real format files, an `ebook-convert` TXT/PDF roundtrip, full-text finds with an engine receipt, and saved-HTML ingest with no browser or token.
+- **Fixtures are built per run**: each recipe creates a deterministic Calibre-shaped `metadata.db`, a minimal EPUB 2, and `full-text-search.db` under `outbox/book/<demo>/`; no real library path and no DRM book are used.
+- **Honest receipts**: conversion reports `down` and skips when Calibre is absent; a library without `full-text-search.db` is reported as `engine: metadata_db` instead of an empty success.
+- `webapp/src/lib/appMeta.ts`: `book` hue `#d97706`, `BookOpen` icon.
+- Verification: `ruff check` / `ruff format --check` clean, `bun run check` (tsc + biome) clean, full suite 115 passed at 59.19% coverage.
+
 ## 0.4.0 (2026-11-03, MaterialCraft, 5-stage CAD Board flow)
 
 - **MaterialCraft joins the fleet**: Registered `material` (`storytold/materialcraft`), a pure-Rust, node-based procedural material authoring tool (clone of Autodesk Material Editor and Substance 3D Designer).
