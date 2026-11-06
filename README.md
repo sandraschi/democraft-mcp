@@ -11,8 +11,7 @@
   <a href="https://getartcraft.com"><img src="https://img.shields.io/badge/Craft_apps-13_%2B_1_community-f59e0b?style=flat-square" alt="13 Craft apps plus 1 community member"></a>
 </p>
 
-**Watch the Craft family build: 14 ArtCraft apps plus SolidCraft, 33 demos, real CLI output you
-can see, hear and measure.**
+**Watch the Craft family build: 14 ArtCraft apps plus SolidCraft, 33 demos, real CLI output you can see, hear and measure.**
 
 Every demo drives an installed `<App>\<app>-cli.exe`, streams its steps while it runs, and
 leaves the artifacts on disk with a manifest and the engine log beside them. No mock pixels,
